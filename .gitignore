@@ -35,3 +35,6 @@ Thumbs.db
 # ── Editor ─────────────────────────────────────────
 .vscode/settings.json
 *.tsbuildinfo
+
+# ── Personal learning notes (local only) ───────────
+LEARNING.md
