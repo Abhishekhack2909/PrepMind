@@ -1,0 +1,65 @@
+{
+  "expo": {
+    "name": "PrepMind",
+    "slug": "prepmind",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/images/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#006399"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.prepmind.app",
+      "infoPlist": {
+        "NSCameraUsageDescription": "PrepMind needs camera access to photograph your handwritten answers for AI evaluation.",
+        "NSMicrophoneUsageDescription": "PrepMind needs microphone access to record your voice questions.",
+        "NSPhotoLibraryUsageDescription": "PrepMind needs photo library access to select answer images."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#006399"
+      },
+      "package": "com.prepmind.app",
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "RECEIVE_BOOT_COMPLETED",
+        "VIBRATE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/images/favicon.png",
+      "bundler": "metro"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-camera",
+      [
+        "expo-av",
+        {
+          "microphonePermission": "PrepMind uses your microphone to record voice questions."
+        }
+      ],
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/notification-icon.png",
+          "color": "#006399"
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "scheme": "prepmind"
+  }
+}

@@ -1,0 +1,37 @@
+# PrepMind — AI Study Companion
+
+# ── Dependency folders ─────────────────────────────
+node_modules/
+.expo/
+
+# ── Environment (NEVER commit these) ──────────────
+.env
+.env.local
+PrepMind-App/.env
+PrepMind-Backend/.env
+
+# ── Python ─────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+venv/
+.venv/
+PrepMind-Backend/venv/
+
+# ── ChromaDB data (large, generated at runtime) ───
+PrepMind-Backend/chroma_db/
+PrepMind-Backend/*.sqlite3
+
+# ── Build outputs ──────────────────────────────────
+dist/
+build/
+android/
+ios/
+
+# ── OS files ───────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Editor ─────────────────────────────────────────
+.vscode/settings.json
+*.tsbuildinfo

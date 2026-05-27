@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PrepMind - Daily Plan</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary": "#632ce5",
+                        "surface": "#f8f9ff",
+                        "inverse-surface": "#27313f",
+                        "on-tertiary-container": "#2f3233",
+                        "primary-fixed": "#cde5ff",
+                        "inverse-primary": "#95ccff",
+                        "surface-container-low": "#eff4ff",
+                        "primary-container": "#1da1f2",
+                        "tertiary-fixed-dim": "#c5c7c8",
+                        "on-secondary": "#ffffff",
+                        "on-primary-container": "#003554",
+                        "secondary-fixed": "#e8deff",
+                        "secondary-fixed-dim": "#cdbdff",
+                        "surface-tint": "#006399",
+                        "on-secondary-fixed-variant": "#4f00d0",
+                        "on-primary-fixed-variant": "#004a75",
+                        "on-primary": "#ffffff",
+                        "background": "#f8f9ff",
+                        "tertiary-fixed": "#e1e3e4",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-highest": "#d9e3f6",
+                        "on-secondary-container": "#fcf6ff",
+                        "on-surface": "#121c2a",
+                        "outline-variant": "#bec7d3",
+                        "surface-container-high": "#dee9fc",
+                        "on-primary-fixed": "#001d32",
+                        "primary": "#006399",
+                        "inverse-on-surface": "#eaf1ff",
+                        "outline": "#6f7882",
+                        "on-tertiary-fixed": "#191c1d",
+                        "error": "#ba1a1a",
+                        "surface-variant": "#d9e3f6",
+                        "tertiary-container": "#989a9b",
+                        "on-tertiary": "#ffffff",
+                        "secondary-container": "#7c4dff",
+                        "tertiary": "#5c5f60",
+                        "on-background": "#121c2a",
+                        "on-error-container": "#93000a",
+                        "on-tertiary-fixed-variant": "#454748",
+                        "error-container": "#ffdad6",
+                        "on-secondary-fixed": "#20005f",
+                        "surface-container": "#e6eeff",
+                        "surface-bright": "#f8f9ff",
+                        "on-error": "#ffffff",
+                        "primary-fixed-dim": "#95ccff",
+                        "surface-dim": "#d0dbed",
+                        "on-surface-variant": "#3f4851"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "16px",
+                        "container-max": "1200px",
+                        "base": "4px",
+                        "margin-mobile": "16px",
+                        "lg": "24px",
+                        "md": "16px",
+                        "margin-desktop": "40px",
+                        "xs": "8px",
+                        "sm": "12px",
+                        "xl": "32px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "headline-sm": ["Plus Jakarta Sans"],
+                        "body-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "label-md": ["JetBrains Mono"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { background-color: #f8f9ff; }
+        .grid-bg {
+            background-size: 20px 20px;
+            background-image: linear-gradient(to right, rgba(0,0,0,0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.03) 1px, transparent 1px);
+        }
+        .progress-ring__circle {
+            transition: stroke-dashoffset 0.35s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="h-full flex flex-col font-body-md text-on-surface antialiased grid-bg relative pb-[80px]">
+<!-- TopAppBar -->
+<header class="bg-surface shadow-sm w-full top-0 sticky z-40">
+<div class="flex justify-between items-center px-gutter py-md w-full max-w-container-max mx-auto">
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 rounded-full overflow-hidden bg-surface-variant flex items-center justify-center">
+<img alt="User profile photo" class="w-full h-full object-cover" data-alt="A close-up portrait of a professional student or user looking focused and motivated. The background is a soft, blurred studio setting with modern lighting. The style is clear and corporate-friendly, matching the PrepMind aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvfIA0W4pAD5CNaDar9AZGhbaaRQbytTJ5xH8E2gw5LJnN_MxIkYehv2fqBmXrAm4gN9_LDobWq9PzsggO2bgyHOVMSPL8vD7tm_oE1t1g9xBnHpgxXxyk9aFFAll78fZtjISJZd_dKm13YcyM0z3kVgGcskZGCBi5v2A2EaDif1WDmaN3E3M4aD8yyEj5Hnzf2uaiXaJFVW1uY84zvkBpAZFMFFcTwdVtgLjAG1f6aD43zH-SqAmV4isrqQFXksvN2fnhC1UFr09K"/>
+</div>
+<h1 class="font-display-lg text-display-lg font-bold text-primary">PrepMind</h1>
+</div>
+<button class="bg-secondary-container text-on-secondary-container px-sm py-xs rounded-full font-label-md text-label-md font-bold uppercase hover:opacity-80 transition-opacity active:scale-95 transition-transform">
+                SUPER
+            </button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-1 w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-lg flex flex-col gap-lg">
+<!-- Header Controls (Topic & Stats) -->
+<div class="flex items-center gap-sm">
+<button class="flex-1 bg-surface-container-lowest border border-outline-variant/30 rounded-xl px-md py-sm flex items-center justify-center gap-sm shadow-[0_4px_12px_rgba(0,0,0,0.03)] hover:shadow-[0_4px_16px_rgba(0,0,0,0.06)] transition-all">
+<span class="material-symbols-outlined text-outline">menu_book</span>
+<span class="font-headline-sm text-headline-sm text-on-surface">Daily Plan</span>
+</button>
+<button class="w-[52px] h-[52px] bg-surface-container-lowest border border-outline-variant/30 rounded-xl flex items-center justify-center text-primary shadow-[0_4px_12px_rgba(0,0,0,0.03)] hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined">bar_chart</span>
+</button>
+</div>
+<!-- Progress Overview -->
+<section class="bg-surface-container-lowest rounded-[24px] p-lg border border-outline-variant/10 shadow-[0_4px_12px_rgba(0,0,0,0.03)] flex flex-col md:flex-row gap-lg items-center relative overflow-hidden">
+<!-- Decorative gradient -->
+<div class="absolute -top-10 -right-10 w-40 h-40 bg-primary/5 rounded-full blur-2xl"></div>
+<div class="relative w-32 h-32 flex-shrink-0">
+<svg class="w-full h-full" viewbox="0 0 100 100">
+<circle class="text-surface-variant stroke-current" cx="50" cy="50" fill="transparent" r="40" stroke-width="8"></circle>
+<circle class="text-primary stroke-current progress-ring__circle" cx="50" cy="50" fill="transparent" r="40" stroke-dasharray="251.2" stroke-dashoffset="87.92" stroke-linecap="round" stroke-width="8"></circle> <!-- 65% -->
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="font-headline-lg text-headline-lg text-on-surface">65%</span>
+<span class="font-label-md text-label-md text-outline">COMPLETED</span>
+</div>
+</div>
+<div class="flex flex-col gap-xs flex-1 text-center md:text-left z-10">
+<h2 class="font-headline-md text-headline-md text-on-surface">Great pace today!</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">You are on track to finish your daily targets. Keep pushing forward.</p>
+<div class="flex items-center justify-center md:justify-start gap-sm mt-sm">
+<div class="flex items-center gap-xs bg-surface-container py-xs px-sm rounded-full">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">4/6 Tasks done</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Task List Bento -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-lg relative">
+<!-- Vertical Timeline Line -->
+<div class="hidden md:block absolute left-[39px] top-6 bottom-6 w-0.5 bg-outline-variant/20 z-0"></div>
+<div class="col-span-1 md:col-span-12 flex flex-col gap-md z-10">
+<!-- Category: Read -->
+<div class="mb-sm">
+<h3 class="font-label-md text-label-md text-outline uppercase tracking-wider mb-sm flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px]">menu_book</span> Read
+                    </h3>
+<div class="flex flex-col gap-sm">
+<!-- Task 1 (Done) -->
+<div class="bg-surface-container-lowest rounded-xl p-md border border-outline-variant/10 shadow-sm flex items-start gap-md group hover:shadow-md transition-shadow">
+<button class="mt-0.5 w-6 h-6 rounded-full border-2 border-primary bg-primary flex items-center justify-center flex-shrink-0 transition-colors">
+<span class="material-symbols-outlined text-white text-[16px]" style="font-variation-settings: 'FILL' 1;">check</span>
+</button>
+<div class="flex-1">
+<h4 class="font-headline-sm text-headline-sm text-on-surface line-through opacity-70">NCERT History: Chapter 4</h4>
+<p class="font-body-sm text-body-sm text-outline">Read and highlight key terms.</p>
+</div>
+<span class="font-label-md text-label-md text-outline-variant bg-surface px-xs py-0.5 rounded">45m</span>
+</div>
+</div>
+</div>
+<!-- Category: Practice -->
+<div class="mb-sm">
+<h3 class="font-label-md text-label-md text-outline uppercase tracking-wider mb-sm flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px]">quiz</span> Practice
+                    </h3>
+<div class="flex flex-col gap-sm">
+<!-- Task 2 (Current) -->
+<div class="bg-surface-container-lowest rounded-xl p-md border border-primary/20 shadow-[0_4px_16px_rgba(0,99,153,0.08)] flex flex-col sm:flex-row sm:items-center gap-md relative overflow-hidden">
+<div class="absolute left-0 top-0 bottom-0 w-1 bg-primary"></div>
+<div class="flex items-start sm:items-center gap-md flex-1">
+<button class="mt-0.5 sm:mt-0 w-6 h-6 rounded-full border-2 border-outline-variant flex items-center justify-center flex-shrink-0 hover:border-primary transition-colors">
+</button>
+<div class="flex-1">
+<h4 class="font-headline-sm text-headline-sm text-on-surface">20 MCQs: Ancient History</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Focus on Mauryan Empire.</p>
+</div>
+</div>
+<div class="flex items-center justify-between sm:justify-end gap-md pl-10 sm:pl-0">
+<span class="font-label-md text-label-md text-outline-variant">20m</span>
+<button class="bg-primary text-on-primary px-lg py-sm rounded-full font-headline-sm text-headline-sm hover:opacity-90 active:scale-95 transition-all shadow-sm">
+                                    Start Now
+                                </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Category: Revise -->
+<div>
+<h3 class="font-label-md text-label-md text-outline uppercase tracking-wider mb-sm flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px]">edit_note</span> Revise
+                    </h3>
+<div class="flex flex-col gap-sm">
+<!-- Task 3 (Pending) -->
+<div class="bg-surface-container-lowest rounded-xl p-md border border-outline-variant/10 shadow-sm flex items-start gap-md group hover:shadow-md transition-shadow opacity-80">
+<button class="mt-0.5 w-6 h-6 rounded-full border-2 border-outline-variant flex items-center justify-center flex-shrink-0 hover:border-primary transition-colors">
+</button>
+<div class="flex-1">
+<h4 class="font-headline-sm text-headline-sm text-on-surface group-hover:text-primary transition-colors">Yesterday's Mistakes</h4>
+<p class="font-body-sm text-body-sm text-outline">Review 5 missed questions from Polity mock.</p>
+</div>
+<span class="font-label-md text-label-md text-outline-variant bg-surface px-xs py-0.5 rounded">15m</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Motivational Quote -->
+<div class="mt-lg mb-xl p-lg bg-surface-container rounded-2xl border border-outline-variant/10 flex flex-col items-center text-center">
+<span class="material-symbols-outlined text-outline-variant text-[32px] mb-sm opacity-50">format_quote</span>
+<p class="font-body-lg text-body-lg text-on-surface-variant italic max-w-2xl">
+                "You have to dream before your dreams can come true."
+            </p>
+<p class="font-label-md text-label-md text-outline mt-sm tracking-widest uppercase">
+                - A.P.J. Abdul Kalam
+            </p>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-margin-mobile py-base bg-surface border-t border-outline-variant/10 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] md:hidden pb-safe">
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-high rounded-full active:scale-90 transition-all duration-200 group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">home</span>
+<span class="font-label-md text-label-md mt-1 group-hover:text-primary transition-colors">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">menu_book</span>
+<span class="font-label-md text-label-md mt-1">Learn</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-high rounded-full active:scale-90 transition-all duration-200 group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">quiz</span>
+<span class="font-label-md text-label-md mt-1 group-hover:text-primary transition-colors">Prelims</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-high rounded-full active:scale-90 transition-all duration-200 group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">edit_note</span>
+<span class="font-label-md text-label-md mt-1 group-hover:text-primary transition-colors">Mains</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-high rounded-full active:scale-90 transition-all duration-200 group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors">newspaper</span>
+<span class="font-label-md text-label-md mt-1 group-hover:text-primary transition-colors">News</span>
+</a>
+</nav>
+</body></html>
