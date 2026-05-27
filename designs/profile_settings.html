@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PrepMind - Profile &amp; Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary": "#632ce5",
+                      "surface": "#f8f9ff",
+                      "inverse-surface": "#27313f",
+                      "on-tertiary-container": "#2f3233",
+                      "primary-fixed": "#cde5ff",
+                      "inverse-primary": "#95ccff",
+                      "surface-container-low": "#eff4ff",
+                      "primary-container": "#1da1f2",
+                      "tertiary-fixed-dim": "#c5c7c8",
+                      "on-secondary": "#ffffff",
+                      "on-primary-container": "#003554",
+                      "secondary-fixed": "#e8deff",
+                      "secondary-fixed-dim": "#cdbdff",
+                      "surface-tint": "#006399",
+                      "on-secondary-fixed-variant": "#4f00d0",
+                      "on-primary-fixed-variant": "#004a75",
+                      "on-primary": "#ffffff",
+                      "background": "#f8f9ff",
+                      "tertiary-fixed": "#e1e3e4",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-container-highest": "#d9e3f6",
+                      "on-secondary-container": "#fcf6ff",
+                      "on-surface": "#121c2a",
+                      "outline-variant": "#bec7d3",
+                      "surface-container-high": "#dee9fc",
+                      "on-primary-fixed": "#001d32",
+                      "primary": "#006399",
+                      "inverse-on-surface": "#eaf1ff",
+                      "outline": "#6f7882",
+                      "on-tertiary-fixed": "#191c1d",
+                      "error": "#ba1a1a",
+                      "surface-variant": "#d9e3f6",
+                      "tertiary-container": "#989a9b",
+                      "on-tertiary": "#ffffff",
+                      "secondary-container": "#7c4dff",
+                      "tertiary": "#5c5f60",
+                      "on-background": "#121c2a",
+                      "on-error-container": "#93000a",
+                      "on-tertiary-fixed-variant": "#454748",
+                      "error-container": "#ffdad6",
+                      "on-secondary-fixed": "#20005f",
+                      "surface-container": "#e6eeff",
+                      "surface-bright": "#f8f9ff",
+                      "on-error": "#ffffff",
+                      "primary-fixed-dim": "#95ccff",
+                      "surface-dim": "#d0dbed",
+                      "on-surface-variant": "#3f4851"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "gutter": "16px",
+                      "container-max": "1200px",
+                      "base": "4px",
+                      "margin-mobile": "16px",
+                      "lg": "24px",
+                      "md": "16px",
+                      "margin-desktop": "40px",
+                      "xs": "8px",
+                      "sm": "12px",
+                      "xl": "32px"
+              },
+              "fontFamily": {
+                      "display-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "headline-sm": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "body-sm": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "headline-lg": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Plus Jakarta Sans"
+                      ],
+                      "label-md": [
+                              "JetBrains Mono"
+                      ],
+                      "headline-lg-mobile": [
+                              "Plus Jakarta Sans"
+                      ]
+              },
+              "fontSize": {
+                      "display-lg": [
+                              "40px",
+                              {
+                                      "lineHeight": "48px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "headline-sm": [
+                              "20px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-sm": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "body-md": [
+                              "16px",
+                              {
+                                      "lineHeight": "24px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "fontWeight": "700"
+                              }
+                      ],
+                      "body-lg": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "label-md": [
+                              "12px",
+                              {
+                                      "lineHeight": "16px",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "28px",
+                              {
+                                      "lineHeight": "36px",
+                                      "fontWeight": "700"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+      </script>
+<style>
+        body {
+            background-color: theme('colors.background');
+            color: theme('colors.on-background');
+        }
+        /* Custom scrollbar for webkit */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: theme('colors.outline-variant');
+            border-radius: theme('borderRadius.full');
+        }
+      </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="antialiased min-h-screen flex flex-col font-body-md text-body-md bg-background pb-24 md:pb-0">
+<!-- Top App Bar -->
+<header class="bg-surface shadow-sm w-full top-0 sticky z-40">
+<div class="flex justify-between items-center px-gutter py-md w-full max-w-container-max mx-auto">
+<div class="flex items-center gap-sm">
+<img alt="User Profile" class="w-10 h-10 rounded-full object-cover border border-outline-variant/20" data-alt="A close-up studio portrait of a young professional wearing smart-casual clothing. Soft, natural lighting highlights clear facial features. The background is a clean, minimal gradient. The overall mood is approachable, intelligent, and focused, fitting for an academic AI companion app." src="https://lh3.googleusercontent.com/aida-public/AB6AXuByxSf4OTUXolMlmCbJuTTcHqyrEEJ4Mm1X_0c178B9UivY8ImT9IaY6rkVqK4I6PhXY50IYQgdSO3ETrt0_qCno6ya5SwAetJg96f2T6KWwXRoAWdm6lW7Eu8e9H5YsscCd8pibb70l7fHEAZ1O-w8i1KfSsVOZUN4PmIjk_PBnyjD2CZ5Pa9nmH7nHSbVST3dR1YvGd-DvbU3Lb5Aceq5iDs_dWFKvmhYFTqyncWKFzsojDtmNEUSBCUeXlWkw_CNcjbfJxUgQEsu"/>
+<span class="font-headline-sm text-headline-sm font-bold text-primary">PrepMind</span>
+</div>
+<button class="bg-secondary text-on-secondary px-4 py-2 rounded-full font-label-md text-label-md font-bold flex items-center gap-2 hover:opacity-90 transition-opacity active:scale-95 shadow-sm">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">bolt</span>
+                SUPER
+            </button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-lg flex flex-col gap-lg">
+<!-- Profile Header Section -->
+<section class="bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-outline-variant/20 p-lg flex flex-col md:flex-row items-center gap-lg">
+<div class="relative group">
+<img alt="Abhishek Tripathi" class="w-24 h-24 md:w-32 md:h-32 rounded-full object-cover border-4 border-surface-container shadow-sm" data-alt="A clean, high-resolution portrait of a focused student in an academic setting. The lighting is bright and modern, creating a fresh, light-mode aesthetic. The subject is wearing a simple shirt against a soft, blurred background, conveying dedication and calm intelligence." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAnCccAlETF_JKCrPdiwWuUVTWzjsJ3Ys1-Q18DzfNu8qUiRzLg1h_ps3bfdP8GGgafxYWPEJR3ndAKXaj0hYJIUYXbVhqPT33CaqEJH0Nd80RMaXwBhnSwBgkFVDcCLar4MctYVLX0fb_yjqVz9VvukI-Yus35RL7B8K2_AtEaL4Eq5SC0KeEkwyWHTwTZinxli9Kd7BsirmVK3wgM5isHr6LWZa7w4QmfqtJMe8EnwPc23IvyWQcq-OQE-66YeCAiTEo6KL7nrq7s"/>
+<button class="absolute bottom-0 right-0 bg-primary text-on-primary w-8 h-8 rounded-full flex items-center justify-center shadow-md hover:bg-surface-tint transition-colors">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+</div>
+<div class="text-center md:text-left flex-grow">
+<h1 class="font-headline-lg-mobile md:font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface mb-1">Abhishek Tripathi</h1>
+<p class="font-body-md text-body-md text-on-surface-variant flex items-center justify-center md:justify-start gap-1">
+<span class="material-symbols-outlined text-[16px]">school</span> Target Year: UPSC 2029
+                </p>
+</div>
+<div class="w-full md:w-auto flex flex-col gap-sm">
+<button class="w-full md:w-auto border border-primary text-primary px-6 py-2 rounded-full font-label-md text-label-md hover:bg-primary-container/10 transition-colors">
+                    Edit Profile
+                </button>
+<button class="w-full md:w-auto border border-outline-variant text-on-surface-variant px-6 py-2 rounded-full font-label-md text-label-md hover:bg-surface-variant/50 transition-colors">
+                    Share Profile
+                </button>
+</div>
+</section>
+<!-- Stats Bento Grid -->
+<section class="grid grid-cols-2 md:grid-cols-4 gap-md">
+<!-- Streak -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-outline-variant/20 p-md flex flex-col items-center justify-center text-center">
+<div class="w-12 h-12 rounded-full bg-surface-variant/50 flex items-center justify-center mb-xs">
+<span class="material-symbols-outlined text-tertiary-container text-[24px]" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-0">12</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Day Streak</p>
+</div>
+<!-- MCQs -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-outline-variant/20 p-md flex flex-col items-center justify-center text-center">
+<div class="w-12 h-12 rounded-full bg-primary-container/20 flex items-center justify-center mb-xs">
+<span class="material-symbols-outlined text-primary text-[24px]">quiz</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-0">1,450</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">MCQs Solved</p>
+</div>
+<!-- Evaluated -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-outline-variant/20 p-md flex flex-col items-center justify-center text-center">
+<div class="w-12 h-12 rounded-full bg-secondary-container/20 flex items-center justify-center mb-xs">
+<span class="material-symbols-outlined text-secondary text-[24px]">edit_document</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-0">84</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Answers Evaluated</p>
+</div>
+<!-- Rank/Points -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-outline-variant/20 p-md flex flex-col items-center justify-center text-center">
+<div class="w-12 h-12 rounded-full bg-[#fff8e1] flex items-center justify-center mb-xs">
+<span class="material-symbols-outlined text-[#fbc02d] text-[24px]" style="font-variation-settings: 'FILL' 1;">emoji_events</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-surface mb-0">Top 5%</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Global Rank</p>
+</div>
+</section>
+<!-- Settings List -->
+<section class="bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-outline-variant/20 overflow-hidden">
+<div class="px-md py-sm bg-surface-container-low border-b border-outline-variant/10">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Settings &amp; Preferences</h2>
+</div>
+<div class="flex flex-col">
+<!-- Notifications -->
+<button class="flex items-center justify-between px-md py-lg hover:bg-surface-variant/30 transition-colors border-b border-outline-variant/10 text-left">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant">notifications</span>
+</div>
+<div>
+<p class="font-body-md text-body-md font-medium text-on-surface">Notifications</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Manage daily reminders and alerts</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</button>
+<!-- Theme -->
+<button class="flex items-center justify-between px-md py-lg hover:bg-surface-variant/30 transition-colors border-b border-outline-variant/10 text-left">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant">palette</span>
+</div>
+<div>
+<p class="font-body-md text-body-md font-medium text-on-surface">Appearance</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Light, Dark, or System default</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</button>
+<!-- Help & Support -->
+<button class="flex items-center justify-between px-md py-lg hover:bg-surface-variant/30 transition-colors border-b border-outline-variant/10 text-left">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant">help</span>
+</div>
+<div>
+<p class="font-body-md text-body-md font-medium text-on-surface">Help &amp; Support</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">FAQs and contact us</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</button>
+<!-- Logout -->
+<button class="flex items-center justify-between px-md py-lg hover:bg-error-container/30 transition-colors text-left group">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-full bg-error-container/50 group-hover:bg-error-container flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined text-error">logout</span>
+</div>
+<div>
+<p class="font-body-md text-body-md font-medium text-error">Log Out</p>
+</div>
+</div>
+</button>
+</div>
+</section>
+</main>
+<!-- Bottom Nav Bar (Mobile Only) -->
+<nav class="md:hidden bg-surface border-t border-outline-variant/10 shadow-[0_-4px_12px_rgba(0,0,0,0.05)] fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-margin-mobile py-base">
+<!-- Assuming Home is default inactive for this view, but keeping the structure intact -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-high rounded-full active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-label-md text-label-md">Home</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-high rounded-full active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="font-label-md text-label-md">Learn</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-high rounded-full active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">quiz</span>
+<span class="font-label-md text-label-md">Prelims</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:bg-surface-container-high rounded-full active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined">edit_note</span>
+<span class="font-label-md text-label-md">Mains</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-full px-4 py-1 active:scale-90 transition-all duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">person</span>
+<span class="font-label-md text-label-md">Profile</span>
+</a>
+</nav>
+</body></html>

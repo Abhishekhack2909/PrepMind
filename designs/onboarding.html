@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PrepMind - Onboarding</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@400;500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        /* Hide scrollbar for clean look */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .onboarding-slide {
+            transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease-in-out;
+        }
+        
+        .pulse-ring {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 99, 153, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(0, 99, 153, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 99, 153, 0); }
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary": "#632ce5",
+                        "surface": "#f8f9ff",
+                        "inverse-surface": "#27313f",
+                        "on-tertiary-container": "#2f3233",
+                        "primary-fixed": "#cde5ff",
+                        "inverse-primary": "#95ccff",
+                        "surface-container-low": "#eff4ff",
+                        "primary-container": "#1da1f2",
+                        "tertiary-fixed-dim": "#c5c7c8",
+                        "on-secondary": "#ffffff",
+                        "on-primary-container": "#003554",
+                        "secondary-fixed": "#e8deff",
+                        "secondary-fixed-dim": "#cdbdff",
+                        "surface-tint": "#006399",
+                        "on-secondary-fixed-variant": "#4f00d0",
+                        "on-primary-fixed-variant": "#004a75",
+                        "on-primary": "#ffffff",
+                        "background": "#f8f9ff",
+                        "tertiary-fixed": "#e1e3e4",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-highest": "#d9e3f6",
+                        "on-secondary-container": "#fcf6ff",
+                        "on-surface": "#121c2a",
+                        "outline-variant": "#bec7d3",
+                        "surface-container-high": "#dee9fc",
+                        "on-primary-fixed": "#001d32",
+                        "primary": "#006399",
+                        "inverse-on-surface": "#eaf1ff",
+                        "outline": "#6f7882",
+                        "on-tertiary-fixed": "#191c1d",
+                        "error": "#ba1a1a",
+                        "surface-variant": "#d9e3f6",
+                        "tertiary-container": "#989a9b",
+                        "on-tertiary": "#ffffff",
+                        "secondary-container": "#7c4dff",
+                        "tertiary": "#5c5f60",
+                        "on-background": "#121c2a",
+                        "on-error-container": "#93000a",
+                        "on-tertiary-fixed-variant": "#454748",
+                        "error-container": "#ffdad6",
+                        "on-secondary-fixed": "#20005f",
+                        "surface-container": "#e6eeff",
+                        "surface-bright": "#f8f9ff",
+                        "on-error": "#ffffff",
+                        "primary-fixed-dim": "#95ccff",
+                        "surface-dim": "#d0dbed",
+                        "on-surface-variant": "#3f4851"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "16px",
+                        "container-max": "1200px",
+                        "base": "4px",
+                        "margin-mobile": "16px",
+                        "lg": "24px",
+                        "md": "16px",
+                        "margin-desktop": "40px",
+                        "xs": "8px",
+                        "sm": "12px",
+                        "xl": "32px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "headline-sm": ["Plus Jakarta Sans"],
+                        "body-sm": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-lg": ["Inter"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "label-md": ["JetBrains Mono"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface h-screen w-screen overflow-hidden font-body-md flex flex-col items-center justify-center relative">
+<!-- Splash Screen overlay (fades out) -->
+<div class="absolute inset-0 z-50 bg-primary flex items-center justify-center transition-opacity duration-1000" id="splash-screen">
+<div class="flex flex-col items-center">
+<div class="bg-white rounded-full p-6 pulse-ring shadow-lg mb-6 flex items-center justify-center w-32 h-32">
+<span class="material-symbols-outlined text-primary text-6xl" style="font-size: 64px;">psychology</span>
+</div>
+<h1 class="font-display-lg text-display-lg text-white">PrepMind</h1>
+<p class="font-body-lg text-body-lg text-primary-fixed mt-2 opacity-80">Your AI Study Companion</p>
+</div>
+</div>
+<!-- Main Onboarding Container -->
+<div class="w-full max-w-md h-full flex flex-col opacity-0 transition-opacity duration-1000 delay-500 relative bg-surface-container-lowest shadow-sm rounded-xl overflow-hidden md:h-[800px] md:max-h-screen my-auto mx-auto border border-outline-variant/10" id="onboarding-container">
+<!-- Skip Button -->
+<div class="absolute top-0 right-0 p-gutter z-20">
+<button class="font-label-md text-label-md text-on-surface-variant hover:text-primary transition-colors px-4 py-2 rounded-full hover:bg-surface-variant">Skip</button>
+</div>
+<!-- Slides Wrapper -->
+<div class="flex-1 relative overflow-hidden" id="slider">
+<!-- Slide 1 -->
+<div class="onboarding-slide absolute inset-0 flex flex-col px-gutter pt-xl pb-gutter transform translate-x-0 bg-surface-container-lowest" id="slide-1">
+<div class="flex-1 flex flex-col items-center justify-center mt-xl">
+<div class="relative w-64 h-64 mb-lg flex items-center justify-center">
+<!-- Decorative background elements -->
+<div class="absolute inset-0 bg-surface-container rounded-full opacity-50 transform scale-110"></div>
+<div class="absolute inset-4 bg-surface-container-high rounded-full opacity-70"></div>
+<!-- Main Icon -->
+<div class="relative bg-white rounded-2xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-outline-variant/10 flex items-center justify-center w-32 h-32 z-10">
+<span class="material-symbols-outlined text-primary text-6xl" style="font-size: 56px;">document_scanner</span>
+<!-- Floating badges -->
+<div class="absolute -top-4 -right-4 bg-green-100 border border-green-200 rounded-lg px-2 py-1 flex items-center gap-1 shadow-sm rotate-12">
+<span class="material-symbols-outlined text-green-600 text-sm" style="font-size: 16px;">check_circle</span>
+<span class="text-green-800 text-xs font-bold font-label-md">98% Match</span>
+</div>
+</div>
+</div>
+<div class="text-center mt-xl max-w-sm">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-sm">AI Answer Evaluation</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Upload your handwritten answers and get instant, detailed feedback mapped against the official marking scheme.</p>
+</div>
+</div>
+</div>
+<!-- Slide 2 -->
+<div class="onboarding-slide absolute inset-0 flex flex-col px-gutter pt-xl pb-gutter transform translate-x-full bg-surface-container-lowest" id="slide-2">
+<div class="flex-1 flex flex-col items-center justify-center mt-xl">
+<div class="relative w-64 h-64 mb-lg flex items-center justify-center">
+<div class="absolute inset-0 bg-secondary-fixed opacity-50 rounded-[40px] rotate-12 transform scale-105"></div>
+<div class="absolute inset-2 bg-secondary-fixed-dim rounded-[30px] opacity-70 rotate-3"></div>
+<div class="relative bg-white rounded-full p-8 shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-secondary/10 flex items-center justify-center w-32 h-32 z-10 pulse-ring">
+<span class="material-symbols-outlined text-secondary text-6xl" style="font-size: 56px;">mic</span>
+<!-- Sound waves -->
+<div class="absolute -left-8 top-1/2 -translate-y-1/2 flex gap-1 items-center">
+<div class="w-1 h-4 bg-secondary/40 rounded-full"></div>
+<div class="w-1 h-8 bg-secondary/60 rounded-full"></div>
+<div class="w-1 h-6 bg-secondary/50 rounded-full"></div>
+</div>
+<div class="absolute -right-8 top-1/2 -translate-y-1/2 flex gap-1 items-center">
+<div class="w-1 h-6 bg-secondary/50 rounded-full"></div>
+<div class="w-1 h-8 bg-secondary/60 rounded-full"></div>
+<div class="w-1 h-4 bg-secondary/40 rounded-full"></div>
+</div>
+</div>
+</div>
+<div class="text-center mt-xl max-w-sm">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-sm">Voice Doubt Solver</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Stuck on a concept? Just ask. Our conversational AI tutor explains complex topics naturally, like a real teacher.</p>
+</div>
+</div>
+</div>
+<!-- Slide 3 -->
+<div class="onboarding-slide absolute inset-0 flex flex-col px-gutter pt-xl pb-gutter transform translate-x-full bg-surface-container-lowest" id="slide-3">
+<div class="flex-1 flex flex-col items-center justify-center mt-xl">
+<div class="relative w-64 h-64 mb-lg flex items-center justify-center">
+<!-- Bento-style grid background -->
+<div class="absolute inset-0 grid grid-cols-2 grid-rows-2 gap-2 p-4 rotate-6 opacity-30">
+<div class="bg-primary rounded-xl"></div>
+<div class="bg-secondary rounded-xl opacity-60"></div>
+<div class="bg-tertiary rounded-xl opacity-40"></div>
+<div class="bg-primary rounded-xl opacity-80"></div>
+</div>
+<div class="relative bg-white rounded-2xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-outline-variant/10 flex flex-col items-center justify-center w-40 h-40 z-10">
+<span class="material-symbols-outlined text-primary mb-2" style="font-size: 48px;">smart_toy</span>
+<div class="w-full h-1 bg-surface-variant rounded-full mt-2 mb-1 overflow-hidden">
+<div class="w-3/4 h-full bg-primary rounded-full"></div>
+</div>
+<span class="material-symbols-outlined text-outline text-sm mt-1">calendar_month</span>
+</div>
+</div>
+<div class="text-center mt-xl max-w-sm">
+<h2 class="font-headline-lg-mobile text-headline-lg-mobile text-on-surface mb-sm">Adaptive Study Planning</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">A dynamic schedule that adapts to your performance. Focus more on your weak areas and track real progress.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Controls (Dots & Button) -->
+<div class="p-gutter pb-xl mt-auto bg-surface-container-lowest relative z-20 flex flex-col items-center">
+<!-- Pagination Dots -->
+<div class="flex gap-2 mb-lg" id="pagination">
+<div class="w-8 h-1.5 bg-primary rounded-full transition-all duration-300" data-index="0"></div>
+<div class="w-1.5 h-1.5 bg-surface-variant rounded-full transition-all duration-300 cursor-pointer" data-index="1"></div>
+<div class="w-1.5 h-1.5 bg-surface-variant rounded-full transition-all duration-300 cursor-pointer" data-index="2"></div>
+</div>
+<!-- Action Button -->
+<button class="w-full max-w-[320px] bg-primary text-on-primary font-headline-sm text-headline-sm py-4 rounded-full shadow-sm hover:opacity-90 active:scale-95 transition-all duration-200 flex justify-center items-center gap-2" id="next-btn">
+                Continue
+                <span class="material-symbols-outlined" style="font-size: 20px;">arrow_forward</span>
+</button>
+</div>
+</div>
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Splash screen logic
+            setTimeout(() => {
+                const splash = document.getElementById('splash-screen');
+                const container = document.getElementById('onboarding-container');
+                
+                splash.style.opacity = '0';
+                container.style.opacity = '1';
+                
+                setTimeout(() => {
+                    splash.style.display = 'none';
+                }, 1000);
+            }, 2500); // Show splash for 2.5s
+
+            // Slider logic
+            const slides = [
+                document.getElementById('slide-1'),
+                document.getElementById('slide-2'),
+                document.getElementById('slide-3')
+            ];
+            const dots = document.querySelectorAll('#pagination div');
+            const nextBtn = document.getElementById('next-btn');
+            
+            let currentSlide = 0;
+
+            function updateSlider(newIndex) {
+                // Update slides positions
+                slides.forEach((slide, index) => {
+                    if (index < newIndex) {
+                        slide.style.transform = 'translateX(-100%)';
+                    } else if (index === newIndex) {
+                        slide.style.transform = 'translateX(0)';
+                    } else {
+                        slide.style.transform = 'translateX(100%)';
+                    }
+                });
+
+                // Update dots
+                dots.forEach((dot, index) => {
+                    if (index === newIndex) {
+                        dot.classList.remove('w-1.5', 'bg-surface-variant');
+                        dot.classList.add('w-8', 'bg-primary');
+                    } else {
+                        dot.classList.remove('w-8', 'bg-primary');
+                        dot.classList.add('w-1.5', 'bg-surface-variant');
+                    }
+                });
+
+                // Update button
+                if (newIndex === slides.length - 1) {
+                    nextBtn.innerHTML = `Get Started <span class="material-symbols-outlined" style="font-size: 20px;">rocket_launch</span>`;
+                    // Optional: change color for final step
+                    // nextBtn.classList.replace('bg-primary', 'bg-secondary');
+                } else {
+                    nextBtn.innerHTML = `Continue <span class="material-symbols-outlined" style="font-size: 20px;">arrow_forward</span>`;
+                    // nextBtn.classList.replace('bg-secondary', 'bg-primary');
+                }
+
+                currentSlide = newIndex;
+            }
+
+            nextBtn.addEventListener('click', () => {
+                if (currentSlide < slides.length - 1) {
+                    updateSlider(currentSlide + 1);
+                } else {
+                    // Final action - usually redirect to login/home
+                    alert('Redirecting to App...');
+                }
+            });
+
+            // Make dots clickable
+            dots.forEach(dot => {
+                dot.addEventListener('click', (e) => {
+                    const index = parseInt(e.target.getAttribute('data-index'));
+                    if (index !== currentSlide) {
+                        updateSlider(index);
+                    }
+                });
+            });
+        });
+    </script>
+</body></html>

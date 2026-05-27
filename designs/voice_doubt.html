@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PrepMind - Voice Doubt Solver</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary": "#632ce5",
+                        "surface": "#f8f9ff",
+                        "inverse-surface": "#27313f",
+                        "on-tertiary-container": "#2f3233",
+                        "primary-fixed": "#cde5ff",
+                        "inverse-primary": "#95ccff",
+                        "surface-container-low": "#eff4ff",
+                        "primary-container": "#1da1f2",
+                        "tertiary-fixed-dim": "#c5c7c8",
+                        "on-secondary": "#ffffff",
+                        "on-primary-container": "#003554",
+                        "secondary-fixed": "#e8deff",
+                        "secondary-fixed-dim": "#cdbdff",
+                        "surface-tint": "#006399",
+                        "on-secondary-fixed-variant": "#4f00d0",
+                        "on-primary-fixed-variant": "#004a75",
+                        "on-primary": "#ffffff",
+                        "background": "#f8f9ff",
+                        "tertiary-fixed": "#e1e3e4",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-highest": "#d9e3f6",
+                        "on-secondary-container": "#fcf6ff",
+                        "on-surface": "#121c2a",
+                        "outline-variant": "#bec7d3",
+                        "surface-container-high": "#dee9fc",
+                        "on-primary-fixed": "#001d32",
+                        "primary": "#006399",
+                        "inverse-on-surface": "#eaf1ff",
+                        "outline": "#6f7882",
+                        "on-tertiary-fixed": "#191c1d",
+                        "error": "#ba1a1a",
+                        "surface-variant": "#d9e3f6",
+                        "tertiary-container": "#989a9b",
+                        "on-tertiary": "#ffffff",
+                        "secondary-container": "#7c4dff",
+                        "tertiary": "#5c5f60",
+                        "on-background": "#121c2a",
+                        "on-error-container": "#93000a",
+                        "on-tertiary-fixed-variant": "#454748",
+                        "error-container": "#ffdad6",
+                        "on-secondary-fixed": "#20005f",
+                        "surface-container": "#e6eeff",
+                        "surface-bright": "#f8f9ff",
+                        "on-error": "#ffffff",
+                        "primary-fixed-dim": "#95ccff",
+                        "surface-dim": "#d0dbed",
+                        "on-surface-variant": "#3f4851"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "16px",
+                        "container-max": "1200px",
+                        "base": "4px",
+                        "margin-mobile": "16px",
+                        "lg": "24px",
+                        "md": "16px",
+                        "margin-desktop": "40px",
+                        "xs": "8px",
+                        "sm": "12px",
+                        "xl": "32px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Plus Jakarta Sans", "sans-serif"],
+                        "headline-sm": ["Plus Jakarta Sans", "sans-serif"],
+                        "body-sm": ["Inter", "sans-serif"],
+                        "body-md": ["Inter", "sans-serif"],
+                        "headline-lg": ["Plus Jakarta Sans", "sans-serif"],
+                        "body-lg": ["Inter", "sans-serif"],
+                        "headline-md": ["Plus Jakarta Sans", "sans-serif"],
+                        "label-md": ["JetBrains Mono", "monospace"],
+                        "headline-lg-mobile": ["Plus Jakarta Sans", "sans-serif"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }]
+                    },
+                    "boxShadow": {
+                        'soft': '0 4px 12px rgba(0, 0, 0, 0.05)',
+                        'glow': '0 0 20px rgba(99, 44, 229, 0.15)',
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .pulse-ring {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% {
+                opacity: .5;
+                transform: scale(1.1);
+            }
+        }
+
+        .mic-listening .pulse-ring {
+            animation: pulse-active 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+        }
+
+        @keyframes pulse-active {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(0, 99, 153, 0.7);
+            }
+            70% {
+                transform: scale(1.1);
+                box-shadow: 0 0 0 15px rgba(0, 99, 153, 0);
+            }
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(0, 99, 153, 0);
+            }
+        }
+        
+        /* Hide scrollbar for clean UI */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen flex flex-col relative md:hidden">
+<!-- Top Navigation (Transactional style, no bottom nav needed) -->
+<header class="flex justify-between items-center px-margin-mobile py-md w-full z-10 sticky top-0 bg-surface/80 backdrop-blur-md border-b border-outline-variant/10">
+<button aria-label="Close" class="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface-variant hover:opacity-80 transition-opacity active:scale-95">
+<span class="material-symbols-outlined" data-icon="close">close</span>
+</button>
+<div class="flex items-center gap-2 bg-secondary-fixed text-on-secondary-fixed px-3 py-1.5 rounded-full">
+<span class="font-body-sm text-body-sm">1/2 queries left today</span>
+<span class="font-label-md text-label-md text-secondary font-bold flex items-center gap-1 cursor-pointer hover:underline">
+                Upgrade <span class="material-symbols-outlined text-[16px]" data-icon="bolt">bolt</span>
+</span>
+</div>
+<button aria-label="Menu" class="w-10 h-10 flex items-center justify-center rounded-full bg-surface-container-high text-on-surface-variant hover:opacity-80 transition-opacity active:scale-95">
+<span class="material-symbols-outlined" data-icon="menu">menu</span>
+</button>
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col items-center justify-center px-margin-mobile pb-32 pt-8 relative">
+<!-- Central AI Branding -->
+<div class="flex flex-col items-center mb-12">
+<div class="w-16 h-16 rounded-full bg-primary flex items-center justify-center mb-4 shadow-soft">
+<span class="material-symbols-outlined text-on-primary text-[32px]" data-icon="science">science</span>
+</div>
+<h1 class="font-headline-sm text-headline-sm text-primary">Ask PrepMind</h1>
+</div>
+<!-- Chat Area (Visible when active) -->
+<div class="w-full max-w-md flex flex-col gap-4 opacity-0 transition-opacity duration-500 hidden mb-8" id="chatContainer">
+<!-- User Query -->
+<div class="self-end bg-surface-container-high text-on-surface px-4 py-3 rounded-2xl rounded-tr-sm max-w-[85%] shadow-sm border border-outline-variant/10">
+<p class="font-body-md text-body-md" id="userTranscribedText">What is the significance of the Dandi March?</p>
+</div>
+<!-- AI Response -->
+<div class="self-start bg-surface-container-lowest text-on-surface px-4 py-3 rounded-2xl rounded-tl-sm max-w-[90%] shadow-soft border border-outline-variant/10 relative">
+<div class="absolute -left-3 -top-3 w-8 h-8 rounded-full bg-primary flex items-center justify-center border-2 border-surface">
+<span class="material-symbols-outlined text-on-primary text-[16px]" data-icon="robot_2">robot_2</span>
+</div>
+<div class="pl-2 pt-2">
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-2" id="aiResponseText">The Dandi March, led by Mahatma Gandhi in 1930, was a pivotal moment in the Indian independence movement. It marked the beginning of the Civil Disobedience Movement...</p>
+<div class="flex gap-2 mt-3">
+<button class="px-3 py-1 rounded-full bg-surface-container border border-outline-variant/20 font-label-md text-label-md text-primary flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]" data-icon="volume_up">volume_up</span> Read Aloud
+                        </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Suggestion Chips -->
+<div class="flex flex-wrap justify-center gap-3 w-full max-w-md absolute bottom-24 left-1/2 -translate-x-1/2 px-margin-mobile" id="suggestionChips">
+<button class="bg-surface-container-lowest border border-outline-variant/20 px-4 py-2 rounded-full flex items-center gap-2 shadow-sm hover:bg-surface-container-low transition-colors active:scale-95">
+<span class="material-symbols-outlined text-secondary" data-icon="tips_and_updates">tips_and_updates</span>
+<span class="font-body-sm text-body-sm text-on-surface">Prep strategy</span>
+</button>
+<button class="bg-surface-container-lowest border border-outline-variant/20 px-4 py-2 rounded-full flex items-center gap-2 shadow-sm hover:bg-surface-container-low transition-colors active:scale-95">
+<span class="material-symbols-outlined text-primary" data-icon="menu_book">menu_book</span>
+<span class="font-body-sm text-body-sm text-on-surface">Study Topics</span>
+</button>
+</div>
+</main>
+<!-- Bottom Input Area (Sticky) -->
+<div class="fixed bottom-0 left-0 w-full bg-surface px-margin-mobile py-4 pb-8 z-20">
+<div class="w-full max-w-md mx-auto relative">
+<div class="absolute -top-1 left-1/2 -translate-x-1/2 w-1/3 h-1 bg-gradient-to-r from-transparent via-primary to-transparent rounded-t-full opacity-50"></div>
+<div class="bg-surface-container-lowest border border-outline-variant/20 rounded-full flex items-center p-1.5 shadow-soft">
+<input class="flex-1 bg-transparent border-none focus:ring-0 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/50 px-4 py-2" id="textInput" placeholder="Try asking by voice..." type="text"/>
+<div class="flex items-center gap-1 pr-1">
+<button aria-label="Use Microphone" class="w-10 h-10 rounded-full flex items-center justify-center text-primary hover:bg-surface-container transition-colors relative" id="micBtn">
+<div class="absolute inset-0 rounded-full bg-primary/10 pulse-ring"></div>
+<span class="material-symbols-outlined relative z-10" data-icon="mic">mic</span>
+</button>
+<button aria-label="Send" class="w-10 h-10 rounded-full bg-primary text-on-primary flex items-center justify-center shadow-sm hover:opacity-90 transition-opacity active:scale-95" id="sendBtn">
+<span class="material-symbols-outlined" data-icon="arrow_upward">arrow_upward</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Home Indicator Area -->
+<div class="w-full flex justify-center mt-6">
+<div class="w-1/3 h-1 bg-outline-variant/30 rounded-full"></div>
+</div>
+</div>
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const micBtn = document.getElementById('micBtn');
+            const textInput = document.getElementById('textInput');
+            const chatContainer = document.getElementById('chatContainer');
+            const suggestionChips = document.getElementById('suggestionChips');
+            
+            let isListening = false;
+
+            // Simulate mic interaction
+            micBtn.addEventListener('click', () => {
+                isListening = !isListening;
+                if (isListening) {
+                    micBtn.parentElement.classList.add('mic-listening');
+                    micBtn.classList.replace('text-primary', 'text-error');
+                    textInput.placeholder = "Listening...";
+                } else {
+                    micBtn.parentElement.classList.remove('mic-listening');
+                    micBtn.classList.replace('text-error', 'text-primary');
+                    textInput.placeholder = "Try asking by voice...";
+                    
+                    // Simulate receiving text after speaking
+                    setTimeout(() => {
+                        textInput.value = "What is the significance of the Dandi March?";
+                        simulateSend();
+                    }, 500);
+                }
+            });
+
+            function simulateSend() {
+                if (textInput.value.trim() === '') return;
+                
+                // Hide suggestions, show chat
+                suggestionChips.style.opacity = '0';
+                setTimeout(() => {
+                    suggestionChips.classList.add('hidden');
+                    chatContainer.classList.remove('hidden');
+                    
+                    // Small delay to allow display:block to apply before animating opacity
+                    requestAnimationFrame(() => {
+                        chatContainer.style.opacity = '1';
+                    });
+                }, 300);
+
+                // Clear input after a short delay
+                setTimeout(() => {
+                    textInput.value = '';
+                }, 1000);
+            }
+
+            document.getElementById('sendBtn').addEventListener('click', simulateSend);
+            
+            textInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') simulateSend();
+            });
+        });
+    </script>
+</body></html>

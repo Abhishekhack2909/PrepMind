@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PrepMind - Prelims MCQ Practice</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;family=Inter:wght@400;500;600&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary": "#632ce5",
+                      "surface": "#f8f9ff",
+                      "inverse-surface": "#27313f",
+                      "on-tertiary-container": "#2f3233",
+                      "primary-fixed": "#cde5ff",
+                      "inverse-primary": "#95ccff",
+                      "surface-container-low": "#eff4ff",
+                      "primary-container": "#1da1f2",
+                      "tertiary-fixed-dim": "#c5c7c8",
+                      "on-secondary": "#ffffff",
+                      "on-primary-container": "#003554",
+                      "secondary-fixed": "#e8deff",
+                      "secondary-fixed-dim": "#cdbdff",
+                      "surface-tint": "#006399",
+                      "on-secondary-fixed-variant": "#4f00d0",
+                      "on-primary-fixed-variant": "#004a75",
+                      "on-primary": "#ffffff",
+                      "background": "#f8f9ff",
+                      "tertiary-fixed": "#e1e3e4",
+                      "surface-container-lowest": "#ffffff",
+                      "surface-container-highest": "#d9e3f6",
+                      "on-secondary-container": "#fcf6ff",
+                      "on-surface": "#121c2a",
+                      "outline-variant": "#bec7d3",
+                      "surface-container-high": "#dee9fc",
+                      "on-primary-fixed": "#001d32",
+                      "primary": "#006399",
+                      "inverse-on-surface": "#eaf1ff",
+                      "outline": "#6f7882",
+                      "on-tertiary-fixed": "#191c1d",
+                      "error": "#ba1a1a",
+                      "surface-variant": "#d9e3f6",
+                      "tertiary-container": "#989a9b",
+                      "on-tertiary": "#ffffff",
+                      "secondary-container": "#7c4dff",
+                      "tertiary": "#5c5f60",
+                      "on-background": "#121c2a",
+                      "on-error-container": "#93000a",
+                      "on-tertiary-fixed-variant": "#454748",
+                      "error-container": "#ffdad6",
+                      "on-secondary-fixed": "#20005f",
+                      "surface-container": "#e6eeff",
+                      "surface-bright": "#f8f9ff",
+                      "on-error": "#ffffff",
+                      "primary-fixed-dim": "#95ccff",
+                      "surface-dim": "#d0dbed",
+                      "on-surface-variant": "#3f4851",
+                      "success": "#10b981",
+                      "success-container": "#d1fae5",
+                      "on-success-container": "#065f46",
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "gutter": "16px",
+                      "container-max": "1200px",
+                      "base": "4px",
+                      "margin-mobile": "16px",
+                      "lg": "24px",
+                      "md": "16px",
+                      "margin-desktop": "40px",
+                      "xs": "8px",
+                      "sm": "12px",
+                      "xl": "32px"
+              },
+              "fontFamily": {
+                      "display-lg": ["Plus Jakarta Sans"],
+                      "headline-sm": ["Plus Jakarta Sans"],
+                      "body-sm": ["Inter"],
+                      "body-md": ["Inter"],
+                      "headline-lg": ["Plus Jakarta Sans"],
+                      "body-lg": ["Inter"],
+                      "headline-md": ["Plus Jakarta Sans"],
+                      "label-md": ["JetBrains Mono"],
+                      "headline-lg-mobile": ["Plus Jakarta Sans"]
+              },
+              "fontSize": {
+                      "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                      "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                      "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                      "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                      "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "700" }],
+                      "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                      "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                      "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+                      "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "700" }]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        .mcq-option { transition: all 0.2s ease-in-out; }
+        .mcq-option:hover { transform: translateY(-2px); }
+        .mcq-option.selected { border-color: theme('colors.primary'); background-color: theme('colors.surface-container-low'); }
+        .mcq-option.correct { border-color: theme('colors.success'); background-color: theme('colors.success-container'); }
+        .mcq-option.incorrect { border-color: theme('colors.error'); background-color: theme('colors.error-container'); }
+        
+        /* Ambient subtle grid background */
+        .bg-grid-pattern {
+            background-image: linear-gradient(to right, rgba(0,0,0,0.03) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(0,0,0,0.03) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md min-h-screen pb-24">
+<!-- Top Navigation (Task-focused, suppressing global TopAppBar) -->
+<header class="bg-surface shadow-sm sticky top-0 z-40">
+<div class="flex justify-between items-center px-gutter py-sm w-full max-w-container-max mx-auto">
+<div class="flex items-center gap-sm">
+<button class="p-xs text-on-surface-variant hover:bg-surface-variant rounded-full transition-colors" onclick="history.back()">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<div>
+<h1 class="font-headline-sm text-headline-sm text-on-surface">Prelims MCQ</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Indian Polity</p>
+</div>
+</div>
+<!-- Timer Component -->
+<div class="flex items-center gap-xs bg-surface-container px-sm py-xs rounded-full">
+<span class="material-symbols-outlined text-outline">timer</span>
+<span class="font-label-md text-label-md text-on-surface font-bold" id="timer">14:59</span>
+</div>
+</div>
+<!-- Progress Bar -->
+<div class="w-full bg-surface-variant h-1">
+<div class="bg-primary h-1 w-[5%]" style="width: 5%;"></div>
+</div>
+</header>
+<main class="w-full max-w-container-max mx-auto px-gutter py-lg flex flex-col gap-lg md:gap-xl">
+<!-- Question Header -->
+<div class="flex justify-between items-end">
+<span class="font-label-md text-label-md text-primary bg-primary-fixed text-on-primary-fixed px-sm py-xs rounded-lg">Question 1 of 20</span>
+<div class="flex gap-xs">
+<button class="p-xs text-outline hover:text-primary transition-colors"><span class="material-symbols-outlined">bookmark</span></button>
+<button class="p-xs text-outline hover:text-error transition-colors"><span class="material-symbols-outlined">report</span></button>
+</div>
+</div>
+<!-- Question Card -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] border border-outline-variant/20 p-lg relative overflow-hidden bg-grid-pattern">
+<p class="font-body-lg text-body-lg text-on-surface mb-lg">
+                Consider the following statements regarding the 'Preamble' of the Indian Constitution:
+                <br/><br/>
+                1. It is based on the 'Objectives Resolution' drafted and moved by Pandit Nehru.
+                <br/>
+                2. It is not justifiable in nature.
+                <br/>
+                3. It cannot be amended as it is a part of the basic structure of the Constitution.
+                <br/><br/>
+                Which of the statements given above is/are correct?
+            </p>
+<!-- Options (Bento Grid Style) -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-md" id="mcq-options">
+<button class="mcq-option flex items-start gap-sm p-md rounded-lg border border-outline-variant bg-surface text-left group" onclick="selectOption(this)">
+<div class="w-6 h-6 rounded-full border border-outline flex items-center justify-center shrink-0 group-[.selected]:border-primary group-[.selected]:bg-primary text-white transition-colors">
+<span class="font-body-sm text-body-sm hidden group-[.selected]:block">A</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface pt-0.5">1 and 2 only</span>
+</button>
+<button class="mcq-option flex items-start gap-sm p-md rounded-lg border border-outline-variant bg-surface text-left group" onclick="selectOption(this)">
+<div class="w-6 h-6 rounded-full border border-outline flex items-center justify-center shrink-0 group-[.selected]:border-primary group-[.selected]:bg-primary text-white transition-colors">
+<span class="font-body-sm text-body-sm hidden group-[.selected]:block">B</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface pt-0.5">2 and 3 only</span>
+</button>
+<button class="mcq-option flex items-start gap-sm p-md rounded-lg border border-outline-variant bg-surface text-left group" onclick="selectOption(this)">
+<div class="w-6 h-6 rounded-full border border-outline flex items-center justify-center shrink-0 group-[.selected]:border-primary group-[.selected]:bg-primary text-white transition-colors">
+<span class="font-body-sm text-body-sm hidden group-[.selected]:block">C</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface pt-0.5">1 and 3 only</span>
+</button>
+<button class="mcq-option flex items-start gap-sm p-md rounded-lg border border-outline-variant bg-surface text-left group" onclick="selectOption(this)">
+<div class="w-6 h-6 rounded-full border border-outline flex items-center justify-center shrink-0 group-[.selected]:border-primary group-[.selected]:bg-primary text-white transition-colors">
+<span class="font-body-sm text-body-sm hidden group-[.selected]:block">D</span>
+</div>
+<span class="font-body-md text-body-md text-on-surface pt-0.5">1, 2, and 3</span>
+</button>
+</div>
+</div>
+<!-- Action Area -->
+<div class="flex justify-end mt-sm">
+<button class="bg-primary text-on-primary font-headline-sm text-headline-sm py-sm px-xl rounded-full hover:opacity-90 active:scale-95 transition-all shadow-sm opacity-50 cursor-not-allowed" disabled="" id="submitBtn" onclick="submitAnswer()">
+                Submit
+            </button>
+</div>
+<!-- Feedback & Explanation Area (Hidden by default) -->
+<div class="hidden flex flex-col gap-md mt-md opacity-0 transition-opacity duration-500" id="feedbackArea">
+<!-- Result Banner -->
+<div class="p-md rounded-lg flex items-center gap-sm" id="resultBanner">
+<span class="material-symbols-outlined text-2xl" id="resultIcon">check_circle</span>
+<span class="font-headline-sm text-headline-sm" id="resultText">Correct!</span>
+</div>
+<!-- Detailed Explanation Card (Glassmorphism inspired) -->
+<div class="bg-surface-container-low border border-primary-fixed/50 rounded-xl p-lg relative overflow-hidden">
+<div class="absolute top-0 left-0 w-1 h-full bg-primary"></div>
+<div class="flex items-center gap-xs mb-md text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">lightbulb</span>
+<h3 class="font-headline-sm text-headline-sm">Detailed Explanation</h3>
+</div>
+<div class="font-body-md text-body-md text-on-surface space-y-md">
+<p><strong>Statement 1 is correct:</strong> The Preamble is based on the 'Objectives Resolution', drafted and moved by Pandit Nehru, and adopted by the Constituent Assembly.</p>
+<p><strong>Statement 2 is correct:</strong> Like the Directive Principles of State Policy, the Preamble is non-justiciable. Its provisions are not enforceable in courts of law.</p>
+<p><strong>Statement 3 is incorrect:</strong> The Supreme Court held in the Kesavananda Bharati case (1973) that the Preamble is a part of the Constitution and can be amended under Article 368, subject to the condition that no amendment is done to the 'basic features' of the Constitution. It has been amended once by the 42nd Amendment Act (1976).</p>
+</div>
+</div>
+<!-- Next Action -->
+<div class="flex justify-end mt-sm">
+<button class="flex items-center gap-xs bg-secondary text-on-secondary font-headline-sm text-headline-sm py-sm px-xl rounded-full hover:opacity-90 active:scale-95 transition-all shadow-sm" onclick="location.reload()">
+                    Next Question <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</div>
+</div>
+</main>
+<script>
+        let isSubmitted = false;
+
+        function selectOption(element) {
+            if (isSubmitted) return;
+            
+            // Remove selected class from all
+            document.querySelectorAll('.mcq-option').forEach(el => {
+                el.classList.remove('selected');
+                el.querySelector('div').innerHTML = ''; // clear A,B,C,D text
+            });
+            
+            // Add to clicked
+            element.classList.add('selected');
+            
+            // Re-add letters just for visual flair in selected state
+            const index = Array.from(element.parentNode.children).indexOf(element);
+            const letter = ['A', 'B', 'C', 'D'][index];
+            element.querySelector('div').innerHTML = `<span class="font-body-sm text-body-sm hidden group-[.selected]:block">${letter}</span>`;
+
+            // Enable submit
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+
+        function submitAnswer() {
+            if (isSubmitted) return;
+            isSubmitted = true;
+
+            const selected = document.querySelector('.mcq-option.selected');
+            if (!selected) return;
+
+            // Mock logic: Option A is correct
+            const isCorrect = Array.from(selected.parentNode.children).indexOf(selected) === 0;
+
+            // Style options
+            const options = document.querySelectorAll('.mcq-option');
+            options.forEach((opt, index) => {
+                opt.style.pointerEvents = 'none'; // disable clicks
+                if (index === 0) {
+                    opt.classList.add('correct');
+                    opt.querySelector('div').innerHTML = '<span class="material-symbols-outlined text-[16px]">check</span>';
+                }
+            });
+
+            if (!isCorrect) {
+                selected.classList.add('incorrect');
+                selected.querySelector('div').innerHTML = '<span class="material-symbols-outlined text-[16px]">close</span>';
+            }
+
+            // Hide Submit button
+            document.getElementById('submitBtn').classList.add('hidden');
+
+            // Show Feedback
+            const feedbackArea = document.getElementById('feedbackArea');
+            const resultBanner = document.getElementById('resultBanner');
+            const resultIcon = document.getElementById('resultIcon');
+            const resultText = document.getElementById('resultText');
+
+            if (isCorrect) {
+                resultBanner.className = 'p-md rounded-lg flex items-center gap-sm bg-success-container text-on-success-container';
+                resultIcon.textContent = 'check_circle';
+                resultText.textContent = 'Correct!';
+            } else {
+                resultBanner.className = 'p-md rounded-lg flex items-center gap-sm bg-error-container text-on-error-container';
+                resultIcon.textContent = 'cancel';
+                resultText.textContent = 'Incorrect';
+            }
+
+            feedbackArea.classList.remove('hidden');
+            // Small delay for fade in effect
+            setTimeout(() => {
+                feedbackArea.classList.remove('opacity-0');
+            }, 50);
+        }
+
+        // Simple timer logic
+        let timeLeft = 14 * 60 + 59; // 14:59
+        const timerDisplay = document.getElementById('timer');
+        
+        setInterval(() => {
+            if(timeLeft <= 0) return;
+            timeLeft--;
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            if(timeLeft < 60) {
+                timerDisplay.classList.add('text-error');
+            }
+        }, 1000);
+
+    </script>
+</body></html>
