@@ -1,5 +1,11 @@
 import { Tabs } from 'expo-router';
+import { Text } from 'react-native';
 import { Colors } from '@/constants/theme';
+
+// TabIcon renders an emoji as the tab icon
+function TabIcon({ icon }: { icon: string; color: string }) {
+  return <Text style={{ fontSize: 20 }}>{icon}</Text>;
+}
 
 export default function TabsLayout() {
   return (
@@ -19,16 +25,11 @@ export default function TabsLayout() {
         },
       }}
     >
-      <Tabs.Screen name="index"    options={{ title: 'Home',     tabBarIcon: ({ color }) => <TabIcon icon="🏠" color={color} /> }} />
-      <Tabs.Screen name="evaluate" options={{ title: 'Evaluate', tabBarIcon: ({ color }) => <TabIcon icon="📝" color={color} /> }} />
-      <Tabs.Screen name="voice"    options={{ title: 'Voice',    tabBarIcon: ({ color }) => <TabIcon icon="🎙️" color={color} /> }} />
-      <Tabs.Screen name="mcq"      options={{ title: 'MCQ',      tabBarIcon: ({ color }) => <TabIcon icon="❓" color={color} /> }} />
-      <Tabs.Screen name="planner"  options={{ title: 'Planner',  tabBarIcon: ({ color }) => <TabIcon icon="📅" color={color} /> }} />
+      <Tabs.Screen name="index"    options={{ title: 'Home',     tabBarIcon: (p) => <TabIcon icon="🏠"  color={p.color} /> }} />
+      <Tabs.Screen name="evaluate" options={{ title: 'Evaluate', tabBarIcon: (p) => <TabIcon icon="📝"  color={p.color} /> }} />
+      <Tabs.Screen name="voice"    options={{ title: 'Voice',    tabBarIcon: (p) => <TabIcon icon="🎙️" color={p.color} /> }} />
+      <Tabs.Screen name="mcq"      options={{ title: 'MCQ',      tabBarIcon: (p) => <TabIcon icon="❓"  color={p.color} /> }} />
+      <Tabs.Screen name="planner"  options={{ title: 'Planner',  tabBarIcon: (p) => <TabIcon icon="📅"  color={p.color} /> }} />
     </Tabs>
   );
-}
-
-function TabIcon({ icon, color }: { icon: string; color: string }) {
-  const { Text } = require('react-native');
-  return <Text style={{ fontSize: 20 }}>{icon}</Text>;
 }

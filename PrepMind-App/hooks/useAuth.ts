@@ -16,23 +16,52 @@ export function useAuth(): AuthState {
   useEffect(() => {
     let mounted = true;
 
-    // Safety timeout — if Supabase doesn't respond in 5s, unblock the app
+    // Safety timeout — unblock after 5s no matter what
     const timeout = setTimeout(() => {
       if (mounted) setLoading(false);
     }, 5000);
 
-    // Check existing session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (!mounted) return;
-      clearTimeout(timeout);
-      setSession(session);
-      if (session?.user) await fetchProfile(session.user.id);
-      setLoading(false);
-    }).catch(() => {
-      if (mounted) setLoading(false);
-    });
+    async function init() {
+      try {
+        // Check for existing session
+        const { data: { session } } = await supabase.auth.getSession();
 
-    // Listen for login/logout events
+        if (session) {
+          // Already have a session (email or anonymous)
+          if (mounted) {
+            setSession(session);
+            await fetchProfile(session.user.id);
+          }
+        } else {
+          // ── Option B: Anonymous Sign-In ──
+          // Auto sign-in anonymously so the user never sees a login screen.
+          // They get a real Supabase user ID immediately.
+          // Later we can "upgrade" this to email auth if needed.
+          const { data, error } = await supabase.auth.signInAnonymously();
+          if (!error && data.session && mounted) {
+            setSession(data.session);
+            // Create a minimal profile row for anonymous users
+            await supabase.from('users').upsert({
+              id: data.session.user.id,
+              email: `anon_${data.session.user.id.slice(0, 8)}@prepmind.local`,
+              name: 'Guest',
+              daily_hours: 4,
+            }, { onConflict: 'id' });
+          }
+        }
+      } catch (err) {
+        console.warn('Auth init error:', err);
+      } finally {
+        if (mounted) {
+          clearTimeout(timeout);
+          setLoading(false);
+        }
+      }
+    }
+
+    init();
+
+    // Listen for auth state changes (sign-in, sign-out, token refresh)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         if (!mounted) return;
@@ -61,7 +90,7 @@ export function useAuth(): AuthState {
         .single();
       if (data) setUser(data as UserProfile);
     } catch {
-      // Profile fetch failed — user still authenticated, just no profile yet
+      // No profile yet — fine for anonymous users
     }
   }
 
