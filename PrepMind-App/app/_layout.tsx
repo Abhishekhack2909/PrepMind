@@ -22,15 +22,17 @@ import { useAuth } from '@/hooks/useAuth';
 import { Colors } from '@/constants/theme';
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
-  const { user, loading } = useAuth();
+  const { session, loading } = useAuth();
   const segments = useSegments();
 
   useEffect(() => {
     if (loading) return;
     const inAuth = segments[0] === '(auth)';
-    if (!user && !inAuth) router.replace('/(auth)/onboarding');
-    else if (user && inAuth) router.replace('/(tabs)');
-  }, [user, loading, segments]);
+    // With anonymous auth, once session exists always go to tabs
+    // Onboarding is only shown on very first launch (AsyncStorage check inside it)
+    if (session && inAuth) router.replace('/(tabs)');
+    if (!session && !inAuth) router.replace('/(auth)/onboarding');
+  }, [session, loading, segments]);
 
   if (loading) {
     return (
@@ -42,6 +44,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
 
   return <>{children}</>;
 }
+
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
@@ -63,7 +66,7 @@ export default function RootLayout() {
     }
   }, []);
 
-  const ready = fontsLoaded || fontError || fontTimeout;
+  const ready = fontsLoaded || !!fontError || fontTimeout;
 
   if (!ready) {
     return (

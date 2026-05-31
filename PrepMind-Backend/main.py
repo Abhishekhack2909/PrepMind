@@ -32,6 +32,7 @@ async def health_check():
     return {"status": "ok", "service": "PrepMind API"}
 
 
-# Routers will be added here as we build each feature
-# from routers import evaluate, voice, mcq, planner, analytics
-# app.include_router(evaluate.router)
+# ── Phase 2: Answer Evaluator ─────────────────────────────────────────────────
+from routers import evaluate
+app.include_router(evaluate.router)
+
