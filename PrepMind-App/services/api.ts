@@ -50,3 +50,33 @@ export async function evaluateAnswer(payload: EvaluatePayload): Promise<Evaluati
   const data = await response.json();
   return data.data as EvaluationResult;
 }
+
+// ── Phase 3: Knowledge Base Q&A ───────────────────────────────────────────────
+
+export type AskResult = {
+  answer: string;
+  sources: string[];
+  context_used: number;
+};
+
+/**
+ * Ask a question — get a RAG-powered answer from the knowledge base.
+ */
+export async function askQuestion(
+  question: string,
+  useRag: boolean = true
+): Promise<AskResult> {
+  const response = await fetch(`${BASE_URL}/api/ask`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question, use_rag: useRag, top_k: 4 }),
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.detail || `Server error: ${response.status}`);
+  }
+
+  return await response.json() as AskResult;
+}
+

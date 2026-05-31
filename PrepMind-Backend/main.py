@@ -36,3 +36,7 @@ async def health_check():
 from routers import evaluate
 app.include_router(evaluate.router)
 
+# ── Phase 3: Knowledge Base & RAG ─────────────────────────────────────────────
+from routers import knowledge
+app.include_router(knowledge.router)
+

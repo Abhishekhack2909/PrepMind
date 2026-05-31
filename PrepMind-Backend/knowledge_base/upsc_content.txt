@@ -1,0 +1,131 @@
+NCERT POLITY — CHAPTER 1: THE CONSTITUTION
+
+The Constitution of India came into force on 26 January 1950. It replaced the Government of India Act 1935. The Constituent Assembly took 2 years, 11 months and 18 days to draft the Constitution. Dr. B.R. Ambedkar was the Chairman of the Drafting Committee and is known as the Father of the Indian Constitution. Dr. Rajendra Prasad was the President of the Constituent Assembly.
+
+The Preamble of the Constitution declares India to be a Sovereign, Socialist, Secular, Democratic, Republic. The words "Socialist" and "Secular" were added by the 42nd Constitutional Amendment in 1976. The Preamble is not enforceable in a court of law but it helps in interpreting the Constitution.
+
+Key Features of the Indian Constitution:
+1. Lengthiest Written Constitution — Originally 395 articles and 8 schedules. Now 470 articles and 12 schedules after numerous amendments.
+2. Drawn from Multiple Sources — Borrowed features from USA (Fundamental Rights, Judicial Review), UK (Parliamentary System, Rule of Law), Ireland (DPSP), Canada (Federal Structure), Australia (Joint Sitting), USSR (Fundamental Duties), Germany (Suspension of Fundamental Rights during Emergency).
+3. Federal with Unitary Bias — India is described as "Union of States" not a federation. During emergencies, the Centre has overriding powers.
+4. Parliamentary Form of Government — Executive is responsible to the Legislature. PM is the head of government, President is the Constitutional head.
+5. Independent Judiciary — Supreme Court at the apex. Judges appointed by the President in consultation with Chief Justice.
+
+FUNDAMENTAL RIGHTS (Articles 12-35):
+1. Right to Equality (Art 14-18)
+2. Right to Freedom (Art 19-22)
+3. Right Against Exploitation (Art 23-24)
+4. Right to Freedom of Religion (Art 25-28)
+5. Cultural and Educational Rights (Art 29-30)
+6. Right to Constitutional Remedies (Art 32) — Dr. Ambedkar called this the "Heart and Soul of the Constitution"
+
+Article 32 gives the right to move the Supreme Court for enforcement of Fundamental Rights. Writs: Habeas Corpus, Mandamus, Prohibition, Certiorari, Quo Warranto.
+
+DIRECTIVE PRINCIPLES OF STATE POLICY (Articles 36-51):
+DPSPs are borrowed from the Irish Constitution. They are non-justiciable (cannot be enforced in court) but fundamental in governance. They aim to establish a welfare state. Key DPSPs include:
+- Equal pay for equal work (Art 39d)
+- Free legal aid (Art 39A)
+- Uniform Civil Code (Art 44)
+- Village Panchayats (Art 40)
+- Protection of environment (Art 48A)
+
+FUNDAMENTAL DUTIES (Article 51A):
+Added by 42nd Amendment 1976 on recommendation of Swaran Singh Committee. Currently 11 duties (10 added in 1976, 11th by 86th Amendment 2002). They are non-justiciable. Example: to abide by the Constitution, to defend the country, to protect natural environment.
+
+---
+
+NCERT GEOGRAPHY — PHYSICAL FEATURES OF INDIA
+
+India is the 7th largest country in the world by area (3.28 million sq km) and 2nd most populous. It is located between latitudes 8°4'N to 37°6'N and longitudes 68°7'E to 97°25'E. The Tropic of Cancer (23.5°N) passes through 8 states: Rajasthan, Gujarat, Madhya Pradesh, Chhattisgarh, Jharkhand, West Bengal, Tripura, and Mizoram.
+
+MAJOR PHYSIOGRAPHIC DIVISIONS:
+
+1. THE HIMALAYAS:
+Formed by tectonic plate collision (Indian Plate with Eurasian Plate). Three parallel ranges:
+- Greater Himalayas (Himadri): Highest. Average elevation 6000m. Mt. Everest (Nepal, 8849m), K2/Godwin-Austin (India, 8611m — highest in India), Kangchenjunga (8598m — highest entirely in India).
+- Lesser Himalayas (Himachal): Mussoorie, Shimla, Darjeeling ranges. Altitude 3700-4500m.
+- Outer Himalayas (Shiwaliks): Altitude 900-1100m. Doon Valley lies between Shiwaliks and Lesser Himalayas.
+
+2. THE NORTHERN PLAINS:
+Formed by alluvial deposits of Indus, Ganga, and Brahmaputra rivers. Most fertile and densely populated region. Divided into: Bhabar (porous), Terai (marshy), Bhangar (old alluvium), Khadar (new alluvium).
+
+3. THE PENINSULAR PLATEAU:
+Oldest and most stable landmass. Two divisions:
+- Deccan Plateau: Triangular. Bounded by Western and Eastern Ghats.
+- Central Highlands: North of Narmada. Includes Malwa Plateau, Bundelkhand.
+Western Ghats: Continuous range, higher (avg 1200m). Eastern Ghats: Discontinuous, lower (avg 600m). Highest peak of Western Ghats: Anamudi (2695m in Kerala — also highest in South India).
+
+4. COASTAL PLAINS:
+Western Coast: Narrow, steep. Divisions: Konkan (Mumbai to Goa), Kannad (Goa to Mangalore), Malabar (Mangalore to Cape Comorin).
+Eastern Coast: Wider, gentle. Divisions: Northern Circar, Coromandel.
+
+5. ISLANDS:
+Andaman & Nicobar: Bay of Bengal. Volcanic origin. Barren Island — only active volcano in South Asia.
+Lakshadweep: Arabian Sea. Coral origin. Smallest UT of India.
+
+---
+
+NCERT HISTORY — MAURYA EMPIRE
+
+The Maurya Empire (321-185 BCE) was the first pan-Indian empire. Founded by Chandragupta Maurya with the help of Chanakya (Kautilya). Chanakya's Arthashastra describes statecraft and economic policy.
+
+CHANDRAGUPTA MAURYA (321-297 BCE):
+Defeated Dhana Nanda (last Nanda ruler) and established the empire. Later defeated Seleucus Nicator (Greek general) in 305 BCE. Seleucus sent Megasthenes as ambassador whose book "Indica" describes Mauryan society. Chandragupta converted to Jainism and died at Shravanabelagola (Karnataka) by Sallekhana (fasting unto death).
+
+BINDUSARA (297-272 BCE):
+Known as "Amitraghata" (slayer of enemies). Extended empire to Deccan. Called "Amitrokates" by Greeks.
+
+ASHOKA THE GREAT (268-232 BCE):
+Most famous Mauryan ruler. Kalinga War (261 BCE) was a turning point — massive casualties led to his conversion to Buddhism. Adopted policy of "Dhamma" (moral conduct). Sent missionaries to Sri Lanka, Egypt, Syria, Greece. Erected pillars (Ashokan Edicts) across empire. Lion Capital at Sarnath is India's national emblem. Rock Edicts and Pillar Edicts are primary sources.
+
+DECLINE OF MAURYA EMPIRE:
+Ashoka's successors were weak. Pushyamitra Shunga (a general) assassinated last Mauryan king Brihadratha in 185 BCE and established the Shunga dynasty.
+
+---
+
+INDIAN ECONOMY — FIVE YEAR PLANS AND PLANNING
+
+India adopted Five Year Plans from 1951, inspired by Soviet model. The Planning Commission (established 1950) was replaced by NITI Aayog on 1 January 2015. NITI Aayog (National Institution for Transforming India) acts as a think tank. PM is the Chairperson.
+
+KEY PLANS:
+- 1st Plan (1951-56): Agriculture focus. Target 2.1%, Achieved 3.6%
+- 2nd Plan (1956-61): Mahalanobis Model. Heavy industry focus. Steel plants at Bhilai, Durgapur, Rourkela.
+- Green Revolution (mid-1960s): HYV seeds, irrigation, fertilizers. Punjab, Haryana, UP benefited most. M.S. Swaminathan is father of Green Revolution in India. Norman Borlaug introduced dwarf wheat varieties.
+- 5th Plan (1974-79): Poverty alleviation (Garibi Hatao), self-reliance. 20-point programme by Indira Gandhi.
+- 8th Plan (1992-97): Liberalization, Privatization, Globalization (LPG Reforms 1991). Narasimha Rao government. Manmohan Singh as Finance Minister introduced reforms.
+- 12th Plan (2012-17): Last Five Year Plan. Focus on "Faster, Sustainable, and More Inclusive Growth".
+
+IMPORTANT ECONOMIC CONCEPTS:
+- GDP: Total value of goods and services produced within a country in a year.
+- GNP: GDP + income earned by residents abroad - income earned by foreigners in India.
+- Per Capita Income: GNP/Total Population.
+- HDI: Human Development Index. Published by UNDP. Three dimensions: Health (life expectancy), Education (mean years of schooling), Standard of Living (GNI per capita). India ranked 134th in HDI 2022 report.
+
+---
+
+CURRENT AFFAIRS — ENVIRONMENT AND ECOLOGY
+
+CLIMATE CHANGE AND INDIA:
+Paris Agreement (2015): Limit global temperature rise to 1.5°C above pre-industrial levels. India's NDC (Nationally Determined Contribution):
+- Reduce emissions intensity of GDP by 45% by 2030 (from 2005 levels)
+- Achieve 50% cumulative electric power from non-fossil fuel sources by 2030
+- Create additional carbon sink of 2.5-3 billion tonnes of CO2 equivalent through forests by 2030
+
+IMPORTANT ENVIRONMENTAL ACTS:
+- Environment Protection Act 1986: Umbrella legislation for environment protection.
+- Wildlife Protection Act 1972: Protects wildlife; establishes National Parks and Sanctuaries.
+- Forest Conservation Act 1980: Restricts diversion of forest land.
+- Biological Diversity Act 2002: Implements Convention on Biological Diversity.
+
+BIODIVERSITY HOTSPOTS IN INDIA:
+India has 4 of world's 36 biodiversity hotspots:
+1. Himalayas
+2. Indo-Burma (Northeast India)
+3. Western Ghats and Sri Lanka
+4. Sundaland (Nicobar Islands)
+
+PROJECT TIGER: Launched 1973. Currently 53 Tiger Reserves. Jim Corbett was first Tiger Reserve. India has 70% of world's wild tiger population.
+
+PROJECT ELEPHANT: Launched 1992. 30+ Elephant Reserves.
+
+RAMSAR SITES: Wetlands of International Importance. India has 75+ Ramsar sites (highest in Asia).
