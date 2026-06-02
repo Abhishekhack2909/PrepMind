@@ -40,3 +40,8 @@ app.include_router(evaluate.router)
 from routers import knowledge
 app.include_router(knowledge.router)
 
+# ── Phase 4: Voice Doubt Solver ────────────────────────────────────────────────
+from routers import voice
+app.include_router(voice.router)
+
+
