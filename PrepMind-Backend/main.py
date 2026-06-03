@@ -44,4 +44,9 @@ app.include_router(knowledge.router)
 from routers import voice
 app.include_router(voice.router)
 
+# ── Phase 5: MCQ Engine ────────────────────────────────────────────────────────
+from routers import mcq
+app.include_router(mcq.router)
+
+
 
