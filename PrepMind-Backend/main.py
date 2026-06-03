@@ -48,5 +48,10 @@ app.include_router(voice.router)
 from routers import mcq
 app.include_router(mcq.router)
 
+# ── Phase 6: Weakness Map & Analytics ─────────────────────────────────────────
+from routers import analytics
+app.include_router(analytics.router)
+
+
 
 
