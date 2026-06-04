@@ -52,6 +52,11 @@ app.include_router(mcq.router)
 from routers import analytics
 app.include_router(analytics.router)
 
+# ── Phase 7: AI Study Planner ──────────────────────────────────────────────────
+from routers import planner
+app.include_router(planner.router)
+
+
 
 
 
