@@ -28,8 +28,11 @@ export default function TabsLayout() {
       <Tabs.Screen name="index"    options={{ title: 'Home',     tabBarIcon: (p) => <TabIcon icon="🏠"  color={p.color} /> }} />
       <Tabs.Screen name="evaluate" options={{ title: 'Evaluate', tabBarIcon: (p) => <TabIcon icon="📝"  color={p.color} /> }} />
       <Tabs.Screen name="voice"    options={{ title: 'Voice',    tabBarIcon: (p) => <TabIcon icon="🎙️" color={p.color} /> }} />
-      <Tabs.Screen name="mcq"      options={{ title: 'MCQ',      tabBarIcon: (p) => <TabIcon icon="❓"  color={p.color} /> }} />
+      <Tabs.Screen name="mcq"      options={{ title: 'MCQ',      tabBarIcon: (p) => <TabIcon icon="🧠"  color={p.color} /> }} />
       <Tabs.Screen name="planner"  options={{ title: 'Planner',  tabBarIcon: (p) => <TabIcon icon="📅"  color={p.color} /> }} />
+      <Tabs.Screen name="weakness" options={{ title: 'Map',      tabBarIcon: (p) => <TabIcon icon="📊"  color={p.color} /> }} />
+      <Tabs.Screen name="profile"  options={{ title: 'Profile',  tabBarIcon: (p) => <TabIcon icon="👤"  color={p.color} /> }} />
     </Tabs>
+
   );
 }
