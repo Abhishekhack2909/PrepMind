@@ -1,4 +1,8 @@
-﻿import { View, Text } from 'react-native';
-export default function analyticsScreen() {
-  return <View style={{flex:1,alignItems:'center',justifyContent:'center'}}><Text>Coming soon: analytics</Text></View>;
+/**
+ * analytics.tsx — redirects to weakness map
+ * This file exists for URL compatibility but the real screen is weakness.tsx
+ */
+import { Redirect } from 'expo-router';
+export default function AnalyticsRedirect() {
+  return <Redirect href="/(tabs)/weakness" />;
 }

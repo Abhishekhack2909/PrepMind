@@ -36,5 +36,5 @@ Thumbs.db
 .vscode/settings.json
 *.tsbuildinfo
 
-# ── Personal learning notes (local only) ───────────
-LEARNING.md
+# ── Personal learning notes (committed for reference) ──
+# LEARNING.md  ← now tracked in git

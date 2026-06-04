@@ -6,6 +6,7 @@ type AuthState = {
   user: UserProfile | null;
   session: Session | null;
   loading: boolean;
+  signOut: () => Promise<void>;
 };
 
 export function useAuth(): AuthState {
@@ -23,24 +24,18 @@ export function useAuth(): AuthState {
 
     async function init() {
       try {
-        // Check for existing session
         const { data: { session } } = await supabase.auth.getSession();
 
         if (session) {
-          // Already have a session (email or anonymous)
           if (mounted) {
             setSession(session);
             await fetchProfile(session.user.id);
           }
         } else {
           // ── Option B: Anonymous Sign-In ──
-          // Auto sign-in anonymously so the user never sees a login screen.
-          // They get a real Supabase user ID immediately.
-          // Later we can "upgrade" this to email auth if needed.
           const { data, error } = await supabase.auth.signInAnonymously();
           if (!error && data.session && mounted) {
             setSession(data.session);
-            // Create a minimal profile row for anonymous users
             await supabase.from('users').upsert({
               id: data.session.user.id,
               email: `anon_${data.session.user.id.slice(0, 8)}@prepmind.local`,
@@ -61,7 +56,6 @@ export function useAuth(): AuthState {
 
     init();
 
-    // Listen for auth state changes (sign-in, sign-out, token refresh)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         if (!mounted) return;
@@ -94,5 +88,12 @@ export function useAuth(): AuthState {
     }
   }
 
-  return { user, session, loading };
+  // ── signOut: clears session from Supabase + local state ─────────────────────
+  async function signOut() {
+    await supabase.auth.signOut();
+    setSession(null);
+    setUser(null);
+  }
+
+  return { user, session, loading, signOut };
 }
