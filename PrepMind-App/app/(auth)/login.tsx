@@ -31,7 +31,24 @@ export default function LoginScreen() {
   const [name, setName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [guestLoading, setGuestLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  async function handleGuest() {
+    setGuestLoading(true);
+    setError(null);
+    try {
+      const { data, error } = await supabase.auth.signInAnonymously();
+      if (error) {
+        setError('Guest login failed. Please enable Anonymous sign-ins in Supabase dashboard: Authentication → Configuration → Enable anonymous sign-ins');
+      }
+      // On success → onAuthStateChange fires → AuthGuard redirects to /(tabs)
+    } catch (e: any) {
+      setError('Guest login failed: ' + e.message);
+    } finally {
+      setGuestLoading(false);
+    }
+  }
 
   async function handleSubmit() {
     setError(null);
@@ -219,15 +236,26 @@ export default function LoginScreen() {
             {/* Divider */}
             <View style={styles.divider}>
               <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>Or continue with</Text>
+              <Text style={styles.dividerText}>Or</Text>
               <View style={styles.dividerLine} />
             </View>
 
-            {/* Google Button */}
-            <TouchableOpacity style={styles.googleBtn} activeOpacity={0.85}>
-              <Text style={styles.googleG}>G</Text>
-              <Text style={styles.googleText}>Google</Text>
+            {/* Continue as Guest Button */}
+            <TouchableOpacity
+              style={styles.guestBtn}
+              onPress={handleGuest}
+              activeOpacity={0.85}
+              disabled={guestLoading}
+            >
+              {guestLoading
+                ? <ActivityIndicator color={Colors.primary} />
+                : <>
+                    <Text style={styles.guestIcon}>👤</Text>
+                    <Text style={styles.guestText}>Continue as Guest</Text>
+                  </>
+              }
             </TouchableOpacity>
+            <Text style={styles.guestNote}>No account needed — your data is saved locally</Text>
 
             {/* Toggle mode */}
             <View style={styles.toggleRow}>
@@ -371,26 +399,27 @@ const styles = StyleSheet.create({
     fontSize: 13, color: Colors.onSurfaceVariant,
   },
 
-  // Google
-  googleBtn: {
+  // Guest
+  guestBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: Colors.outlineVariant,
+    borderWidth: 1.5,
+    borderColor: Colors.primary,
     borderRadius: Radius.full,
     height: 52,
     gap: 10,
-    backgroundColor: Colors.surfaceBright,
+    backgroundColor: Colors.primary + '08',
   },
-  googleG: {
-    fontSize: 18,
-    fontFamily: 'PlusJakartaSans_700Bold',
-    color: '#4285F4',
-  },
-  googleText: {
+  guestIcon: { fontSize: 18 },
+  guestText: {
     fontFamily: 'Inter_500Medium',
-    fontSize: 15, color: Colors.onSurface,
+    fontSize: 15, color: Colors.primary,
+  },
+  guestNote: {
+    fontFamily: 'Inter_400Regular',
+    fontSize: 12, color: Colors.outline,
+    textAlign: 'center', marginTop: 8,
   },
 
   // Toggle
