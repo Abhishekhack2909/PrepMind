@@ -65,7 +65,7 @@
 cd PrepMind-Backend
 pip install -r requirements.txt
 cp .env.example .env
-# Fill in your API keys in .env
+
 
 # Seed knowledge base (run once)
 python seed_knowledge.py
@@ -171,15 +171,4 @@ PrepMind/
 
 ---
 
-## Learning Notes
 
-See [LEARNING.md](./LEARNING.md) for detailed explanations of every technology used:
-- Vision AI & Prompt Engineering
-- RAG, Embeddings, ChromaDB
-- Whisper STT, Groq LPU
-- FastAPI, Pydantic, Supabase RLS
-- React Native, Expo Router, anonymous auth
-
----
-
-*Built phase by phase — designed for learning while building.*
