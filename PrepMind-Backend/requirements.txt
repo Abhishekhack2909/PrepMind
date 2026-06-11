@@ -19,4 +19,4 @@ supabase==2.30.1             # All phases: PostgreSQL + Auth + RLS
 
 # ── Config ────────────────────────────────────────────────────────────────────
 python-dotenv==1.1.1         # Load .env files
-pydantic==2.10.6             # Request/response validation
+pydantic>=2.11.7            # Request/response validation

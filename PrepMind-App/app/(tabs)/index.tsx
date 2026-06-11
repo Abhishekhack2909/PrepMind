@@ -1,20 +1,7 @@
-/**
- * Home Dashboard — Phase 8
- *
- * The main landing screen. Shows:
- *  - Greeting + streak
- *  - Quick stats (MCQ avg, evals submitted)
- *  - Today's study plan snapshot
- *  - Quick action cards (Evaluate / Ask / MCQ / Voice)
- *  - Recent activity feed
- *
- * All data fetched from backend analytics + planner endpoints.
- */
-
 import { useEffect, useState, useCallback } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, SafeAreaView,
-  TouchableOpacity, ActivityIndicator, RefreshControl,
+  TouchableOpacity, ActivityIndicator, RefreshControl, Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Colors, Spacing, Radius } from '@/constants/theme';
@@ -22,278 +9,618 @@ import { useAuth } from '@/hooks/useAuth';
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
-const GREETINGS = ['Good morning', 'Good afternoon', 'Good evening'];
-function getGreeting() {
-  const h = new Date().getHours();
-  if (h < 12) return GREETINGS[0];
-  if (h < 17) return GREETINGS[1];
-  return GREETINGS[2];
-}
-
-const QUICK_ACTIONS = [
-  { id: 'evaluate', icon: '✍️', label: 'Evaluate Answer', route: '/(tabs)/evaluate', color: '#3b82f6' },
-  { id: 'voice',    icon: '🎙️', label: 'Ask a Doubt',     route: '/(tabs)/voice',    color: '#8b5cf6' },
-  { id: 'mcq',      icon: '🧠', label: 'Take MCQ Quiz',   route: '/(tabs)/mcq',      color: '#f59e0b' },
-  { id: 'planner',  icon: '📅', label: 'Study Planner',   route: '/(tabs)/planner',  color: '#22c55e' },
-];
-
 export default function HomeScreen() {
   const router = useRouter();
-  const { session } = useAuth();
+  const { session, user } = useAuth();
   const userId = session?.user?.id;
-  const userName = session?.user?.email?.split('@')[0] || 'Aspirant';
+  
+  // Format username dynamically, fall back to "Abhishek Tripathi" (from design) if not set
+  const fullName = user?.name || 'Abhishek Tripathi';
+  const streakCount = 12; // Static or dynamic placeholder matching design profile stats
 
   const [summary, setSummary] = useState<any>(null);
-  const [todayTasks, setTodayTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
   const fetchData = useCallback(async () => {
     if (!userId) { setLoading(false); return; }
     try {
-      const [sumRes, planRes] = await Promise.all([
-        fetch(`${BASE_URL}/api/analytics/summary?user_id=${userId}`).catch(() => null),
-        fetch(`${BASE_URL}/api/planner/latest?user_id=${userId}`).catch(() => null),
-      ]);
-
+      const sumRes = await fetch(`${BASE_URL}/api/analytics/summary?user_id=${userId}`).catch(() => null);
       if (sumRes?.ok) {
         const d = await sumRes.json();
         if (d.success) setSummary(d);
       }
-
-      if (planRes?.ok) {
-        const d = await planRes.json();
-        if (d.success && d.plan?.days) {
-          // Get today's tasks
-          const todayIdx = new Date().getDay(); // 0=Sun, 1=Mon ...
-          const planIdx = todayIdx === 0 ? 6 : todayIdx - 1; // convert to Mon=0
-          const today = d.plan.days[Math.min(planIdx, d.plan.days.length - 1)];
-          setTodayTasks(today?.tasks?.slice(0, 3) || []);
-        }
-      }
     } catch {
-      // Silently fail — backend might not be running
+      // Ignore
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
   }, [userId]);
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
-  function onRefresh() { setRefreshing(true); fetchData(); }
-
-  const mcqAvg = summary?.mcq?.avg_score ?? 0;
-  const mcqSessions = summary?.mcq?.total_sessions ?? 0;
-  const evalCount = summary?.evaluations?.total_submitted ?? 0;
-  const evalAvg = summary?.evaluations?.avg_marks ?? 0;
-  const evalOutOf = summary?.evaluations?.out_of ?? 15;
+  function onRefresh() {
+    setRefreshing(true);
+    fetchData();
+  }
 
   return (
     <SafeAreaView style={styles.safe}>
+      {/* ── TopAppBar ── */}
+      <View style={styles.topAppBar}>
+        <View style={styles.appBarLeft}>
+          <TouchableOpacity activeOpacity={0.8} onPress={() => router.push('/(tabs)/profile' as any)}>
+            <Image
+              source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAG-6hrRt-wKLpxpe424UxZuFo1q4pOxaqkpxWrJzE400hmHYaadmdDp_dtusF5zfMMfkL7vjGxf7fgftwWT9mhz5BbD-jdwXcwGkoG2R5Thu8jLuVA-53ZCuQw_-g9OB-ryIigk1vrIDgY2Ze018DhkWrUWJBl5KF2o3YKQJe8DimAdjjWujepXe6AkbQ5wxvAF7qjWvqNktdQWxOMq-Vt26W3rXvQfI5czFOF4Bw2B94nsy5pD_pn6b3K1_aH-6xy8-C3pW2oAsOj' }}
+              style={styles.avatar}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.superBadge} activeOpacity={0.8}>
+            <Text style={styles.superBadgeIcon}>⚡</Text>
+            <Text style={styles.superBadgeText}>SUPER</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.appBarRight}>
+          <TouchableOpacity style={styles.iconChip} activeOpacity={0.7} onPress={() => router.push('/(tabs)/weakness' as any)}>
+            <Text style={styles.iconChipText}>📊</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.iconChip} activeOpacity={0.7}>
+            <Text style={styles.iconChipText}>🏆</Text>
+          </TouchableOpacity>
+          <View style={styles.streakChip}>
+            <Text style={styles.streakIcon}>🔥</Text>
+            <Text style={styles.streakText}>{streakCount}</Text>
+          </View>
+        </View>
+      </View>
+
       <ScrollView
         contentContainerStyle={styles.scroll}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primary} />}
+        showsVerticalScrollIndicator={false}
       >
-
-        {/* ── Header ── */}
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.greeting}>{getGreeting()},</Text>
-            <Text style={styles.userName}>{userName} 👋</Text>
-          </View>
-          <TouchableOpacity style={styles.profileBtn} onPress={() => router.push('/(tabs)/profile' as any)}>
-            <Text style={styles.profileInitial}>{userName[0].toUpperCase()}</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* ── Motivational Banner ── */}
-        <View style={styles.motivationBanner}>
-          <Text style={styles.motivationText}>
-            🏆 "Success is not final, failure is not fatal — keep preparing!"
-          </Text>
-        </View>
-
-        {/* ── Stats Row ── */}
-        {loading ? (
-          <ActivityIndicator color={Colors.primary} style={{ marginVertical: 20 }} />
-        ) : (
-          <View style={styles.statsRow}>
-            <StatCard icon="🧠" label="MCQ Avg" value={`${mcqAvg}%`} sub={`${mcqSessions} sessions`} color="#3b82f6" />
-            <StatCard icon="✍️" label="Answers" value={evalCount.toString()} sub={`Avg ${evalAvg}/${evalOutOf}`} color="#8b5cf6" />
-            <StatCard icon="🔥" label="Streak" value={mcqSessions > 0 ? '🔥' : '—'} sub="Keep going!" color="#f59e0b" />
-          </View>
-        )}
-
-        {/* ── Quick Actions ── */}
-        <Text style={styles.sectionTitle}>Quick Actions</Text>
-        <View style={styles.actionsGrid}>
-          {QUICK_ACTIONS.map((action) => (
-            <TouchableOpacity
-              key={action.id}
-              style={[styles.actionCard, { borderColor: action.color + '30' }]}
-              onPress={() => router.push(action.route as any)}
-              activeOpacity={0.8}
-            >
-              <View style={[styles.actionIcon, { backgroundColor: action.color + '15' }]}>
-                <Text style={styles.actionIconText}>{action.icon}</Text>
-              </View>
-              <Text style={styles.actionLabel}>{action.label}</Text>
-              <Text style={[styles.actionArrow, { color: action.color }]}>→</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-
-        {/* ── Today's Plan ── */}
-        {todayTasks.length > 0 && (
-          <>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Today's Schedule</Text>
-              <TouchableOpacity onPress={() => router.push('/(tabs)/planner' as any)}>
-                <Text style={styles.seeAll}>See all →</Text>
+        
+        {/* ── Promotional Banners Section ── */}
+        <View style={styles.promoSection}>
+          
+          {/* Super Promo Card */}
+          <TouchableOpacity style={styles.promoCardSuper} activeOpacity={0.9}>
+            <View style={styles.promoSuperContent}>
+              <Text style={styles.promoSuperTitle}>Try SUPER at just ₹7</Text>
+              <Text style={styles.promoSuperSubtitle}>Guided journey to crack UPSC 2029!</Text>
+              <TouchableOpacity style={styles.promoSuperBtn} activeOpacity={0.8}>
+                <Text style={styles.promoSuperBtnText}>⚡ Get Now</Text>
               </TouchableOpacity>
             </View>
-            {todayTasks.map((task, i) => (
-              <View key={i} style={styles.todayTask}>
-                <Text style={styles.taskTime}>{task.time}</Text>
-                <View style={styles.taskInfo}>
-                  <Text style={styles.taskSubject}>{task.subject}</Text>
-                  <Text style={styles.taskDesc} numberOfLines={1}>{task.task}</Text>
-                </View>
-                <Text style={styles.taskDuration}>{task.duration_mins}m</Text>
-              </View>
-            ))}
-          </>
-        )}
-
-        {/* ── Weak Area Reminder ── */}
-        {mcqSessions > 0 && mcqAvg < 60 && (
-          <TouchableOpacity
-            style={styles.weakReminder}
-            onPress={() => router.push('/(tabs)/weakness' as any)}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.weakReminderIcon}>📊</Text>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.weakReminderTitle}>Check your Weakness Map</Text>
-              <Text style={styles.weakReminderSub}>Your MCQ average is {mcqAvg}% — focus on weak areas</Text>
+            <View style={styles.promoSuperBlob}>
+              <Text style={styles.promoSuperBlobIcon}>⚡</Text>
             </View>
-            <Text style={{ color: '#ef4444', fontSize: 18 }}>→</Text>
           </TouchableOpacity>
-        )}
 
-        {/* ── Empty state (no data yet) ── */}
-        {!loading && mcqSessions === 0 && evalCount === 0 && (
-          <View style={styles.emptyCard}>
-            <Text style={styles.emptyIcon}>🚀</Text>
-            <Text style={styles.emptyTitle}>Let's get started!</Text>
-            <Text style={styles.emptyText}>
-              Take your first MCQ quiz or evaluate an answer to start tracking your progress.
-            </Text>
-            <TouchableOpacity style={styles.emptyBtn} onPress={() => router.push('/(tabs)/mcq' as any)}>
-              <Text style={styles.emptyBtnText}>Take First Quiz</Text>
+          {/* Prelims Answer Key Card */}
+          <TouchableOpacity style={styles.promoCardAnswerKey} activeOpacity={0.9}>
+            <View style={styles.answerKeyContent}>
+              <Text style={styles.answerKeyTitle}>Prelims '26 Answer Key</Text>
+              <View style={styles.answerKeyActionRow}>
+                <Text style={styles.answerKeyLinkText}>Check Now</Text>
+                <Text style={styles.answerKeyChevron}>→</Text>
+              </View>
+            </View>
+            
+            {/* Simulated Answer Key Badge Graphic */}
+            <View style={styles.simulatedBadge}>
+              <Text style={styles.simulatedBadgeTitle}>ANSWER{"\n"}KEY</Text>
+              <View style={styles.simulatedChart}>
+                <View style={[styles.simulatedBar, { height: '33%', backgroundColor: '#ba1a1a' }]} />
+                <View style={[styles.simulatedBar, { height: '66%', backgroundColor: '#f59e0b' }]} />
+                <View style={[styles.simulatedBar, { height: '100%', backgroundColor: '#006399' }]} />
+              </View>
+            </View>
+          </TouchableOpacity>
+        </View>
+
+        {/* ── Targets Section ── */}
+        <View style={styles.targetsSection}>
+          <Text style={styles.sectionTitle}>My Targets</Text>
+          
+          {/* Greeting Card */}
+          <View style={styles.greetingCard}>
+            <Text style={styles.greetingSun}>☀️</Text>
+            <View style={styles.greetingTextContainer}>
+              <Text style={styles.greetingUser}>Hey {fullName}!</Text>
+              <Text style={styles.greetingMainText}>Let's plan your targets</Text>
+            </View>
+          </View>
+
+          {/* Add Targets Container */}
+          <View style={styles.addTargetsCard}>
+            <Text style={styles.addTargetsHeader}>ADD TARGETS</Text>
+            
+            {/* Dashed Add Button */}
+            <TouchableOpacity 
+              style={styles.dashedAddBtn} 
+              activeOpacity={0.8}
+              onPress={() => router.push('/(tabs)/planner' as any)}
+            >
+              <Text style={styles.addBtnPlus}>+</Text>
+              <Text style={styles.addBtnText}>Add Targets</Text>
+            </TouchableOpacity>
+
+            {/* Social Proof */}
+            <View style={styles.socialProofRow}>
+              <View style={styles.socialAvatars}>
+                <Image
+                  source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC-VWzr2i-cKLL4HWwIPw-lCXMqeQBrTs7ONoeeV68L4fLAPdIn1TN5x-7KgOCD-I4TzAvNrGMd1xrpJ_nKqYR6BfA4ICFo50gWsdvr4m9IUFYBnVciIWmAXqwyutbstxo1818Pzk7bmEa_V-evNv7rurEkfE5jX1CkTiQWoLa8fQJ-LvH0n3oOxIHZqm1ij4QQDmCEA0-QlzyunTMtpydRbrj1Pur4xwbIU22P3L2UXp83i5wdv0wUQpTJ8k7yTEMzJMZqMIfDloDr' }}
+                  style={styles.smallAvatar}
+                />
+                <Image
+                  source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDH5eVyBJfMK6UfNne26ozd1zbsoX9zz-tFG8GsI5LUHHzmltyJOz-Qev_RyhyuAGBe8ykIHkXgstcN9JVDyxAO3-RwmdYs8Fc5hz9U1sZ9gdfNRyfUbgMgekJsLGfUCJWEKKXsbtzZSgodn0xCQAlN_3cTejGqLq11Y9XwMXxCtEt_SToKTb5TExaB3j99kUtYRf0PYmyOznNZFRG96gX27F7XwEvXQL84wGZ4gskqrdQn9nOb_xKcS0w0jRcifjXV8QgNCa6ej9Kc' }}
+                  style={[styles.smallAvatar, { marginLeft: -8 }]}
+                />
+                <Image
+                  source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuClVzYBO1BTENVOGJwb514Y2OxkjUZIlQCBYleaVZ7CFwHtwJtie_fHe5CtXGi_idpipEHsaflrFcGi5GtdSUzcYSR-ePO-8qQDdJnBW9ysdjOMu1wIiX1SlVDFj96PHr-dj-fJbB9uSycKprfqxkNogL0rrYY9XNMdXjQeyY1XYLdfWl92C57mZsLwro4YTB3fVOmWKsWg_oM4QFKVKa843wIWOwbv4INoq0ODmBJsNsV01KHdUR25RoMQPNhNv8AVsSgjPAopVIZZ' }}
+                  style={[styles.smallAvatar, { marginLeft: -8 }]}
+                />
+              </View>
+              <Text style={styles.socialProofText}>2526 completed their targets last week</Text>
+            </View>
+
+            <View style={styles.cardSeparator} />
+
+            {/* Quote Block */}
+            <View style={styles.quoteBlock}>
+              <Text style={styles.quoteIcon}>“</Text>
+              <View style={styles.quoteTextContainer}>
+                <Text style={styles.quoteText}>
+                  You don't need to study 15 hours a day. You just need to hit the <Text style={styles.quoteTextHighlight}>right goals daily.</Text>
+                </Text>
+                <Text style={styles.quoteAuthor}>- IAS Shakti</Text>
+              </View>
+            </View>
+
+            {/* Ask SuperKalam Overlay FAB */}
+            <TouchableOpacity 
+              style={styles.askSuperBtn} 
+              activeOpacity={0.85}
+              onPress={() => router.push('/(tabs)/voice' as any)}
+            >
+              <Text style={styles.askSuperBtnIcon}>✨</Text>
+              <Text style={styles.askSuperBtnText}>Ask SuperKalam</Text>
             </TouchableOpacity>
           </View>
-        )}
+        </View>
+
+        {/* Space at the bottom */}
+        <View style={styles.bottomSpacer} />
 
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-function StatCard({ icon, label, value, sub, color }: {
-  icon: string; label: string; value: string; sub: string; color: string;
-}) {
-  return (
-    <View style={[styles.statCard, { borderColor: color + '25' }]}>
-      <Text style={styles.statIcon}>{icon}</Text>
-      <Text style={[styles.statValue, { color }]}>{value}</Text>
-      <Text style={styles.statLabel}>{label}</Text>
-      <Text style={styles.statSub}>{sub}</Text>
-    </View>
-  );
-}
-
-// ── Styles ─────────────────────────────────────────────────────────────────────
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.surface },
-  scroll: { padding: Spacing.md, paddingBottom: 40 },
-
-  header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: Spacing.md },
-  greeting: { fontFamily: 'Inter_400Regular', fontSize: 15, color: Colors.onSurfaceVariant },
-  userName: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 26, color: Colors.onSurface },
-  profileBtn: {
-    width: 44, height: 44, borderRadius: 22,
-    backgroundColor: Colors.primary, justifyContent: 'center', alignItems: 'center',
+  safe: {
+    flex: 1,
+    backgroundColor: '#f8f9ff',
   },
-  profileInitial: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 18, color: '#fff' },
-
-  motivationBanner: {
-    backgroundColor: Colors.primary + '10', borderRadius: Radius.xl,
-    padding: Spacing.md, marginBottom: Spacing.lg,
-    borderWidth: 1, borderColor: Colors.primary + '25',
+  scroll: {
+    padding: Spacing.md,
+    paddingBottom: 24,
   },
-  motivationText: { fontFamily: 'Inter_400Regular', fontSize: 13, color: Colors.primary, lineHeight: 20 },
-
-  statsRow: { flexDirection: 'row', gap: 8, marginBottom: Spacing.lg },
-  statCard: {
-    flex: 1, backgroundColor: Colors.surfaceContainerLow,
-    borderRadius: Radius.xl, padding: Spacing.sm,
-    alignItems: 'center', borderWidth: 1,
+  bottomSpacer: {
+    height: 32,
   },
-  statIcon: { fontSize: 22, marginBottom: 4 },
-  statValue: { fontFamily: 'PlusJakartaSans_800ExtraBold', fontSize: 20 },
-  statLabel: { fontFamily: 'Inter_500Medium', fontSize: 11, color: Colors.onSurfaceVariant, textAlign: 'center' },
-  statSub: { fontFamily: 'Inter_400Regular', fontSize: 10, color: Colors.outline, textAlign: 'center' },
 
-  sectionTitle: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 17, color: Colors.onSurface, marginBottom: 10 },
-  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
-  seeAll: { fontFamily: 'Inter_500Medium', fontSize: 13, color: Colors.primary },
+  // TopAppBar
+  topAppBar: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    backgroundColor: '#f8f9ff',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(190, 199, 211, 0.15)',
+  },
+  appBarLeft: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+  },
+  avatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(190, 199, 211, 0.3)',
+  },
+  superBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#8b5cf6',
+    borderRadius: Radius.full,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    gap: 3,
+  },
+  superBadgeIcon: {
+    color: '#ffffff',
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
+  superBadgeText: {
+    color: '#ffffff',
+    fontFamily: 'PlusJakartaSans_700Bold',
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.5,
+  },
+  appBarRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.xs,
+  },
+  iconChip: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#eff4ff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconChipText: {
+    fontSize: 16,
+  },
+  streakChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#eff4ff',
+    borderRadius: Radius.full,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    gap: 4,
+  },
+  streakIcon: {
+    fontSize: 16,
+    color: '#6f7882',
+  },
+  streakText: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 13,
+    color: '#3f4851',
+    fontWeight: '500',
+  },
 
-  actionsGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, marginBottom: Spacing.lg },
-  actionCard: {
-    width: '47.5%', backgroundColor: Colors.surfaceContainerLow,
-    borderRadius: Radius.xl, padding: Spacing.md,
-    borderWidth: 1, flexDirection: 'row', alignItems: 'center', gap: 8,
+  // Promotional Banners Section
+  promoSection: {
+    gap: Spacing.md,
+    marginBottom: Spacing.lg,
   },
-  actionIcon: { width: 40, height: 40, borderRadius: 12, justifyContent: 'center', alignItems: 'center' },
-  actionIconText: { fontSize: 20 },
-  actionLabel: { fontFamily: 'Inter_500Medium', fontSize: 13, color: Colors.onSurface, flex: 1 },
-  actionArrow: { fontFamily: 'Inter_700Bold', fontSize: 16 },
+  promoCardSuper: {
+    backgroundColor: '#ede9fe',
+    borderRadius: Radius.xl,
+    padding: Spacing.md,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.1)',
+    shadowColor: '#8b5cf6',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 2,
+    overflow: 'hidden',
+  },
+  promoSuperContent: {
+    width: '65%',
+    zIndex: 10,
+  },
+  promoSuperTitle: {
+    fontFamily: 'PlusJakartaSans_700Bold',
+    fontSize: 18,
+    color: '#121c2a',
+    fontWeight: '700',
+  },
+  promoSuperSubtitle: {
+    fontFamily: 'Inter_400Regular',
+    fontSize: 13,
+    color: '#3f4851',
+    marginTop: 4,
+    marginBottom: Spacing.md,
+  },
+  promoSuperBtn: {
+    backgroundColor: '#8b5cf6',
+    borderRadius: Radius.md,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs,
+    alignSelf: 'flex-start',
+  },
+  promoSuperBtnText: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 13,
+    color: '#ffffff',
+    fontWeight: '500',
+  },
+  promoSuperBlob: {
+    position: 'absolute',
+    right: 0,
+    top: '50%',
+    transform: [{ translateY: -64 }, { translateX: 16 }],
+    width: 128,
+    height: 128,
+    borderRadius: 64,
+    backgroundColor: '#8b5cf6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#8b5cf6',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.3,
+    shadowRadius: 15,
+    elevation: 4,
+  },
+  promoSuperBlobIcon: {
+    color: '#ffffff',
+    fontSize: 80,
+    fontWeight: 'bold',
+  },
 
-  todayTask: {
-    flexDirection: 'row', alignItems: 'center', gap: 12,
-    backgroundColor: Colors.surfaceContainerLow, borderRadius: Radius.lg,
-    padding: Spacing.sm, marginBottom: 6,
-    borderWidth: 1, borderColor: Colors.outlineVariant,
+  promoCardAnswerKey: {
+    backgroundColor: '#006399',
+    borderRadius: Radius.xl,
+    padding: Spacing.md,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    minHeight: 100,
+    position: 'relative',
+    overflow: 'hidden',
   },
-  taskTime: { fontFamily: 'Inter_500Medium', fontSize: 12, color: Colors.primary, minWidth: 52 },
-  taskInfo: { flex: 1 },
-  taskSubject: { fontFamily: 'Inter_600SemiBold', fontSize: 13, color: Colors.onSurface },
-  taskDesc: { fontFamily: 'Inter_400Regular', fontSize: 12, color: Colors.onSurfaceVariant },
-  taskDuration: { fontFamily: 'Inter_400Regular', fontSize: 12, color: Colors.outline },
+  answerKeyContent: {
+    width: '65%',
+    zIndex: 10,
+  },
+  answerKeyTitle: {
+    fontFamily: 'PlusJakartaSans_700Bold',
+    fontSize: 18,
+    color: '#ffffff',
+    fontWeight: '700',
+  },
+  answerKeyActionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginTop: Spacing.xs,
+  },
+  answerKeyLinkText: {
+    fontFamily: 'Inter_400Regular',
+    fontSize: 13,
+    color: '#95ccff',
+  },
+  answerKeyChevron: {
+    color: '#ffffff',
+    fontSize: 14,
+  },
+  simulatedBadge: {
+    position: 'absolute',
+    right: 16,
+    top: '50%',
+    transform: [{ translateY: -45 }, { rotate: '6deg' }],
+    backgroundColor: '#ffffff',
+    borderRadius: Radius.md,
+    padding: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(190, 199, 211, 0.2)',
+    width: 80,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+  },
+  simulatedBadgeTitle: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 8,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    color: '#006399',
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(190, 199, 211, 0.2)',
+    paddingBottom: 4,
+    marginBottom: 4,
+  },
+  simulatedChart: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'center',
+    gap: 4,
+    height: 32,
+  },
+  simulatedBar: {
+    width: 8,
+    borderRadius: 2,
+  },
 
-  weakReminder: {
-    flexDirection: 'row', alignItems: 'center', gap: 12,
-    backgroundColor: '#ef444410', borderRadius: Radius.xl,
-    padding: Spacing.md, marginTop: Spacing.md,
-    borderWidth: 1, borderColor: '#ef444430',
+  // Targets Section
+  targetsSection: {
+    gap: Spacing.md,
   },
-  weakReminderIcon: { fontSize: 28 },
-  weakReminderTitle: { fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 14, color: '#ef4444' },
-  weakReminderSub: { fontFamily: 'Inter_400Regular', fontSize: 12, color: Colors.onSurfaceVariant, marginTop: 2 },
-
-  emptyCard: {
-    alignItems: 'center', padding: Spacing.xl,
-    backgroundColor: Colors.surfaceContainerLow, borderRadius: Radius.xl,
-    marginTop: Spacing.lg, borderWidth: 1, borderColor: Colors.outlineVariant,
+  sectionTitle: {
+    fontFamily: 'PlusJakartaSans_700Bold',
+    fontSize: 24,
+    color: '#121c2a',
+    fontWeight: '700',
   },
-  emptyIcon: { fontSize: 52, marginBottom: 12 },
-  emptyTitle: { fontFamily: 'PlusJakartaSans_700Bold', fontSize: 22, color: Colors.onSurface, marginBottom: 8 },
-  emptyText: { fontFamily: 'Inter_400Regular', fontSize: 14, color: Colors.onSurfaceVariant, textAlign: 'center', lineHeight: 22, marginBottom: 16 },
-  emptyBtn: {
-    backgroundColor: Colors.primary, borderRadius: Radius.full,
-    paddingVertical: 12, paddingHorizontal: 28,
+  greetingCard: {
+    backgroundColor: '#fef3c7',
+    borderRadius: Radius.lg,
+    padding: Spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+    borderWidth: 1,
+    borderColor: '#fde68a',
   },
-  emptyBtnText: { fontFamily: 'PlusJakartaSans_600SemiBold', fontSize: 15, color: '#fff' },
+  greetingSun: {
+    fontSize: 32,
+  },
+  greetingTextContainer: {
+    flex: 1,
+  },
+  greetingUser: {
+    fontFamily: 'Inter_400Regular',
+    fontSize: 14,
+    color: '#3f4851',
+  },
+  greetingMainText: {
+    fontFamily: 'PlusJakartaSans_700Bold',
+    fontSize: 16,
+    color: '#121c2a',
+    fontWeight: '700',
+    marginTop: 2,
+  },
+  addTargetsCard: {
+    backgroundColor: '#ffffff',
+    borderRadius: Radius.xxl,
+    padding: Spacing.md,
+    borderWidth: 1,
+    borderColor: 'rgba(190, 199, 211, 0.3)',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.03,
+    shadowRadius: 10,
+    elevation: 1,
+    alignItems: 'center',
+    position: 'relative',
+    paddingBottom: 40, // Space for overlapping Ask SuperKalam button
+  },
+  addTargetsHeader: {
+    alignSelf: 'flex-start',
+    fontFamily: 'Inter_500Medium',
+    fontSize: 11,
+    color: '#6f7882',
+    letterSpacing: 1,
+    fontWeight: '700',
+    marginBottom: Spacing.md,
+  },
+  dashedAddBtn: {
+    width: '100%',
+    borderWidth: 2,
+    borderStyle: 'dashed',
+    borderColor: 'rgba(0, 99, 153, 0.4)',
+    borderRadius: Radius.xl,
+    paddingVertical: Spacing.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 8,
+  },
+  addBtnPlus: {
+    fontSize: 20,
+    color: '#006399',
+    fontWeight: 'bold',
+  },
+  addBtnText: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 16,
+    color: '#006399',
+    fontWeight: '500',
+  },
+  socialProofRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#eff4ff',
+    borderRadius: Radius.full,
+    paddingVertical: 6,
+    paddingRight: Spacing.md,
+    paddingLeft: Spacing.sm,
+    alignSelf: 'center',
+    marginTop: Spacing.md,
+    gap: 8,
+  },
+  socialAvatars: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  smallAvatar: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: '#ffffff',
+  },
+  socialProofText: {
+    fontFamily: 'Inter_400Regular',
+    fontSize: 12,
+    color: '#3f4851',
+  },
+  cardSeparator: {
+    width: '100%',
+    height: 1,
+    backgroundColor: 'rgba(190, 199, 211, 0.2)',
+    marginVertical: Spacing.md,
+  },
+  quoteBlock: {
+    flexDirection: 'row',
+    gap: Spacing.sm,
+    paddingHorizontal: Spacing.sm,
+    paddingBottom: Spacing.lg,
+    alignSelf: 'flex-start',
+  },
+  quoteIcon: {
+    fontSize: 32,
+    color: 'rgba(0, 99, 153, 0.3)',
+    fontWeight: 'bold',
+    transform: [{ rotate: '180deg' }],
+  },
+  quoteTextContainer: {
+    flex: 1,
+  },
+  quoteText: {
+    fontFamily: 'Inter_400Regular',
+    fontSize: 14,
+    color: '#121c2a',
+    lineHeight: 20,
+    fontStyle: 'italic',
+  },
+  quoteTextHighlight: {
+    color: '#006399',
+    fontWeight: '500',
+  },
+  quoteAuthor: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 12,
+    color: '#6f7882',
+    marginTop: Spacing.xs,
+  },
+  askSuperBtn: {
+    position: 'absolute',
+    bottom: -20,
+    backgroundColor: '#006399',
+    borderRadius: Radius.full,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    shadowColor: '#006399',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 5,
+    zIndex: 20,
+  },
+  askSuperBtnIcon: {
+    color: '#ffffff',
+    fontSize: 16,
+  },
+  askSuperBtnText: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 14,
+    color: '#ffffff',
+    fontWeight: '500',
+  },
 });

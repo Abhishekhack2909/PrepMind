@@ -1,22 +1,7 @@
-/**
- * Login / Sign Up Screen
- *
- * Single screen that TOGGLES between Sign In and Sign Up modes.
- * No separate routes — just state change.
- *
- * Auth flows:
- *  Sign In  → supabase.auth.signInWithPassword()
- *  Sign Up  → supabase.auth.signUp() → creates auth user
- *             → then inserts row into our `users` table
- *
- * On success, useAuth() detects the new session and
- * AuthGuard in _layout.tsx redirects to /(tabs) automatically.
- */
-
 import { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
-  KeyboardAvoidingView, Platform, ScrollView, Alert,
+  KeyboardAvoidingView, Platform, ScrollView,
   ActivityIndicator, SafeAreaView,
 } from 'react-native';
 import { supabase } from '@/lib/supabase';
@@ -42,7 +27,6 @@ export default function LoginScreen() {
       if (error) {
         setError('Guest login failed. Please enable Anonymous sign-ins in Supabase dashboard: Authentication → Configuration → Enable anonymous sign-ins');
       }
-      // On success → onAuthStateChange fires → AuthGuard redirects to /(tabs)
     } catch (e: any) {
       setError('Guest login failed: ' + e.message);
     } finally {
@@ -53,7 +37,6 @@ export default function LoginScreen() {
   async function handleSubmit() {
     setError(null);
 
-    // Basic validation
     if (!email || !password) {
       setError('Please fill in all fields.');
       return;
@@ -86,16 +69,13 @@ export default function LoginScreen() {
         ? 'Wrong email or password. Please try again.'
         : error.message);
     }
-    // On success → onAuthStateChange fires → AuthGuard redirects to /(tabs)
   }
 
   async function signUp() {
-    // Step 1: Create auth user
     const { data, error } = await supabase.auth.signUp({ email, password });
     if (error) { setError(error.message); return; }
     if (!data.user) { setError('Sign up failed. Please try again.'); return; }
 
-    // Step 2: Insert profile into our users table
     const { error: profileError } = await supabase.from('users').insert({
       id: data.user.id,
       email: data.user.email,
@@ -104,10 +84,8 @@ export default function LoginScreen() {
     });
 
     if (profileError) {
-      // Auth user created but profile failed — still workable
       console.warn('Profile insert failed:', profileError.message);
     }
-    // On success → onAuthStateChange fires → AuthGuard redirects to /(tabs)
   }
 
   function toggleMode() {
@@ -128,9 +106,9 @@ export default function LoginScreen() {
           contentContainerStyle={styles.scroll}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Card */}
+          {/* Main Auth Card */}
           <View style={styles.card}>
-            {/* Decorative gradient blob */}
+            {/* Subtle top right blob decoration */}
             <View style={styles.blob} />
 
             {/* Header */}
@@ -152,7 +130,8 @@ export default function LoginScreen() {
 
             {/* Form */}
             <View style={styles.form}>
-              {/* Name field — only on sign up */}
+              
+              {/* Name Field (Sign Up Only) */}
               {mode === 'signup' && (
                 <View style={styles.fieldGroup}>
                   <Text style={styles.label}>Full Name</Text>
@@ -161,7 +140,7 @@ export default function LoginScreen() {
                     <TextInput
                       style={styles.input}
                       placeholder="Abhishek Kumar"
-                      placeholderTextColor={Colors.outline}
+                      placeholderTextColor="rgba(111, 120, 130, 0.6)"
                       value={name}
                       onChangeText={setName}
                       autoCapitalize="words"
@@ -171,7 +150,7 @@ export default function LoginScreen() {
                 </View>
               )}
 
-              {/* Email */}
+              {/* Email address */}
               <View style={styles.fieldGroup}>
                 <Text style={styles.label}>Email address</Text>
                 <View style={styles.inputWrapper}>
@@ -179,7 +158,7 @@ export default function LoginScreen() {
                   <TextInput
                     style={styles.input}
                     placeholder="you@example.com"
-                    placeholderTextColor={Colors.outline}
+                    placeholderTextColor="rgba(111, 120, 130, 0.6)"
                     value={email}
                     onChangeText={setEmail}
                     autoCapitalize="none"
@@ -194,7 +173,7 @@ export default function LoginScreen() {
                 <View style={styles.labelRow}>
                   <Text style={styles.label}>Password</Text>
                   {mode === 'signin' && (
-                    <TouchableOpacity>
+                    <TouchableOpacity activeOpacity={0.7}>
                       <Text style={styles.forgotText}>Forgot password?</Text>
                     </TouchableOpacity>
                   )}
@@ -202,69 +181,72 @@ export default function LoginScreen() {
                 <View style={styles.inputWrapper}>
                   <Text style={styles.inputIcon}>🔒</Text>
                   <TextInput
-                    style={[styles.input, styles.inputPassword]}
+                    style={styles.input}
                     placeholder="••••••••"
-                    placeholderTextColor={Colors.outline}
+                    placeholderTextColor="rgba(111, 120, 130, 0.6)"
                     value={password}
                     onChangeText={setPassword}
                     secureTextEntry={!showPassword}
                     returnKeyType="done"
                     onSubmitEditing={handleSubmit}
                   />
-                  <TouchableOpacity onPress={() => setShowPassword(v => !v)}>
-                    <Text style={styles.inputIcon}>{showPassword ? '🙈' : '👁️'}</Text>
+                  <TouchableOpacity onPress={() => setShowPassword(v => !v)} activeOpacity={0.7} style={styles.eyeBtn}>
+                    <Text style={styles.eyeIcon}>{showPassword ? '🙈' : '👁️'}</Text>
                   </TouchableOpacity>
                 </View>
               </View>
 
-              {/* Submit Button */}
+              {/* Action Submit Button */}
               <TouchableOpacity
                 style={[styles.submitBtn, loading && styles.submitBtnDisabled]}
                 onPress={handleSubmit}
                 activeOpacity={0.85}
                 disabled={loading}
               >
-                {loading
-                  ? <ActivityIndicator color="white" />
-                  : <Text style={styles.submitText}>
-                      {mode === 'signin' ? 'Sign In' : 'Create Account'}
-                    </Text>
-                }
+                {loading ? (
+                  <ActivityIndicator color="#ffffff" />
+                ) : (
+                  <Text style={styles.submitText}>
+                    {mode === 'signin' ? 'Sign In' : 'Sign Up'}
+                  </Text>
+                )}
               </TouchableOpacity>
             </View>
 
             {/* Divider */}
             <View style={styles.divider}>
               <View style={styles.dividerLine} />
-              <Text style={styles.dividerText}>Or</Text>
+              <Text style={styles.dividerText}>Or continue with</Text>
               <View style={styles.dividerLine} />
             </View>
 
-            {/* Continue as Guest Button */}
-            <TouchableOpacity
-              style={styles.guestBtn}
-              onPress={handleGuest}
-              activeOpacity={0.85}
-              disabled={guestLoading}
-            >
-              {guestLoading
-                ? <ActivityIndicator color={Colors.primary} />
-                : <>
-                    <Text style={styles.guestIcon}>👤</Text>
-                    <Text style={styles.guestText}>Continue as Guest</Text>
+            {/* Guest Sign-In (Customized to match premium Google button) */}
+            <View style={styles.socialContainer}>
+              <TouchableOpacity
+                style={styles.socialBtn}
+                onPress={handleGuest}
+                activeOpacity={0.85}
+                disabled={guestLoading}
+              >
+                {guestLoading ? (
+                  <ActivityIndicator color={Colors.primary} />
+                ) : (
+                  <>
+                    <Text style={styles.socialIcon}>👤</Text>
+                    <Text style={styles.socialText}>Continue as Guest</Text>
                   </>
-              }
-            </TouchableOpacity>
-            <Text style={styles.guestNote}>No account needed — your data is saved locally</Text>
+                )}
+              </TouchableOpacity>
+            </View>
 
-            {/* Toggle mode */}
+            {/* Toggle Mode Link */}
             <View style={styles.toggleRow}>
               <Text style={styles.toggleBase}>
                 {mode === 'signin' ? "Don't have an account?" : 'Already have an account?'}
               </Text>
-              <TouchableOpacity onPress={toggleMode}>
+              <TouchableOpacity onPress={toggleMode} activeOpacity={0.7}>
                 <Text style={styles.toggleLink}>
-                  {mode === 'signin' ? '  Sign Up' : '  Sign In'}
+                  {mode === 'signin' ? ' Switch to Sign Up' : ' Switch to Sign In'}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -276,68 +258,90 @@ export default function LoginScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.background },
-  flex: { flex: 1 },
+  safe: {
+    flex: 1,
+    backgroundColor: '#f8f9ff',
+  },
+  flex: {
+    flex: 1,
+  },
   scroll: {
     flexGrow: 1,
     justifyContent: 'center',
-    padding: Spacing.md,
+    padding: Spacing.gutter,
   },
-
+  
   // Card
   card: {
-    backgroundColor: Colors.surfaceContainerLowest,
+    backgroundColor: '#ffffff',
     borderRadius: Radius.xxl,
     borderWidth: 1,
-    borderColor: Colors.outlineVariant,
+    borderColor: '#bec7d3',
     padding: Spacing.xl,
     overflow: 'hidden',
-    shadowColor: '#000',
+    shadowColor: '#000000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.06,
-    shadowRadius: 16,
+    shadowOpacity: 0.05,
+    shadowRadius: 12,
     elevation: 4,
+    position: 'relative',
   },
   blob: {
     position: 'absolute',
-    top: -60, right: -60,
-    width: 160, height: 160,
-    borderRadius: 80,
-    backgroundColor: Colors.primary,
+    top: -96,
+    right: -96,
+    width: 192,
+    height: 192,
+    borderRadius: 96,
+    backgroundColor: '#006399',
     opacity: 0.05,
   },
 
   // Header
-  header: { alignItems: 'center', marginBottom: Spacing.lg },
+  header: {
+    alignItems: 'center',
+    marginBottom: Spacing.xl,
+  },
   brand: {
+    fontSize: 40,
     fontFamily: 'PlusJakartaSans_700Bold',
-    fontSize: 36, color: Colors.primary,
+    color: '#006399',
+    fontWeight: '800',
     letterSpacing: -0.5,
+    marginBottom: Spacing.base,
   },
   subtitle: {
+    fontSize: 16,
     fontFamily: 'Inter_400Regular',
-    fontSize: 15, color: Colors.onSurfaceVariant,
-    marginTop: 4,
+    color: '#3f4851',
+    textAlign: 'center',
   },
 
-  // Error
+  // Error Banner
   errorBanner: {
-    backgroundColor: Colors.errorContainer,
-    borderRadius: Radius.md,
+    backgroundColor: '#ffdad6',
+    borderRadius: Radius.lg,
     padding: Spacing.sm,
     marginBottom: Spacing.md,
   },
   errorText: {
     fontFamily: 'Inter_400Regular',
-    fontSize: 13, color: Colors.error,
+    fontSize: 13,
+    color: '#ba1a1a',
   },
 
-  // Form
-  form: { gap: Spacing.md },
-  fieldGroup: { gap: 6 },
+  // Form Fields
+  form: {
+    gap: Spacing.md,
+  },
+  fieldGroup: {
+    gap: Spacing.xs,
+  },
   label: {
     fontFamily: 'Inter_500Medium',
-    fontSize: 13, color: Colors.onSurface,
+    fontSize: 14,
+    color: '#121c2a',
+    fontWeight: '500',
   },
   labelRow: {
     flexDirection: 'row',
@@ -345,45 +349,61 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   forgotText: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 13, color: Colors.primary,
+    fontFamily: 'Inter_500Medium',
+    fontSize: 14,
+    color: '#006399',
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: Colors.outlineVariant,
+    borderColor: '#bec7d3',
     borderRadius: Radius.lg,
-    backgroundColor: Colors.surfaceBright,
-    paddingHorizontal: Spacing.sm,
+    backgroundColor: '#f8f9ff',
+    paddingHorizontal: Spacing.md,
     height: 52,
   },
-  inputIcon: { fontSize: 16, marginRight: 8 },
+  inputIcon: {
+    fontSize: 18,
+    marginRight: Spacing.xs,
+    color: '#6f7882',
+  },
   input: {
     flex: 1,
     fontFamily: 'Inter_400Regular',
-    fontSize: 15, color: Colors.onSurface,
+    fontSize: 16,
+    color: '#121c2a',
   },
-  inputPassword: { flex: 1 },
+  eyeBtn: {
+    paddingHorizontal: Spacing.xs,
+  },
+  eyeIcon: {
+    fontSize: 18,
+    color: '#6f7882',
+  },
 
-  // Submit
+  // Action Buttons
   submitBtn: {
-    backgroundColor: Colors.primary,
+    backgroundColor: '#006399',
     borderRadius: Radius.full,
     height: 52,
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 4,
-    shadowColor: Colors.primary,
+    marginTop: Spacing.sm,
+    shadowColor: '#006399',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 5,
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 3,
   },
-  submitBtnDisabled: { opacity: 0.7 },
+  submitBtnDisabled: {
+    opacity: 0.75,
+  },
   submitText: {
     fontFamily: 'PlusJakartaSans_600SemiBold',
-    fontSize: 17, color: 'white',
+    fontSize: 18,
+    color: '#ffffff',
+    fontWeight: '600',
   },
 
   // Divider
@@ -393,48 +413,59 @@ const styles = StyleSheet.create({
     marginVertical: Spacing.lg,
     gap: Spacing.sm,
   },
-  dividerLine: { flex: 1, height: 1, backgroundColor: Colors.outlineVariant, opacity: 0.4 },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: 'rgba(190, 199, 211, 0.3)',
+  },
   dividerText: {
     fontFamily: 'Inter_400Regular',
-    fontSize: 13, color: Colors.onSurfaceVariant,
+    fontSize: 14,
+    color: '#3f4851',
   },
 
-  // Guest
-  guestBtn: {
+  // Social / Guest buttons
+  socialContainer: {
+    gap: Spacing.sm,
+    marginBottom: Spacing.sm,
+  },
+  socialBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1.5,
-    borderColor: Colors.primary,
+    borderWidth: 1,
+    borderColor: '#bec7d3',
     borderRadius: Radius.full,
     height: 52,
-    gap: 10,
-    backgroundColor: Colors.primary + '08',
+    gap: 12,
+    backgroundColor: '#f8f9ff',
   },
-  guestIcon: { fontSize: 18 },
-  guestText: {
+  socialIcon: {
+    fontSize: 20,
+  },
+  socialText: {
     fontFamily: 'Inter_500Medium',
-    fontSize: 15, color: Colors.primary,
-  },
-  guestNote: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 12, color: Colors.outline,
-    textAlign: 'center', marginTop: 8,
+    fontSize: 16,
+    color: '#121c2a',
+    fontWeight: '500',
   },
 
-  // Toggle
+  // Toggle rows
   toggleRow: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: Spacing.lg,
+    marginTop: Spacing.md,
     flexWrap: 'wrap',
   },
   toggleBase: {
     fontFamily: 'Inter_400Regular',
-    fontSize: 14, color: Colors.onSurfaceVariant,
+    fontSize: 14,
+    color: '#3f4851',
   },
   toggleLink: {
     fontFamily: 'PlusJakartaSans_600SemiBold',
-    fontSize: 14, color: Colors.primary,
+    fontSize: 14,
+    color: '#006399',
+    fontWeight: '600',
   },
 });

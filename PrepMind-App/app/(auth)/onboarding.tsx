@@ -1,17 +1,3 @@
-/**
- * Onboarding Screen
- *
- * Flow:
- *  1. Splash screen (blue, 2.5s) fades in
- *  2. Slide 1 → AI Answer Evaluation
- *  3. Slide 2 → Voice Doubt Solver
- *  4. Slide 3 → Adaptive Study Planning
- *  5. "Get Started" → navigate to Login
- *
- * Only shown once — after first launch we skip straight to Login.
- * We use AsyncStorage to track if onboarding was already seen.
- */
-
 import { useState, useRef, useEffect } from 'react';
 import {
   View, Text, StyleSheet, Animated, Dimensions,
@@ -23,134 +9,225 @@ import { Colors, Spacing, Radius } from '@/constants/theme';
 
 const { width } = Dimensions.get('window');
 
-const SLIDES = [
-  {
-    id: 1,
-    icon: '📄',
-    title: 'AI Answer Evaluation',
-    body: 'Upload your handwritten answers and get instant, detailed feedback mapped against the official UPSC marking scheme.',
-    accent: Colors.primary,
-    bg: '#e8f4ff',
-  },
-  {
-    id: 2,
-    icon: '🎙️',
-    title: 'Voice Doubt Solver',
-    body: 'Stuck on a concept? Just ask. Our AI tutor explains complex topics naturally, like a real teacher.',
-    accent: Colors.secondary,
-    bg: '#f0ebff',
-  },
-  {
-    id: 3,
-    icon: '🧠',
-    title: 'Adaptive Study Planning',
-    body: 'A dynamic schedule that adapts to your performance. Focus more on weak areas and track real progress.',
-    accent: Colors.primary,
-    bg: '#e8f4ff',
-  },
-];
-
 export default function OnboardingScreen() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const splashOpacity = useRef(new Animated.Value(1)).current;
   const slideAnim = useRef(new Animated.Value(0)).current;
-  // On web, skip splash immediately — useNativeDriver not supported
+  
+  // Custom pulse animation for splash & mic button
+  const pulseAnim = useRef(new Animated.Value(0.95)).current;
+
+  // On web, skip splash immediately to save time, or show it
   const [splashDone, setSplashDone] = useState(Platform.OS === 'web');
 
   useEffect(() => {
-    if (Platform.OS === 'web') return; // Skip splash animation on web
-    // Fade out splash after 2.5s on native
+    // Pulse animation loop
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.05,
+          duration: 1000,
+          useNativeDriver: false,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 0.95,
+          duration: 1000,
+          useNativeDriver: false,
+        }),
+      ])
+    ).start();
+
+    if (Platform.OS === 'web') return;
+    
+    // Fade out splash after 2.5s
     setTimeout(() => {
       Animated.timing(splashOpacity, {
         toValue: 0,
         duration: 800,
-        useNativeDriver: false, // false = works on both web and native
+        useNativeDriver: false,
       }).start(() => setSplashDone(true));
     }, 2500);
   }, []);
 
   function goNext() {
-    if (currentSlide < SLIDES.length - 1) {
+    if (currentSlide < 2) {
       const next = currentSlide + 1;
       Animated.spring(slideAnim, {
         toValue: -next * width,
-        useNativeDriver: false, // false = works on both web and native
-        tension: 60,
-        friction: 10,
+        useNativeDriver: false,
+        tension: 50,
+        friction: 8,
       }).start();
       setCurrentSlide(next);
     } else {
-      // Last slide — mark onboarding done, go to login
-      AsyncStorage.setItem('onboarding_done', 'true');
-      router.replace('/(auth)/login');
+      finishOnboarding();
     }
   }
 
   function skip() {
+    finishOnboarding();
+  }
+
+  function finishOnboarding() {
     AsyncStorage.setItem('onboarding_done', 'true');
     router.replace('/(auth)/login');
   }
 
   return (
     <View style={styles.container}>
-      {/* ── Splash Screen ── */}
+      {/* ── Splash Screen Overlay ── */}
       {!splashDone && (
         <Animated.View style={[styles.splash, { opacity: splashOpacity }]}>
-          <View style={styles.splashIconContainer}>
-            <Text style={styles.splashIcon}>🧠</Text>
+          <View style={styles.splashContent}>
+            <Animated.View style={[
+              styles.splashIconWrapper, 
+              { transform: [{ scale: pulseAnim }] }
+            ]}>
+              <Text style={styles.splashIcon}>🧠</Text>
+            </Animated.View>
+            <Text style={styles.splashTitle}>PrepMind</Text>
+            <Text style={styles.splashSubtitle}>Your AI Study Companion</Text>
           </View>
-          <Text style={styles.splashTitle}>PrepMind</Text>
-          <Text style={styles.splashSubtitle}>Your AI Study Companion</Text>
         </Animated.View>
       )}
 
-      {/* ── Onboarding Slides ── */}
-      {splashDone && (
+      {/* ── Main Onboarding Container ── */}
+      {(splashDone || Platform.OS === 'web') && (
         <SafeAreaView style={styles.flex}>
-          {/* Skip */}
+          {/* Skip Button */}
           <TouchableOpacity style={styles.skipBtn} onPress={skip}>
             <Text style={styles.skipText}>Skip</Text>
           </TouchableOpacity>
 
-          {/* Slides */}
-          <View style={styles.slidesWrapper}>
-            <Animated.View
-              style={[
-                styles.slidesRow,
-                { transform: [{ translateX: slideAnim }] },
-              ]}
-            >
-              {SLIDES.map((slide) => (
-                <View key={slide.id} style={styles.slide}>
-                  <View style={[styles.iconWrapper, { backgroundColor: slide.bg }]}>
-                    <Text style={styles.slideIcon}>{slide.icon}</Text>
+          {/* Slides Slider */}
+          <View style={styles.sliderContainer}>
+            <Animated.View style={[
+              styles.slidesRow,
+              { transform: [{ translateX: slideAnim }] }
+            ]}>
+              
+              {/* Slide 1: AI Answer Evaluation */}
+              <View style={styles.slide}>
+                <View style={styles.graphicsWrapper}>
+                  {/* Decorative backgrounds */}
+                  <View style={styles.slide1BgOuter} />
+                  <View style={styles.slide1BgInner} />
+                  
+                  {/* Main Icon Card */}
+                  <View style={styles.mainIconCard}>
+                    <Text style={styles.mainIconText}>📄</Text>
+                    {/* Floating Green Badge */}
+                    <View style={styles.floatingGreenBadge}>
+                      <Text style={styles.badgeCheckIcon}>✓</Text>
+                      <Text style={styles.badgeText}>98% Match</Text>
+                    </View>
                   </View>
-                  <Text style={styles.slideTitle}>{slide.title}</Text>
-                  <Text style={styles.slideBody}>{slide.body}</Text>
                 </View>
-              ))}
+                
+                <View style={styles.textContainer}>
+                  <Text style={styles.slideTitle}>AI Answer Evaluation</Text>
+                  <Text style={styles.slideDescription}>
+                    Upload your handwritten answers and get instant, detailed feedback mapped against the official marking scheme.
+                  </Text>
+                </View>
+              </View>
+
+              {/* Slide 2: Voice Doubt Solver */}
+              <View style={styles.slide}>
+                <View style={styles.graphicsWrapper}>
+                  {/* Decorative background shapes */}
+                  <View style={styles.slide2BgOuter} />
+                  <View style={styles.slide2BgInner} />
+                  
+                  {/* Main Mic Card */}
+                  <Animated.View style={[
+                    styles.mainMicCard,
+                    { transform: [{ scale: pulseAnim }] }
+                  ]}>
+                    <Text style={styles.mainIconText}>🎙️</Text>
+                    
+                    {/* Sound waves left */}
+                    <View style={styles.soundWavesLeft}>
+                      <View style={[styles.soundBar, { height: 12 }]} />
+                      <View style={[styles.soundBar, { height: 24 }]} />
+                      <View style={[styles.soundBar, { height: 16 }]} />
+                    </View>
+                    
+                    {/* Sound waves right */}
+                    <View style={styles.soundWavesRight}>
+                      <View style={[styles.soundBar, { height: 16 }]} />
+                      <View style={[styles.soundBar, { height: 24 }]} />
+                      <View style={[styles.soundBar, { height: 12 }]} />
+                    </View>
+                  </Animated.View>
+                </View>
+                
+                <View style={styles.textContainer}>
+                  <Text style={styles.slideTitle}>Voice Doubt Solver</Text>
+                  <Text style={styles.slideDescription}>
+                    Stuck on a concept? Just ask. Our conversational AI tutor explains complex topics naturally, like a real teacher.
+                  </Text>
+                </View>
+              </View>
+
+              {/* Slide 3: Adaptive Study Planning */}
+              <View style={styles.slide}>
+                <View style={styles.graphicsWrapper}>
+                  {/* Bento Grid layout decoration */}
+                  <View style={styles.bentoGridBackground}>
+                    <View style={[styles.bentoItem, { backgroundColor: Colors.primary }]} />
+                    <View style={[styles.bentoItem, { backgroundColor: Colors.secondary, opacity: 0.6 }]} />
+                    <View style={[styles.bentoItem, { backgroundColor: '#5c5f60', opacity: 0.4 }]} />
+                    <View style={[styles.bentoItem, { backgroundColor: Colors.primary, opacity: 0.8 }]} />
+                  </View>
+                  
+                  {/* Main Planning Box */}
+                  <View style={styles.mainPlanningCard}>
+                    <Text style={styles.planningRobotIcon}>🤖</Text>
+                    <View style={styles.planningProgressBarTrack}>
+                      <View style={styles.planningProgressBarFill} />
+                    </View>
+                    <Text style={styles.planningCalendarIcon}>📅</Text>
+                  </View>
+                </View>
+                
+                <View style={styles.textContainer}>
+                  <Text style={styles.slideTitle}>Adaptive Study Planning</Text>
+                  <Text style={styles.slideDescription}>
+                    A dynamic schedule that adapts to your performance. Focus more on your weak areas and track real progress.
+                  </Text>
+                </View>
+              </View>
+
             </Animated.View>
           </View>
 
-          {/* Controls */}
-          <View style={styles.controls}>
-            {/* Dots */}
-            <View style={styles.dots}>
-              {SLIDES.map((_, i) => (
-                <View
+          {/* Bottom Navigation & Controls */}
+          <View style={styles.controlsContainer}>
+            {/* Pagination Dots */}
+            <View style={styles.paginationRow}>
+              {[0, 1, 2].map((i) => (
+                <TouchableOpacity
                   key={i}
+                  onPress={() => {
+                    Animated.spring(slideAnim, {
+                      toValue: -i * width,
+                      useNativeDriver: false,
+                    }).start();
+                    setCurrentSlide(i);
+                  }}
                   style={[
-                    styles.dot,
-                    i === currentSlide ? styles.dotActive : styles.dotInactive,
+                    styles.paginationDot,
+                    i === currentSlide ? styles.paginationDotActive : styles.paginationDotInactive
                   ]}
                 />
               ))}
             </View>
 
-            {/* Button */}
-            <TouchableOpacity style={styles.btn} onPress={goNext} activeOpacity={0.85}>
-              <Text style={styles.btnText}>
-                {currentSlide === SLIDES.length - 1 ? '🚀  Get Started' : 'Continue  →'}
+            {/* Action Button */}
+            <TouchableOpacity style={styles.actionButton} onPress={goNext} activeOpacity={0.9}>
+              <Text style={styles.actionButtonText}>
+                {currentSlide === 2 ? 'Get Started  🚀' : 'Continue  →'}
               </Text>
             </TouchableOpacity>
           </View>
@@ -161,106 +238,355 @@ export default function OnboardingScreen() {
 }
 
 const styles = StyleSheet.create({
-  flex: { flex: 1 },
-  container: { flex: 1, backgroundColor: Colors.surface },
-
-  // Splash
+  container: {
+    flex: 1,
+    backgroundColor: Colors.background,
+  },
+  flex: {
+    flex: 1,
+  },
+  
+  // Splash Overlay
   splash: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 10,
+    zIndex: 999,
   },
-  splashIconContainer: {
-    width: 120, height: 120,
-    borderRadius: 60,
-    backgroundColor: 'white',
-    alignItems: 'center', justifyContent: 'center',
-    marginBottom: Spacing.lg,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
-    shadowRadius: 20,
-    elevation: 10,
+  splashContent: {
+    alignItems: 'center',
   },
-  splashIcon: { fontSize: 64 },
-  splashTitle: {
-    fontSize: 40, fontFamily: 'PlusJakartaSans_700Bold',
-    color: 'white', letterSpacing: -0.8,
-  },
-  splashSubtitle: {
-    fontSize: 16, fontFamily: 'Inter_400Regular',
-    color: 'rgba(255,255,255,0.8)', marginTop: 8,
-  },
-
-  // Slides
-  slidesWrapper: { flex: 1, overflow: 'hidden' },
-  slidesRow: { flexDirection: 'row', width: width * SLIDES.length },
-  slide: {
-    width,
-    paddingHorizontal: Spacing.lg,
+  splashIconWrapper: {
+    width: 128,
+    height: 128,
+    borderRadius: 64,
+    backgroundColor: '#ffffff',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingBottom: Spacing.xl,
+    marginBottom: Spacing.lg,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
   },
-  iconWrapper: {
-    width: 160, height: 160,
-    borderRadius: Radius.xxl,
-    alignItems: 'center', justifyContent: 'center',
-    marginBottom: Spacing.xl,
+  splashIcon: {
+    fontSize: 56,
   },
-  slideIcon: { fontSize: 72 },
-  slideTitle: {
-    fontSize: 28, fontFamily: 'PlusJakartaSans_700Bold',
-    color: Colors.onSurface, textAlign: 'center',
-    marginBottom: Spacing.sm,
+  splashTitle: {
+    fontSize: 36,
+    fontFamily: 'PlusJakartaSans_700Bold',
+    color: '#ffffff',
+    fontWeight: '800',
+    letterSpacing: -0.5,
   },
-  slideBody: {
-    fontSize: 16, fontFamily: 'Inter_400Regular',
-    color: Colors.onSurfaceVariant, textAlign: 'center',
-    lineHeight: 24, maxWidth: 300,
+  splashSubtitle: {
+    fontSize: 16,
+    fontFamily: 'Inter_400Regular',
+    color: '#cde5ff',
+    marginTop: Spacing.xs,
+    opacity: 0.9,
   },
 
-  // Skip
+  // Onboarding Header Skip Button
   skipBtn: {
     alignSelf: 'flex-end',
-    margin: Spacing.md,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 6,
+    marginTop: Platform.OS === 'ios' ? 0 : Spacing.md,
+    marginRight: Spacing.lg,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs,
+    borderRadius: Radius.full,
   },
   skipText: {
     fontFamily: 'Inter_500Medium',
-    fontSize: 14, color: Colors.onSurfaceVariant,
+    fontSize: 14,
+    color: Colors.onSurfaceVariant,
   },
 
-  // Controls
-  controls: {
+  // Slides structure
+  sliderContainer: {
+    flex: 1,
+    overflow: 'hidden',
+  },
+  slidesRow: {
+    flexDirection: 'row',
+    width: width * 3,
+    height: '100%',
+  },
+  slide: {
+    width: width,
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: Spacing.lg,
+  },
+
+  // Graphics Layout
+  graphicsWrapper: {
+    width: 260,
+    height: 260,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.xl,
+    position: 'relative',
+  },
+
+  // Slide 1 Graphics (Evaluation)
+  slide1BgOuter: {
+    position: 'absolute',
+    width: 250,
+    height: 250,
+    borderRadius: 125,
+    backgroundColor: Colors.surfaceContainer,
+    opacity: 0.5,
+    transform: [{ scale: 1.1 }],
+  },
+  slide1BgInner: {
+    position: 'absolute',
+    width: 210,
+    height: 210,
+    borderRadius: 105,
+    backgroundColor: Colors.surfaceContainerHigh,
+    opacity: 0.7,
+  },
+  mainIconCard: {
+    width: 128,
+    height: 128,
+    borderRadius: Radius.xl,
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: 'rgba(190, 199, 211, 0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.08,
+    shadowRadius: 20,
+    elevation: 5,
+    zIndex: 10,
+    position: 'relative',
+  },
+  mainIconText: {
+    fontSize: 56,
+  },
+  floatingGreenBadge: {
+    position: 'absolute',
+    top: -16,
+    right: -24,
+    backgroundColor: '#d1fae5',
+    borderColor: '#a7f3d0',
+    borderWidth: 1,
+    borderRadius: Radius.md,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    flexDirection: 'row',
+    alignItems: 'center',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+    transform: [{ rotate: '12deg' }],
+  },
+  badgeCheckIcon: {
+    color: '#059669',
+    fontWeight: 'bold',
+    fontSize: 12,
+    marginRight: 4,
+  },
+  badgeText: {
+    color: '#065f46',
+    fontWeight: '700',
+    fontSize: 10,
+    fontFamily: 'Inter_600SemiBold',
+  },
+
+  // Slide 2 Graphics (Voice)
+  slide2BgOuter: {
+    position: 'absolute',
+    width: 240,
+    height: 240,
+    borderRadius: Radius.xxl,
+    backgroundColor: Colors.secondary + '18',
+    opacity: 0.5,
+    transform: [{ rotate: '12deg' }, { scale: 1.05 }],
+  },
+  slide2BgInner: {
+    position: 'absolute',
+    width: 220,
+    height: 220,
+    borderRadius: Radius.xl,
+    backgroundColor: Colors.secondary + '24',
+    opacity: 0.7,
+    transform: [{ rotate: '3deg' }],
+  },
+  mainMicCard: {
+    width: 128,
+    height: 128,
+    borderRadius: 64,
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: Colors.secondary + '20',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: Colors.secondary,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 20,
+    elevation: 6,
+    zIndex: 10,
+    position: 'relative',
+  },
+  soundWavesLeft: {
+    position: 'absolute',
+    left: -32,
+    top: 52,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  soundWavesRight: {
+    position: 'absolute',
+    right: -32,
+    top: 52,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  soundBar: {
+    width: 4,
+    borderRadius: Radius.full,
+    backgroundColor: Colors.secondary,
+    opacity: 0.6,
+  },
+
+  // Slide 3 Graphics (Planner)
+  bentoGridBackground: {
+    position: 'absolute',
+    width: 220,
+    height: 220,
+    gridGap: 8,
+    padding: 16,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    alignContent: 'center',
+    transform: [{ rotate: '6deg' }],
+    opacity: 0.3,
+  },
+  bentoItem: {
+    width: 90,
+    height: 90,
+    margin: 4,
+    borderRadius: Radius.xl,
+  },
+  mainPlanningCard: {
+    width: 160,
+    height: 160,
+    borderRadius: Radius.xl,
+    backgroundColor: '#ffffff',
+    borderWidth: 1,
+    borderColor: 'rgba(190, 199, 211, 0.2)',
+    padding: Spacing.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.08,
+    shadowRadius: 20,
+    elevation: 5,
+    zIndex: 10,
+  },
+  planningRobotIcon: {
+    fontSize: 48,
+    marginBottom: Spacing.xs,
+  },
+  planningProgressBarTrack: {
+    width: '100%',
+    height: 6,
+    backgroundColor: Colors.surfaceVariant,
+    borderRadius: Radius.full,
+    overflow: 'hidden',
+    marginVertical: Spacing.xs,
+  },
+  planningProgressBarFill: {
+    width: '75%',
+    height: '100%',
+    backgroundColor: Colors.primary,
+    borderRadius: Radius.full,
+  },
+  planningCalendarIcon: {
+    fontSize: 16,
+    color: Colors.outline,
+  },
+
+  // Text details
+  textContainer: {
+    alignItems: 'center',
+    marginTop: Spacing.md,
+    maxWidth: 320,
+  },
+  slideTitle: {
+    fontSize: 28,
+    fontFamily: 'PlusJakartaSans_700Bold',
+    color: Colors.onSurface,
+    fontWeight: '700',
+    textAlign: 'center',
+    marginBottom: Spacing.sm,
+  },
+  slideDescription: {
+    fontSize: 15,
+    fontFamily: 'Inter_400Regular',
+    color: Colors.onSurfaceVariant,
+    textAlign: 'center',
+    lineHeight: 22,
+  },
+
+  // Bottom controls
+  controlsContainer: {
     paddingHorizontal: Spacing.lg,
     paddingBottom: Spacing.xl,
     alignItems: 'center',
     gap: Spacing.lg,
+    backgroundColor: Colors.background,
   },
-  dots: { flexDirection: 'row', gap: 8 },
-  dot: { height: 6, borderRadius: 3 },
-  dotActive: { width: 28, backgroundColor: Colors.primary },
-  dotInactive: { width: 8, backgroundColor: Colors.surfaceContainerHighest },
-
-  // Button
-  btn: {
-    width: '100%', maxWidth: 320,
+  paginationRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: Spacing.xs,
+  },
+  paginationDot: {
+    height: 6,
+    borderRadius: 3,
+    transition: 'all 0.3s',
+  },
+  paginationDotActive: {
+    width: 32,
+    backgroundColor: Colors.primary,
+  },
+  paginationDotInactive: {
+    width: 6,
+    backgroundColor: Colors.surfaceVariant,
+  },
+  actionButton: {
+    width: '100%',
+    maxWidth: 320,
     backgroundColor: Colors.primary,
     paddingVertical: 16,
     borderRadius: Radius.full,
     alignItems: 'center',
+    justifyContent: 'center',
     shadowColor: Colors.primary,
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 12,
-    elevation: 6,
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 4,
   },
-  btnText: {
+  actionButtonText: {
     fontFamily: 'PlusJakartaSans_600SemiBold',
-    fontSize: 17, color: 'white',
+    fontSize: 16,
+    color: '#ffffff',
+    fontWeight: '600',
   },
 });

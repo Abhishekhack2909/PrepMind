@@ -34,7 +34,10 @@ export function useAuth(): AuthState {
         } else {
           // ── Option B: Anonymous Sign-In ──
           const { data, error } = await supabase.auth.signInAnonymously();
-          if (!error && data.session && mounted) {
+          if (error) {
+            console.error('Anonymous Sign-In Error:', error.message);
+          }
+          if (!error && data?.session && mounted) {
             setSession(data.session);
             await supabase.from('users').upsert({
               id: data.session.user.id,
