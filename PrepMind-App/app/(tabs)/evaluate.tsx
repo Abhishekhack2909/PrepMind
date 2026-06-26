@@ -7,16 +7,16 @@ import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import { evaluateAnswer, type EvaluationResult } from '@/services/api';
 import { useAuth } from '@/hooks/useAuth';
-import { Colors, Spacing, Radius } from '@/constants/theme';
+import { Colors, Spacing, Radius, Shadows, Typography } from '@/constants/theme';
 
 type AppState = 'idle' | 'loading' | 'results' | 'error';
 
 const GRADE_COLORS: Record<string, string> = {
-  Excellent: '#22c55e',
-  Good: '#3b82f6',
-  Average: '#f59e0b',
-  'Below Average': '#f97316',
-  Poor: '#ef4444',
+  Excellent: '#10B981',
+  Good: '#3B82F6',
+  Average: '#F59E0B',
+  'Below Average': '#F97316',
+  Poor: '#EF4444',
 };
 
 export default function EvaluateScreen() {
@@ -116,10 +116,10 @@ export default function EvaluateScreen() {
 
   return (
     <SafeAreaView style={styles.safe}>
-      {/* Mobile Free Limits Bar */}
+      {/* Limits Bar — gradient purple tint */}
       <View style={styles.limitsBar}>
         <Text style={styles.limitsText}>
-          <Text style={{ fontWeight: 'bold', color: Colors.secondary }}>3/3 FREE</Text> Evaluations left this month
+          <Text style={{ fontWeight: 'bold', color: Colors.accent }}>3/3 FREE</Text> Evaluations left this month
         </Text>
         <TouchableOpacity activeOpacity={0.7}>
           <Text style={styles.upgradeText}>Upgrade →</Text>
@@ -128,8 +128,9 @@ export default function EvaluateScreen() {
 
       <ScrollView contentContainerStyle={styles.scroll} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
         
-        {/* Daily Mains Question Card */}
+        {/* Daily Mains Question Card — accent bar */}
         <View style={styles.dailyQuestionCard}>
+          <View style={styles.dailyAccentBar} />
           <View style={styles.dailyLeft}>
             <Text style={styles.dailyTitle}>Daily Mains Question</Text>
             <View style={styles.attemptedRow}>
@@ -154,6 +155,7 @@ export default function EvaluateScreen() {
         {/* Central Evaluation Card */}
         <View style={styles.centralCard}>
           <View style={styles.scannerIconWrapper}>
+            <View style={styles.scannerRing} />
             <Text style={styles.scannerIcon}>📄</Text>
           </View>
 
@@ -183,7 +185,7 @@ export default function EvaluateScreen() {
               value={question}
               onChangeText={setQuestion}
               placeholder="Paste or type the question here..."
-              placeholderTextColor={Colors.outline}
+              placeholderTextColor={Colors.onSurfaceMuted}
               multiline
               numberOfLines={2}
             />
@@ -254,6 +256,7 @@ export default function EvaluateScreen() {
           </TouchableOpacity>
         </View>
 
+        <View style={{ height: 80 }} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -264,7 +267,9 @@ export default function EvaluateScreen() {
 function LoadingView({ message }: { message: string }) {
   return (
     <View style={styles.centerView}>
-      <ActivityIndicator size="large" color={Colors.primary} />
+      <View style={styles.loadingIconContainer}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+      </View>
       <Text style={styles.loadingText}>{message}</Text>
       <Text style={styles.loadingSubtext}>This usually takes 10–20 seconds</Text>
     </View>
@@ -294,7 +299,7 @@ function ResultsView({ result, onReset }: { result: EvaluationResult; onReset: (
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        {/* Grade Banner */}
+        {/* Grade Banner — gradient tint */}
         <View style={[styles.gradeBanner, { backgroundColor: gradeColor + '15' }]}>
           <Text style={[styles.gradeText, { color: gradeColor }]}>{result.grade}</Text>
           <Text style={[styles.marksText, { color: gradeColor }]}>{result.total_marks} / 15</Text>
@@ -335,7 +340,7 @@ function ResultsView({ result, onReset }: { result: EvaluationResult; onReset: (
 
         {/* Model Answer Hint */}
         {result.model_answer_hint && (
-          <View style={[styles.resultsCard, { backgroundColor: '#eff4ff' }]}>
+          <View style={[styles.resultsCard, { backgroundColor: Colors.surfaceContainer }]}>
             <Text style={styles.resultsCardTitle}>💡 Model Answer Hint</Text>
             <Text style={styles.hintText}>{result.model_answer_hint}</Text>
           </View>
@@ -353,6 +358,7 @@ function ResultsView({ result, onReset }: { result: EvaluationResult; onReset: (
         <TouchableOpacity style={styles.evaluateBtn} onPress={onReset} activeOpacity={0.9}>
           <Text style={styles.evaluateBtnText}>📝  Evaluate Another Answer</Text>
         </TouchableOpacity>
+        <View style={{ height: 80 }} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -378,7 +384,7 @@ function ScoreRow({ label, score, max }: { label: string; score: number; max: nu
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: '#f8f9ff',
+    backgroundColor: Colors.background,
   },
   scroll: {
     padding: Spacing.md,
@@ -389,58 +395,64 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: Spacing.lg,
-    backgroundColor: '#f8f9ff',
+    backgroundColor: Colors.background,
   },
 
-  // Limits Bar
+  // Limits Bar — purple tint
   limitsBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: 'rgba(232, 222, 255, 0.5)',
+    backgroundColor: Colors.accentGhost,
     paddingHorizontal: Spacing.md,
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(139, 92, 246, 0.1)',
+    borderBottomColor: Colors.outlineFaint,
   },
   limitsText: {
     fontFamily: 'Inter_400Regular',
     fontSize: 13,
-    color: '#121c2a',
+    color: Colors.onSurface,
   },
   upgradeText: {
-    fontFamily: 'Inter_500Medium',
+    fontFamily: 'Inter_600SemiBold',
     fontSize: 13,
-    color: '#632ce5',
+    color: Colors.accent,
     fontWeight: '600',
   },
 
-  // Daily Question Card
+  // Daily Question Card — with accent bar
   dailyQuestionCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: Radius.lg,
-    borderWidth: 1,
-    borderColor: 'rgba(190, 199, 211, 0.3)',
+    backgroundColor: Colors.surfaceCard,
+    borderRadius: Radius.xl,
     padding: Spacing.md,
+    paddingLeft: Spacing.lg,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: Spacing.md,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 6,
-    elevation: 1,
+    ...Shadows.card,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  dailyAccentBar: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 4,
+    backgroundColor: Colors.primary,
+    borderTopLeftRadius: Radius.xl,
+    borderBottomLeftRadius: Radius.xl,
   },
   dailyLeft: {
     flex: 1,
     gap: 4,
   },
   dailyTitle: {
-    fontFamily: 'PlusJakartaSans_700Bold',
+    ...Typography.subtitle,
+    color: Colors.primary,
     fontSize: 16,
-    color: '#006399',
-    fontWeight: '700',
   },
   attemptedRow: {
     flexDirection: 'row',
@@ -459,49 +471,48 @@ const styles = StyleSheet.create({
     borderColor: '#ffffff',
   },
   attemptedText: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 12,
-    color: '#3f4851',
+    ...Typography.caption,
+    color: Colors.onSurfaceVariant,
   },
   attemptBtn: {
-    borderWidth: 1,
-    borderColor: '#006399',
-    borderRadius: Radius.md,
+    borderWidth: 1.5,
+    borderColor: Colors.primary,
+    borderRadius: Radius.lg,
     paddingHorizontal: Spacing.md,
     paddingVertical: 6,
   },
   attemptBtnText: {
-    fontFamily: 'Inter_500Medium',
+    fontFamily: 'Inter_600SemiBold',
     fontSize: 13,
-    color: '#006399',
+    color: Colors.primary,
     fontWeight: '600',
   },
 
   // Central Card
   centralCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: Radius.xl,
-    borderWidth: 1,
-    borderColor: 'rgba(190, 199, 211, 0.3)',
+    backgroundColor: Colors.surfaceCard,
+    borderRadius: Radius.xxl,
     padding: Spacing.xl,
     alignItems: 'center',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.04,
-    shadowRadius: 12,
-    elevation: 2,
+    ...Shadows.card,
     marginBottom: Spacing.md,
   },
   scannerIconWrapper: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: '#eff4ff',
+    width: 84,
+    height: 84,
+    borderRadius: 42,
+    backgroundColor: Colors.surfaceContainer,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(0, 99, 153, 0.1)',
     marginBottom: Spacing.md,
+    position: 'relative',
+  },
+  scannerRing: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 42,
+    borderWidth: 2,
+    borderColor: Colors.primaryGlow,
+    borderTopColor: Colors.primary,
   },
   scannerIcon: {
     fontSize: 40,
@@ -512,17 +523,11 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
   },
   centralTitle: {
-    fontFamily: 'PlusJakartaSans_700Bold',
-    fontSize: 24,
-    color: '#121c2a',
-    fontWeight: '700',
+    ...Typography.h2,
   },
   centralSubtitle: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 15,
-    color: '#3f4851',
+    ...Typography.body,
     textAlign: 'center',
-    lineHeight: 22,
   },
 
   // Preview Container
@@ -560,44 +565,36 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
   },
   inputLabel: {
-    fontFamily: 'Inter_500Medium',
-    fontSize: 13,
-    color: '#3f4851',
+    ...Typography.bodyMedium,
+    color: Colors.onSurfaceVariant,
   },
   textInput: {
     width: '100%',
-    borderWidth: 1,
-    borderColor: '#bec7d3',
+    borderWidth: 1.5,
+    borderColor: Colors.outlineVariant,
     borderRadius: Radius.lg,
     padding: Spacing.sm,
     fontFamily: 'Inter_400Regular',
     fontSize: 14,
-    color: '#121c2a',
-    backgroundColor: '#f8f9ff',
+    color: Colors.onSurface,
+    backgroundColor: Colors.surfaceContainerLow,
     minHeight: 64,
     textAlignVertical: 'top',
   },
 
-  // Action Button
+  // Action Button — gradient-like glow
   evaluateBtn: {
     width: '100%',
-    backgroundColor: '#006399',
+    backgroundColor: Colors.primary,
     borderRadius: Radius.xl,
     paddingVertical: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#006399',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
-    elevation: 4,
+    ...Shadows.primaryGlow,
     marginBottom: Spacing.md,
   },
   evaluateBtnText: {
-    fontFamily: 'PlusJakartaSans_600SemiBold',
-    fontSize: 16,
-    color: '#ffffff',
-    fontWeight: '600',
+    ...Typography.button,
   },
 
   // Social proof
@@ -618,14 +615,13 @@ const styles = StyleSheet.create({
     borderColor: '#ffffff',
   },
   socialProofText: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 12,
-    color: '#3f4851',
+    ...Typography.caption,
+    color: Colors.onSurfaceVariant,
   },
   separator: {
     width: '100%',
     height: 1,
-    backgroundColor: 'rgba(190, 199, 211, 0.2)',
+    backgroundColor: Colors.outlineFaint,
     marginVertical: Spacing.md,
   },
 
@@ -644,7 +640,7 @@ const styles = StyleSheet.create({
   sampleText: {
     fontFamily: 'Inter_500Medium',
     fontSize: 14,
-    color: '#006399',
+    color: Colors.primary,
     fontWeight: '500',
   },
 
@@ -656,17 +652,16 @@ const styles = StyleSheet.create({
   listItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
-    borderRadius: Radius.lg,
-    borderWidth: 1,
-    borderColor: 'rgba(190, 199, 211, 0.3)',
+    backgroundColor: Colors.surfaceCard,
+    borderRadius: Radius.xl,
     padding: Spacing.md,
+    ...Shadows.subtle,
   },
   listIconWrapper: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: '#eff4ff',
+    backgroundColor: Colors.surfaceContainer,
     alignItems: 'center',
     justifyContent: 'center',
     marginRight: Spacing.md,
@@ -678,69 +673,66 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   listTitle: {
-    fontFamily: 'PlusJakartaSans_600SemiBold',
+    ...Typography.subtitle,
     fontSize: 15,
-    color: '#121c2a',
-    fontWeight: '600',
   },
   listSubtitle: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 12,
-    color: '#6f7882',
+    ...Typography.caption,
     marginTop: 2,
   },
   listChevron: {
     fontSize: 16,
-    color: '#bec7d3',
+    color: Colors.onSurfaceMuted,
   },
 
   // Loading View
+  loadingIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: Colors.surfaceContainer,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+  },
   loadingText: {
-    fontFamily: 'PlusJakartaSans_600SemiBold',
+    ...Typography.subtitle,
     fontSize: 18,
-    color: '#121c2a',
-    marginTop: 20,
+    marginTop: 12,
   },
   loadingSubtext: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 13,
-    color: '#3f4851',
+    ...Typography.caption,
     marginTop: 6,
   },
 
   // Error View
   errorTitle: {
-    fontFamily: 'PlusJakartaSans_700Bold',
-    fontSize: 22,
-    color: '#ba1a1a',
+    ...Typography.h2,
+    color: Colors.error,
     marginTop: 16,
   },
   errorMsg: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 14,
-    color: '#3f4851',
+    ...Typography.body,
     textAlign: 'center',
     marginVertical: 16,
     maxWidth: 280,
-    lineHeight: 20,
   },
   retryBtn: {
-    backgroundColor: '#006399',
+    backgroundColor: Colors.primary,
     borderRadius: Radius.full,
     paddingHorizontal: Spacing.xl,
     paddingVertical: 12,
-    elevation: 3,
+    ...Shadows.primaryGlow,
   },
   retryBtnText: {
-    fontFamily: 'PlusJakartaSans_600SemiBold',
+    ...Typography.button,
     fontSize: 15,
-    color: '#ffffff',
   },
 
   // Results styling
   gradeBanner: {
     alignItems: 'center',
-    borderRadius: Radius.xl,
+    borderRadius: Radius.xxl,
     padding: Spacing.xl,
     marginBottom: Spacing.md,
   },
@@ -757,29 +749,26 @@ const styles = StyleSheet.create({
   },
   progressBarBg: {
     width: '80%',
-    height: 6,
-    backgroundColor: '#e5e7eb',
-    borderRadius: 3,
+    height: 8,
+    backgroundColor: Colors.outlineVariant,
+    borderRadius: 4,
     marginTop: 12,
+    overflow: 'hidden',
   },
   progressBarFill: {
-    height: 6,
-    borderRadius: 3,
+    height: 8,
+    borderRadius: 4,
   },
   resultsCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: Radius.xl,
-    padding: Spacing.md,
+    backgroundColor: Colors.surfaceCard,
+    borderRadius: Radius.xxl,
+    padding: Spacing.lg,
     marginBottom: Spacing.md,
-    borderWidth: 1,
-    borderColor: 'rgba(190, 199, 211, 0.3)',
+    ...Shadows.subtle,
   },
   resultsCardTitle: {
-    fontFamily: 'PlusJakartaSans_600SemiBold',
-    fontSize: 16,
-    color: '#121c2a',
+    ...Typography.subtitle,
     marginBottom: Spacing.sm,
-    fontWeight: '600',
   },
   scoreRow: {
     marginBottom: 10,
@@ -790,42 +779,43 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   scoreLabel: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 13,
-    color: '#3f4851',
+    ...Typography.bodyMedium,
+    color: Colors.onSurfaceVariant,
   },
   scoreValue: {
     fontFamily: 'Inter_600SemiBold',
     fontSize: 13,
-    color: '#121c2a',
+    color: Colors.onSurface,
+    fontWeight: '600',
   },
   scoreBg: {
-    height: 6,
-    backgroundColor: '#eff4ff',
-    borderRadius: 3,
+    height: 8,
+    backgroundColor: Colors.surfaceContainer,
+    borderRadius: 4,
+    overflow: 'hidden',
   },
   scoreFill: {
-    height: 6,
-    backgroundColor: '#006399',
-    borderRadius: 3,
+    height: 8,
+    backgroundColor: Colors.primary,
+    borderRadius: 4,
   },
   bulletItem: {
     fontFamily: 'Inter_400Regular',
     fontSize: 14,
-    color: '#121c2a',
+    color: Colors.onSurface,
     lineHeight: 22,
     marginBottom: 4,
   },
   hintText: {
     fontFamily: 'Inter_400Regular',
     fontSize: 14,
-    color: '#121c2a',
+    color: Colors.onSurface,
     lineHeight: 22,
   },
   transcribedText: {
     fontFamily: 'Inter_400Regular',
     fontSize: 13,
-    color: '#3f4851',
+    color: Colors.onSurfaceVariant,
     lineHeight: 20,
     fontStyle: 'italic',
   },

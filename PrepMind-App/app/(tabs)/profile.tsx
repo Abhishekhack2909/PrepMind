@@ -4,7 +4,7 @@ import {
   TouchableOpacity, ActivityIndicator, Alert, Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Colors, Spacing, Radius } from '@/constants/theme';
+import { Colors, Spacing, Radius, Shadows, Typography } from '@/constants/theme';
 import { useAuth } from '@/hooks/useAuth';
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:8000';
@@ -69,11 +69,16 @@ export default function ProfileScreen() {
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         {/* ── Profile Header Section ── */}
         <View style={styles.profileHeaderCard}>
+          {/* Decorative gradient overlay */}
+          <View style={styles.profileHeaderGlow} />
+          
           <View style={styles.avatarWrapper}>
-            <Image
-              source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAnCccAlETF_JKCrPdiwWuUVTWzjsJ3Ys1-Q18DzfNu8qUiRzLg1h_ps3bfdP8GGgafxYWPEJR3ndAKXaj0hYJIUYXbVhqPT33CaqEJH0Nd80RMaXwBhnSwBgkFVDcCLar4MctYVLX0fb_yjqVz9VvukI-Yus35RL7B8K2_AtEaL4Eq5SC0KeEkwyWHTwTZinxli9Kd7BsirmVK3wgM5isHr6LWZa7w4QmfqtJMe8EnwPc23IvyWQcq-OQE-66YeCAiTEo6KL7nrq7s' }}
-              style={styles.largeAvatar}
-            />
+            <View style={styles.avatarRing}>
+              <Image
+                source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAnCccAlETF_JKCrPdiwWuUVTWzjsJ3Ys1-Q18DzfNu8qUiRzLg1h_ps3bfdP8GGgafxYWPEJR3ndAKXaj0hYJIUYXbVhqPT33CaqEJH0Nd80RMaXwBhnSwBgkFVDcCLar4MctYVLX0fb_yjqVz9VvukI-Yus35RL7B8K2_AtEaL4Eq5SC0KeEkwyWHTwTZinxli9Kd7BsirmVK3wgM5isHr6LWZa7w4QmfqtJMe8EnwPc23IvyWQcq-OQE-66YeCAiTEo6KL7nrq7s' }}
+                style={styles.largeAvatar}
+              />
+            </View>
             <TouchableOpacity style={styles.editBtn} activeOpacity={0.85}>
               <Text style={styles.editIcon}>✏️</Text>
             </TouchableOpacity>
@@ -105,7 +110,8 @@ export default function ProfileScreen() {
         <View style={styles.statsGrid}>
           {/* Streak */}
           <View style={styles.statCard}>
-            <View style={styles.statIconContainer}>
+            <View style={styles.statAccentStrip} />
+            <View style={[styles.statIconContainer, { backgroundColor: Colors.streakAmberGlow }]}>
               <Text style={styles.statIcon}>🔥</Text>
             </View>
             <Text style={styles.statValue}>{streakCount}</Text>
@@ -114,8 +120,9 @@ export default function ProfileScreen() {
 
           {/* MCQs */}
           <View style={styles.statCard}>
-            <View style={[styles.statIconContainer, { backgroundColor: '#1da1f21a' }]}>
-              <Text style={[styles.statIcon, { color: '#1da1f2' }]}>🧠</Text>
+            <View style={[styles.statAccentStrip, { backgroundColor: Colors.primary }]} />
+            <View style={[styles.statIconContainer, { backgroundColor: Colors.primaryGhost }]}>
+              <Text style={styles.statIcon}>🧠</Text>
             </View>
             <Text style={styles.statValue}>{mcqCount}</Text>
             <Text style={styles.statLabel}>MCQs Solved</Text>
@@ -123,8 +130,9 @@ export default function ProfileScreen() {
 
           {/* Evaluated */}
           <View style={styles.statCard}>
-            <View style={[styles.statIconContainer, { backgroundColor: '#7c4dff1a' }]}>
-              <Text style={[styles.statIcon, { color: '#7c4dff' }]}>✍️</Text>
+            <View style={[styles.statAccentStrip, { backgroundColor: Colors.accent }]} />
+            <View style={[styles.statIconContainer, { backgroundColor: Colors.accentGhost }]}>
+              <Text style={styles.statIcon}>✍️</Text>
             </View>
             <Text style={styles.statValue}>{evaluatedCount}</Text>
             <Text style={styles.statLabel}>Answers Evaluated</Text>
@@ -132,8 +140,9 @@ export default function ProfileScreen() {
 
           {/* Global Rank */}
           <View style={styles.statCard}>
-            <View style={[styles.statIconContainer, { backgroundColor: '#fff8e1' }]}>
-              <Text style={[styles.statIcon, { color: '#fbc02d' }]}>🏆</Text>
+            <View style={[styles.statAccentStrip, { backgroundColor: Colors.warning }]} />
+            <View style={[styles.statIconContainer, { backgroundColor: Colors.warningContainer }]}>
+              <Text style={styles.statIcon}>🏆</Text>
             </View>
             <Text style={styles.statValue}>{globalRank}</Text>
             <Text style={styles.statLabel}>Global Rank</Text>
@@ -192,7 +201,7 @@ export default function ProfileScreen() {
             {/* Logout */}
             <TouchableOpacity style={[styles.settingsItem, { borderBottomWidth: 0 }]} activeOpacity={0.7} onPress={handleSignOut}>
               <View style={styles.settingsItemLeft}>
-                <View style={[styles.settingsItemIconBg, { backgroundColor: '#ffdad6' }]}>
+                <View style={[styles.settingsItemIconBg, { backgroundColor: Colors.errorContainer }]}>
                   <Text style={[styles.settingsItemEmoji, { color: Colors.error }]}>📤</Text>
                 </View>
                 <View>
@@ -204,7 +213,7 @@ export default function ProfileScreen() {
           </View>
         </View>
 
-        {/* Space at the bottom */}
+        {/* Space at the bottom for floating tab bar */}
         <View style={styles.bottomSpacer} />
       </ScrollView>
     </SafeAreaView>
@@ -214,12 +223,12 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: '#f8f9ff',
+    backgroundColor: Colors.background,
   },
   scroll: {
     padding: Spacing.md,
     gap: Spacing.md,
-    paddingBottom: 40,
+    paddingBottom: 100,
   },
   bottomSpacer: {
     height: 20,
@@ -232,9 +241,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
-    backgroundColor: '#ffffff',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(190, 199, 211, 0.15)',
+    backgroundColor: Colors.surfaceCard,
+    ...Shadows.subtle,
   },
   appBarLeft: {
     flexDirection: 'row',
@@ -245,27 +253,28 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(190, 199, 211, 0.3)',
+    borderWidth: 2,
+    borderColor: Colors.primaryGhost,
   },
   headerTitle: {
     fontFamily: 'PlusJakartaSans_700Bold',
     fontSize: 18,
-    color: '#006399',
+    color: Colors.primary,
     fontWeight: '700',
   },
   superBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#632ce5',
+    backgroundColor: Colors.superPurple,
     borderRadius: Radius.full,
-    paddingHorizontal: 10,
+    paddingHorizontal: 12,
     paddingVertical: 5,
-    gap: 3,
+    gap: 4,
+    ...Shadows.accentGlow,
   },
   superBadgeIcon: {
     color: '#ffffff',
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: 'bold',
   },
   superBadgeText: {
@@ -278,53 +287,61 @@ const styles = StyleSheet.create({
 
   // Profile Header Card
   profileHeaderCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: Radius.xl,
+    backgroundColor: Colors.surfaceCard,
+    borderRadius: Radius.xxl,
     padding: Spacing.lg,
-    borderWidth: 1,
-    borderColor: 'rgba(190, 199, 211, 0.3)',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
-    elevation: 2,
+    ...Shadows.card,
     alignItems: 'center',
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  profileHeaderGlow: {
+    position: 'absolute',
+    top: -60,
+    left: '50%',
+    marginLeft: -150,
+    width: 300,
+    height: 120,
+    borderRadius: 150,
+    backgroundColor: Colors.primary,
+    opacity: 0.04,
   },
   avatarWrapper: {
     position: 'relative',
     marginBottom: Spacing.sm,
   },
+  avatarRing: {
+    padding: 3,
+    borderRadius: 52,
+    borderWidth: 3,
+    borderColor: Colors.primary,
+    overflow: 'hidden',
+  },
   largeAvatar: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
-    borderWidth: 4,
-    borderColor: '#e6eeff',
+    width: 92,
+    height: 92,
+    borderRadius: 46,
   },
   editBtn: {
     position: 'absolute',
     bottom: 0,
-    right: 0,
-    backgroundColor: '#006399',
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    right: -4,
+    backgroundColor: Colors.primary,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-    elevation: 3,
+    ...Shadows.primaryGlow,
+    borderWidth: 3,
+    borderColor: Colors.surfaceCard,
   },
   editIcon: {
     fontSize: 12,
   },
   profileName: {
-    fontFamily: 'PlusJakartaSans_700Bold',
+    ...Typography.h2,
     fontSize: 22,
-    color: '#121c2a',
-    fontWeight: '700',
     textAlign: 'center',
   },
   targetRow: {
@@ -337,23 +354,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   targetText: {
-    fontFamily: 'Inter_400Regular',
+    ...Typography.body,
     fontSize: 14,
-    color: '#3f4851',
   },
   anonAlert: {
-    backgroundColor: '#eff4ff',
+    backgroundColor: Colors.warningContainer,
     borderRadius: Radius.full,
     paddingHorizontal: Spacing.md,
     paddingVertical: 4,
     marginTop: Spacing.xs,
     borderWidth: 1,
-    borderColor: '#bec7d3',
+    borderColor: '#FDE68A',
   },
   anonAlertText: {
     fontFamily: 'Inter_400Regular',
     fontSize: 12,
-    color: '#3f4851',
+    color: '#92400E',
   },
   actionBtnRow: {
     flexDirection: 'row',
@@ -363,23 +379,23 @@ const styles = StyleSheet.create({
   },
   primaryActionBtn: {
     flex: 1,
-    borderWidth: 1,
-    borderColor: '#006399',
+    borderWidth: 1.5,
+    borderColor: Colors.primary,
     borderRadius: Radius.full,
     paddingVertical: 10,
     alignItems: 'center',
     justifyContent: 'center',
   },
   primaryActionText: {
-    fontFamily: 'Inter_500Medium',
+    fontFamily: 'Inter_600SemiBold',
     fontSize: 13,
-    color: '#006399',
+    color: Colors.primary,
     fontWeight: '600',
   },
   secondaryActionBtn: {
     flex: 1,
-    borderWidth: 1,
-    borderColor: '#bec7d3',
+    borderWidth: 1.5,
+    borderColor: Colors.outlineVariant,
     borderRadius: Radius.full,
     paddingVertical: 10,
     alignItems: 'center',
@@ -388,7 +404,7 @@ const styles = StyleSheet.create({
   secondaryActionText: {
     fontFamily: 'Inter_500Medium',
     fontSize: 13,
-    color: '#3f4851',
+    color: Colors.onSurfaceVariant,
     fontWeight: '600',
   },
 
@@ -400,26 +416,31 @@ const styles = StyleSheet.create({
   },
   statCard: {
     width: '47.5%',
-    backgroundColor: '#ffffff',
+    backgroundColor: Colors.surfaceCard,
     borderRadius: Radius.xl,
     padding: Spacing.md,
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(190, 199, 211, 0.3)',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.03,
-    shadowRadius: 8,
-    elevation: 1,
+    ...Shadows.card,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  statAccentStrip: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 3,
+    backgroundColor: Colors.streakAmber,
   },
   statIconContainer: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#f8f9ff',
+    backgroundColor: Colors.surfaceContainer,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: Spacing.xs,
+    marginTop: 4,
   },
   statIcon: {
     fontSize: 22,
@@ -427,41 +448,28 @@ const styles = StyleSheet.create({
   statValue: {
     fontFamily: 'PlusJakartaSans_700Bold',
     fontSize: 22,
-    color: '#121c2a',
+    color: Colors.onSurface,
     fontWeight: '700',
   },
   statLabel: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 12,
-    color: '#3f4851',
+    ...Typography.caption,
     marginTop: 2,
   },
 
   // Settings Card
   settingsCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: Radius.xl,
-    borderWidth: 1,
-    borderColor: 'rgba(190, 199, 211, 0.3)',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.03,
-    shadowRadius: 12,
-    elevation: 2,
+    backgroundColor: Colors.surfaceCard,
+    borderRadius: Radius.xxl,
+    ...Shadows.card,
     overflow: 'hidden',
   },
   settingsHeader: {
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
-    backgroundColor: '#eff4ff',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(190, 199, 211, 0.15)',
+    backgroundColor: Colors.surfaceContainer,
   },
   settingsHeaderTitle: {
-    fontFamily: 'PlusJakartaSans_700Bold',
-    fontSize: 16,
-    color: '#121c2a',
-    fontWeight: '700',
+    ...Typography.subtitle,
   },
   settingsList: {
     flexDirection: 'column',
@@ -473,7 +481,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(190, 199, 211, 0.15)',
+    borderBottomColor: Colors.outlineFaint,
   },
   settingsItemLeft: {
     flexDirection: 'row',
@@ -482,10 +490,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   settingsItemIconBg: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#e6eeff',
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: Colors.surfaceContainer,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -493,20 +501,16 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   settingsItemText: {
-    fontFamily: 'Inter_500Medium',
-    fontSize: 14,
-    color: '#121c2a',
-    fontWeight: '600',
+    ...Typography.bodyMedium,
+    color: Colors.onSurface,
   },
   settingsItemSubtext: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 12,
-    color: '#3f4851',
+    ...Typography.caption,
     marginTop: 2,
   },
   chevron: {
     fontSize: 16,
-    color: '#bec7d3',
+    color: Colors.onSurfaceMuted,
     fontWeight: 'bold',
   },
 });

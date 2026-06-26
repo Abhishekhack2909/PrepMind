@@ -3,7 +3,7 @@ import {
   View, Text, StyleSheet, TouchableOpacity, ScrollView,
   SafeAreaView, ActivityIndicator, TextInput, Platform,
 } from 'react-native';
-import { Colors, Spacing, Radius } from '@/constants/theme';
+import { Colors, Spacing, Radius, Shadows, Typography } from '@/constants/theme';
 import { useAuth } from '@/hooks/useAuth';
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:8000';
@@ -31,6 +31,14 @@ type StudyPlan = {
 type PlannerState = 'setup' | 'loading' | 'plan';
 
 const DAY_ABBR = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+const CATEGORY_ACCENTS: Record<string, string> = {
+  study: Colors.primary,
+  practice: Colors.accent,
+  mock_test: Colors.accent,
+  revision: Colors.warning,
+  current_affairs: Colors.warning,
+};
 
 export default function PlannerScreen() {
   const { session } = useAuth();
@@ -109,7 +117,9 @@ export default function PlannerScreen() {
   if (state === 'loading') {
     return (
       <View style={[styles.safe, { justifyContent: 'center', alignItems: 'center' }]}>
-        <ActivityIndicator size="large" color={Colors.primary} />
+        <View style={styles.loadingIconContainer}>
+          <ActivityIndicator size="large" color={Colors.primary} />
+        </View>
         <Text style={styles.loadingTitle}>AI is building your plan...</Text>
         <Text style={styles.loadingSubtitle}>Analyzing weak areas & creating your schedule</Text>
       </View>
@@ -187,6 +197,7 @@ export default function PlannerScreen() {
                   <Text style={styles.categoryTitle}>📖  READ</Text>
                   {readTasks.map((task, i) => (
                     <View key={i} style={styles.taskRow}>
+                      <View style={[styles.taskAccentBar, { backgroundColor: Colors.primary }]} />
                       <TouchableOpacity style={[styles.checkBtn, styles.checkBtnChecked]} activeOpacity={0.7}>
                         <Text style={styles.checkIcon}>✓</Text>
                       </TouchableOpacity>
@@ -194,7 +205,9 @@ export default function PlannerScreen() {
                         <Text style={[styles.taskRowSubject, styles.textLineThrough]}>{task.subject}</Text>
                         <Text style={styles.taskRowDesc}>{task.task}</Text>
                       </View>
-                      <Text style={styles.taskRowTime}>{task.duration_mins}m</Text>
+                      <View style={styles.durationBadge}>
+                        <Text style={styles.taskRowTime}>{task.duration_mins}m</Text>
+                      </View>
                     </View>
                   ))}
                 </View>
@@ -206,7 +219,7 @@ export default function PlannerScreen() {
                   <Text style={styles.categoryTitle}>🎯  PRACTICE</Text>
                   {practiceTasks.map((task, i) => (
                     <View key={i} style={styles.taskRowActive}>
-                      <View style={styles.activeLine} />
+                      <View style={[styles.taskAccentBarActive, { backgroundColor: Colors.accent }]} />
                       <View style={styles.activeInnerRow}>
                         <TouchableOpacity style={styles.checkBtn} activeOpacity={0.7} />
                         <View style={styles.taskRowInfo}>
@@ -214,7 +227,9 @@ export default function PlannerScreen() {
                           <Text style={styles.taskRowDesc}>{task.task}</Text>
                         </View>
                         <View style={styles.activeAction}>
-                          <Text style={[styles.taskRowTime, { marginRight: 8 }]}>{task.duration_mins}m</Text>
+                          <View style={styles.durationBadge}>
+                            <Text style={styles.taskRowTime}>{task.duration_mins}m</Text>
+                          </View>
                           <TouchableOpacity style={styles.startBtnSmall} activeOpacity={0.8}>
                             <Text style={styles.startBtnSmallText}>Start</Text>
                           </TouchableOpacity>
@@ -231,12 +246,15 @@ export default function PlannerScreen() {
                   <Text style={styles.categoryTitle}>📝  REVISE</Text>
                   {reviseTasks.map((task, i) => (
                     <View key={i} style={styles.taskRow}>
+                      <View style={[styles.taskAccentBar, { backgroundColor: Colors.warning }]} />
                       <TouchableOpacity style={styles.checkBtn} activeOpacity={0.7} />
                       <View style={styles.taskRowInfo}>
                         <Text style={styles.taskRowSubject}>{task.subject}</Text>
                         <Text style={styles.taskRowDesc}>{task.task}</Text>
                       </View>
-                      <Text style={styles.taskRowTime}>{task.duration_mins}m</Text>
+                      <View style={styles.durationBadge}>
+                        <Text style={styles.taskRowTime}>{task.duration_mins}m</Text>
+                      </View>
                     </View>
                   ))}
                 </View>
@@ -248,12 +266,15 @@ export default function PlannerScreen() {
                   <Text style={styles.categoryTitle}>⏰  OTHERS</Text>
                   {otherTasks.map((task, i) => (
                     <View key={i} style={styles.taskRow}>
+                      <View style={[styles.taskAccentBar, { backgroundColor: Colors.onSurfaceMuted }]} />
                       <TouchableOpacity style={styles.checkBtn} activeOpacity={0.7} />
                       <View style={styles.taskRowInfo}>
                         <Text style={styles.taskRowSubject}>{task.subject}</Text>
                         <Text style={styles.taskRowDesc}>{task.task}</Text>
                       </View>
-                      <Text style={styles.taskRowTime}>{task.duration_mins}m</Text>
+                      <View style={styles.durationBadge}>
+                        <Text style={styles.taskRowTime}>{task.duration_mins}m</Text>
+                      </View>
                     </View>
                   ))}
                 </View>
@@ -264,9 +285,9 @@ export default function PlannerScreen() {
             <Text style={styles.noTasks}>No tasks planned for today</Text>
           )}
 
-          {/* APJ Kalam Quote Card */}
+          {/* APJ Kalam Quote Card — gradient dark card */}
           <View style={styles.quoteCard}>
-            <Text style={styles.quoteIcon}>“</Text>
+            <Text style={styles.quoteIcon}>"</Text>
             <Text style={styles.quoteText}>
               "You have to dream before your dreams can come true."
             </Text>
@@ -278,7 +299,7 @@ export default function PlannerScreen() {
             <Text style={styles.regenerateBtnText}>⟳ Configure Plan Parameters</Text>
           </TouchableOpacity>
 
-          <View style={{ height: 32 }} />
+          <View style={{ height: 100 }} />
         </ScrollView>
       </SafeAreaView>
     );
@@ -306,7 +327,9 @@ export default function PlannerScreen() {
           {/* Exam Date Card */}
           <View style={styles.setupCard}>
             <View style={styles.setupCardHeader}>
-              <Text style={styles.setupCardIcon}>📅</Text>
+              <View style={styles.setupCardIconBg}>
+                <Text style={styles.setupCardIcon}>📅</Text>
+              </View>
               <Text style={styles.setupCardTitle}>Target Exam Date</Text>
             </View>
             <Text style={styles.setupCardDesc}>Select your upcoming exam date to anchor the plan.</Text>
@@ -315,18 +338,20 @@ export default function PlannerScreen() {
               value={examDate}
               onChangeText={setExamDate}
               placeholder="YYYY-MM-DD"
-              placeholderTextColor={Colors.outline}
+              placeholderTextColor={Colors.onSurfaceMuted}
             />
           </View>
 
           {/* Focus Areas Card */}
           <View style={styles.setupCard}>
             <View style={styles.setupCardHeader}>
-              <Text style={styles.setupCardIcon}>🎯</Text>
+              <View style={[styles.setupCardIconBg, { backgroundColor: Colors.accentGhost }]}>
+                <Text style={styles.setupCardIcon}>🎯</Text>
+              </View>
               <View style={styles.flexRowJustified}>
                 <Text style={styles.setupCardTitle}>Focus Areas</Text>
                 <View style={styles.aiBadge}>
-                  <Text style={styles.aiBadgeText}>AI Suggested</Text>
+                  <Text style={styles.aiBadgeText}>✨ AI Suggested</Text>
                 </View>
               </View>
             </View>
@@ -347,7 +372,9 @@ export default function PlannerScreen() {
           {/* Daily Hours Capacity Card */}
           <View style={styles.setupCard}>
             <View style={styles.setupCardHeader}>
-              <Text style={styles.setupCardIcon}>🕒</Text>
+              <View style={[styles.setupCardIconBg, { backgroundColor: Colors.warningContainer }]}>
+                <Text style={styles.setupCardIcon}>🕒</Text>
+              </View>
               <Text style={styles.setupCardTitle}>Daily Capacity</Text>
             </View>
             <Text style={styles.setupCardDesc}>Select hours you can allocate per day.</Text>
@@ -372,6 +399,7 @@ export default function PlannerScreen() {
           <Text style={styles.generateBtnText}>✨ Generate Smart Plan</Text>
         </TouchableOpacity>
 
+        <View style={{ height: 80 }} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -397,7 +425,7 @@ const Alert = {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: '#f8f9ff',
+    backgroundColor: Colors.background,
   },
   scroll: {
     padding: Spacing.md,
@@ -415,14 +443,11 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
   },
   title: {
-    fontFamily: 'PlusJakartaSans_700Bold',
+    ...Typography.h2,
     fontSize: 28,
-    color: Colors.onSurface,
   },
   subtitle: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 14,
-    color: Colors.onSurfaceVariant,
+    ...Typography.body,
     marginTop: 4,
     lineHeight: 20,
   },
@@ -431,51 +456,49 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
   },
   setupCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: Radius.xl,
+    backgroundColor: Colors.surfaceCard,
+    borderRadius: Radius.xxl,
     padding: Spacing.lg,
-    borderWidth: 1,
-    borderColor: 'rgba(190, 199, 211, 0.3)',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.02,
-    shadowRadius: 6,
-    elevation: 1,
+    ...Shadows.card,
   },
   setupCardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.xs,
+    gap: Spacing.sm,
     marginBottom: Spacing.xs,
+  },
+  setupCardIconBg: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: Colors.primaryGhost,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   setupCardIcon: {
     fontSize: 18,
-    color: '#006399',
   },
   setupCardTitle: {
-    fontFamily: 'PlusJakartaSans_700Bold',
-    fontSize: 16,
-    color: Colors.onSurface,
-    fontWeight: '700',
+    ...Typography.subtitle,
   },
   setupCardDesc: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 13,
-    color: '#6f7882',
+    ...Typography.caption,
+    color: Colors.onSurfaceVariant,
     marginBottom: Spacing.md,
+    marginLeft: 48,
   },
   dateInput: {
-    borderWidth: 1,
-    borderColor: '#bec7d3',
+    borderWidth: 1.5,
+    borderColor: Colors.outlineVariant,
     borderRadius: Radius.lg,
     padding: 12,
     fontFamily: 'Inter_400Regular',
     fontSize: 15,
     color: Colors.onSurface,
-    backgroundColor: '#f8f9ff',
+    backgroundColor: Colors.surfaceContainerLow,
   },
   aiBadge: {
-    backgroundColor: '#eff4ff',
+    backgroundColor: Colors.accentGhost,
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: Radius.full,
@@ -483,7 +506,8 @@ const styles = StyleSheet.create({
   aiBadgeText: {
     fontFamily: 'Inter_500Medium',
     fontSize: 11,
-    color: '#3f4851',
+    color: Colors.accent,
+    fontWeight: '600',
   },
   tagContainer: {
     flexDirection: 'row',
@@ -493,9 +517,9 @@ const styles = StyleSheet.create({
   tagBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#cde5ff',
+    backgroundColor: Colors.primaryGhost,
     borderWidth: 1,
-    borderColor: 'rgba(0, 99, 153, 0.2)',
+    borderColor: Colors.primaryGlow,
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: Radius.full,
@@ -504,25 +528,25 @@ const styles = StyleSheet.create({
   tagText: {
     fontFamily: 'Inter_500Medium',
     fontSize: 13,
-    color: '#006399',
+    color: Colors.primary,
   },
   tagClose: {
     fontSize: 11,
-    color: '#006399',
+    color: Colors.primary,
     fontWeight: 'bold',
   },
   addTagBtn: {
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: Radius.full,
-    borderWidth: 1,
-    borderColor: '#bec7d3',
-    backgroundColor: '#f8f9ff',
+    borderWidth: 1.5,
+    borderColor: Colors.outlineVariant,
+    backgroundColor: Colors.surfaceContainerLow,
   },
   addTagText: {
     fontFamily: 'Inter_500Medium',
     fontSize: 13,
-    color: '#6f7882',
+    color: Colors.onSurfaceVariant,
   },
   hoursSelectionRow: {
     flexDirection: 'row',
@@ -530,42 +554,37 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   hoursBtn: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    borderWidth: 1,
-    borderColor: '#bec7d3',
-    backgroundColor: '#f8f9ff',
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    borderWidth: 1.5,
+    borderColor: Colors.outlineVariant,
+    backgroundColor: Colors.surfaceContainerLow,
     alignItems: 'center',
     justifyContent: 'center',
   },
   hoursBtnActive: {
-    backgroundColor: '#006399',
-    borderColor: '#006399',
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+    ...Shadows.primaryGlow,
   },
   hoursBtnText: {
     fontFamily: 'Inter_600SemiBold',
     fontSize: 14,
-    color: '#121c2a',
+    color: Colors.onSurface,
   },
   generateBtn: {
-    backgroundColor: '#006399', // Sparkle gradient mockup
+    backgroundColor: Colors.primary,
     borderRadius: Radius.full,
     paddingVertical: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#632ce5',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 10,
-    elevation: 4,
+    ...Shadows.primaryGlow,
     marginTop: Spacing.sm,
   },
   generateBtnText: {
-    fontFamily: 'PlusJakartaSans_700Bold',
+    ...Typography.button,
     fontSize: 16,
-    color: '#ffffff',
-    fontWeight: '700',
   },
 
   // Plan view Header
@@ -575,9 +594,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
-    backgroundColor: '#ffffff',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(190, 199, 211, 0.15)',
+    backgroundColor: Colors.surfaceCard,
+    ...Shadows.subtle,
   },
   planHeaderLeft: {
     flexDirection: 'row',
@@ -588,18 +606,14 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   planHeaderTitle: {
-    fontFamily: 'PlusJakartaSans_700Bold',
+    ...Typography.subtitle,
     fontSize: 18,
-    color: '#121c2a',
-    fontWeight: '700',
   },
   statsBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#ffffff',
-    borderWidth: 1,
-    borderColor: 'rgba(190, 199, 211, 0.3)',
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: Colors.surfaceContainer,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -609,29 +623,30 @@ const styles = StyleSheet.create({
 
   // Day tab selector
   dayTabs: {
-    maxHeight: 64,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(190, 199, 211, 0.15)',
-    paddingVertical: 8,
-    backgroundColor: '#ffffff',
+    maxHeight: 68,
+    paddingVertical: 10,
+    backgroundColor: Colors.surfaceCard,
+    ...Shadows.subtle,
   },
   dayTab: {
     alignItems: 'center',
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: Radius.lg,
-    borderWidth: 1,
-    borderColor: '#bec7d3',
-    minWidth: 54,
+    borderWidth: 1.5,
+    borderColor: Colors.outlineVariant,
+    minWidth: 56,
+    backgroundColor: Colors.surfaceContainerLow,
   },
   dayTabActive: {
-    backgroundColor: '#006399',
-    borderColor: '#006399',
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+    ...Shadows.primaryGlow,
   },
   dayTabText: {
     fontFamily: 'PlusJakartaSans_600SemiBold',
     fontSize: 12,
-    color: '#3f4851',
+    color: Colors.onSurfaceVariant,
   },
   dayTabTextActive: {
     color: '#ffffff',
@@ -640,7 +655,7 @@ const styles = StyleSheet.create({
   dayTabHours: {
     fontFamily: 'Inter_400Regular',
     fontSize: 10,
-    color: '#6f7882',
+    color: Colors.onSurfaceMuted,
     marginTop: 2,
   },
 
@@ -650,27 +665,21 @@ const styles = StyleSheet.create({
 
   // Progress Overview Card
   progressCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: Colors.surfaceCard,
     borderRadius: Radius.xxl,
     padding: Spacing.lg,
-    borderWidth: 1,
-    borderColor: 'rgba(190, 199, 211, 0.15)',
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.md,
     margin: Spacing.md,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.02,
-    shadowRadius: 6,
-    elevation: 1,
+    ...Shadows.card,
   },
   circleProgressWrapper: {
     width: 80,
     height: 80,
     borderRadius: 40,
     borderWidth: 6,
-    borderColor: '#e6eeff',
+    borderColor: Colors.surfaceContainerHigh,
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
@@ -679,7 +688,7 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     borderRadius: 40,
     borderWidth: 6,
-    borderColor: '#006399',
+    borderColor: Colors.primary,
     borderBottomColor: 'transparent',
     borderRightColor: 'transparent',
   },
@@ -689,13 +698,13 @@ const styles = StyleSheet.create({
   circlePercentage: {
     fontFamily: 'PlusJakartaSans_700Bold',
     fontSize: 18,
-    color: '#121c2a',
+    color: Colors.onSurface,
     fontWeight: '700',
   },
   circleLabel: {
     fontFamily: 'Inter_500Medium',
     fontSize: 8,
-    color: '#6f7882',
+    color: Colors.onSurfaceMuted,
     letterSpacing: 0.5,
   },
   progressTextContainer: {
@@ -703,21 +712,17 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   progressTitle: {
-    fontFamily: 'PlusJakartaSans_700Bold',
-    fontSize: 16,
-    color: '#121c2a',
-    fontWeight: '700',
+    ...Typography.subtitle,
   },
   progressSubtitle: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 12,
-    color: '#3f4851',
+    ...Typography.caption,
+    color: Colors.onSurfaceVariant,
     lineHeight: 16,
   },
   progressBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#eff4ff',
+    backgroundColor: Colors.primaryGhost,
     borderRadius: Radius.full,
     paddingHorizontal: 8,
     paddingVertical: 4,
@@ -729,12 +734,12 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#006399',
+    backgroundColor: Colors.primary,
   },
   progressBadgeText: {
     fontFamily: 'Inter_500Medium',
     fontSize: 11,
-    color: '#3f4851',
+    color: Colors.primary,
   },
 
   // Task list timeline
@@ -746,35 +751,42 @@ const styles = StyleSheet.create({
     gap: Spacing.xs,
   },
   categoryTitle: {
-    fontFamily: 'Inter_500Medium',
-    fontSize: 11,
-    color: '#6f7882',
-    letterSpacing: 1,
-    fontWeight: '700',
+    ...Typography.overline,
     marginBottom: 4,
   },
   taskRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
+    backgroundColor: Colors.surfaceCard,
     borderRadius: Radius.xl,
     padding: Spacing.md,
-    borderWidth: 1,
-    borderColor: 'rgba(190, 199, 211, 0.15)',
     gap: Spacing.md,
+    ...Shadows.subtle,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  taskAccentBar: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 4,
+    borderTopLeftRadius: Radius.xl,
+    borderBottomLeftRadius: Radius.xl,
   },
   checkBtn: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
     borderWidth: 2,
-    borderColor: '#bec7d3',
+    borderColor: Colors.outlineVariant,
     alignItems: 'center',
     justifyContent: 'center',
+    marginLeft: 4,
   },
   checkBtnChecked: {
-    backgroundColor: '#006399',
-    borderColor: '#006399',
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
   },
   checkIcon: {
     color: '#ffffff',
@@ -788,7 +800,7 @@ const styles = StyleSheet.create({
   taskRowSubject: {
     fontFamily: 'Inter_500Medium',
     fontSize: 14,
-    color: '#121c2a',
+    color: Colors.onSurface,
     fontWeight: '600',
   },
   textLineThrough: {
@@ -798,34 +810,35 @@ const styles = StyleSheet.create({
   taskRowDesc: {
     fontFamily: 'Inter_400Regular',
     fontSize: 12,
-    color: '#6f7882',
+    color: Colors.onSurfaceVariant,
+  },
+  durationBadge: {
+    backgroundColor: Colors.surfaceContainer,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: Radius.sm,
   },
   taskRowTime: {
-    fontFamily: 'Inter_500Medium',
+    fontFamily: 'Inter_600SemiBold',
     fontSize: 11,
-    color: '#bec7d3',
-    backgroundColor: '#f8f9ff',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: Radius.sm,
+    color: Colors.onSurfaceMuted,
+    fontWeight: '600',
   },
 
   // Active current task row
   taskRowActive: {
-    backgroundColor: '#ffffff',
+    backgroundColor: Colors.surfaceCard,
     borderRadius: Radius.xl,
-    borderWidth: 1,
-    borderColor: 'rgba(0, 99, 153, 0.2)',
     position: 'relative',
     overflow: 'hidden',
+    ...Shadows.card,
   },
-  activeLine: {
+  taskAccentBarActive: {
     position: 'absolute',
     left: 0,
     top: 0,
     bottom: 0,
     width: 4,
-    backgroundColor: '#006399',
   },
   activeInnerRow: {
     flexDirection: 'row',
@@ -837,15 +850,16 @@ const styles = StyleSheet.create({
   activeAction: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 6,
   },
   startBtnSmall: {
-    backgroundColor: '#006399',
+    backgroundColor: Colors.accent,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: Radius.full,
   },
   startBtnSmallText: {
-    fontFamily: 'Inter_500Medium',
+    fontFamily: 'Inter_600SemiBold',
     fontSize: 11,
     color: '#ffffff',
     fontWeight: '600',
@@ -854,38 +868,37 @@ const styles = StyleSheet.create({
   noTasks: {
     textAlign: 'center',
     padding: Spacing.xl,
-    color: '#6f7882',
+    color: Colors.onSurfaceMuted,
     fontFamily: 'Inter_400Regular',
   },
 
-  // APJ Kalam quote card
+  // APJ Kalam quote card — dark card
   quoteCard: {
-    backgroundColor: '#eff4ff',
-    borderWidth: 1,
-    borderColor: 'rgba(190, 199, 211, 0.15)',
-    borderRadius: Radius.xl,
+    backgroundColor: Colors.inverseSurface,
+    borderRadius: Radius.xxl,
     padding: Spacing.lg,
     alignItems: 'center',
     margin: Spacing.md,
+    ...Shadows.elevated,
   },
   quoteIcon: {
     fontSize: 32,
-    color: 'rgba(0, 99, 153, 0.2)',
+    color: 'rgba(255, 255, 255, 0.2)',
     fontWeight: 'bold',
     marginBottom: -8,
   },
   quoteText: {
     fontFamily: 'Inter_400Regular',
     fontSize: 14,
-    color: '#3f4851',
+    color: 'rgba(255, 255, 255, 0.85)',
     lineHeight: 20,
     fontStyle: 'italic',
     textAlign: 'center',
   },
   quoteAuthor: {
-    fontFamily: 'Inter_500Medium',
+    fontFamily: 'Inter_600SemiBold',
     fontSize: 11,
-    color: '#6f7882',
+    color: 'rgba(255, 255, 255, 0.5)',
     letterSpacing: 1.5,
     marginTop: Spacing.sm,
     fontWeight: '700',
@@ -894,42 +907,47 @@ const styles = StyleSheet.create({
   // Regenerate plan button
   regenerateBtn: {
     marginHorizontal: Spacing.md,
-    borderWidth: 1,
-    borderColor: '#bec7d3',
+    borderWidth: 1.5,
+    borderColor: Colors.outlineVariant,
     borderRadius: Radius.full,
     paddingVertical: 14,
     alignItems: 'center',
-    backgroundColor: '#ffffff',
+    backgroundColor: Colors.surfaceCard,
   },
   regenerateBtnText: {
     fontFamily: 'Inter_500Medium',
     fontSize: 14,
-    color: '#3f4851',
+    color: Colors.onSurfaceVariant,
   },
 
+  loadingIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: Colors.surfaceContainer,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+  },
   loadingTitle: {
-    fontFamily: 'PlusJakartaSans_700Bold',
-    fontSize: 22,
-    color: Colors.onSurface,
+    ...Typography.h3,
     marginTop: 20,
   },
   loadingSubtitle: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 14,
-    color: Colors.onSurfaceVariant,
+    ...Typography.body,
     marginTop: 6,
   },
   errorCard: {
-    backgroundColor: '#ffdad6',
+    backgroundColor: Colors.errorContainer,
     borderRadius: Radius.lg,
     padding: Spacing.sm,
     marginBottom: Spacing.md,
     borderWidth: 1,
-    borderColor: 'rgba(186, 26, 26, 0.3)',
+    borderColor: 'rgba(239, 68, 68, 0.15)',
   },
   errorText: {
     fontFamily: 'Inter_400Regular',
     fontSize: 13,
-    color: '#ba1a1a',
+    color: Colors.error,
   },
 });

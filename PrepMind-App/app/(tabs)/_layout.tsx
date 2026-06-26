@@ -1,9 +1,13 @@
 import { Tabs } from 'expo-router';
-import { Text } from 'react-native';
-import { Colors } from '@/constants/theme';
+import { View, Text, StyleSheet, Platform } from 'react-native';
+import { Colors, Shadows, Radius, Spacing } from '@/constants/theme';
 
-function TabIcon({ icon }: { icon: string; color: string }) {
-  return <Text style={{ fontSize: 20 }}>{icon}</Text>;
+function TabIcon({ icon, focused }: { icon: string; color: string; focused: boolean }) {
+  return (
+    <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
+      <Text style={[styles.iconText, focused && styles.iconTextActive]}>{icon}</Text>
+    </View>
+  );
 }
 
 /**
@@ -24,25 +28,35 @@ export default function TabsLayout() {
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: Colors.outline,
+        tabBarInactiveTintColor: Colors.onSurfaceMuted,
         tabBarStyle: {
-          backgroundColor: Colors.surface,
-          borderTopColor: Colors.outlineVariant,
-          borderTopWidth: 1,
-          paddingBottom: 4,
-          height: 58,
+          backgroundColor: Colors.surfaceCard,
+          borderTopWidth: 0,
+          marginHorizontal: 16,
+          marginBottom: Platform.OS === 'ios' ? 24 : 12,
+          borderRadius: Radius.xxl,
+          height: 64,
+          paddingBottom: 0,
+          position: 'absolute',
+          ...Shadows.elevated,
         },
         tabBarLabelStyle: {
-          fontFamily: 'Inter_500Medium',
-          fontSize: 11,
+          fontFamily: 'Inter_600SemiBold',
+          fontSize: 10,
+          marginTop: -2,
+          marginBottom: 8,
+          fontWeight: '600',
+        },
+        tabBarItemStyle: {
+          paddingTop: 8,
         },
       }}
     >
-      <Tabs.Screen name="index"    options={{ title: 'Home',     tabBarIcon: (p) => <TabIcon icon="🏠" color={p.color} /> }} />
-      <Tabs.Screen name="evaluate" options={{ title: 'Evaluate', tabBarIcon: (p) => <TabIcon icon="📝" color={p.color} /> }} />
-      <Tabs.Screen name="mcq"      options={{ title: 'MCQ',      tabBarIcon: (p) => <TabIcon icon="🧠" color={p.color} /> }} />
-      <Tabs.Screen name="planner"  options={{ title: 'Planner',  tabBarIcon: (p) => <TabIcon icon="📅" color={p.color} /> }} />
-      <Tabs.Screen name="profile"  options={{ title: 'Profile',  tabBarIcon: (p) => <TabIcon icon="👤" color={p.color} /> }} />
+      <Tabs.Screen name="index"    options={{ title: 'Home',     tabBarIcon: (p) => <TabIcon icon="🏠" color={p.color} focused={!!p.focused} /> }} />
+      <Tabs.Screen name="evaluate" options={{ title: 'Evaluate', tabBarIcon: (p) => <TabIcon icon="📝" color={p.color} focused={!!p.focused} /> }} />
+      <Tabs.Screen name="mcq"      options={{ title: 'MCQ',      tabBarIcon: (p) => <TabIcon icon="🧠" color={p.color} focused={!!p.focused} /> }} />
+      <Tabs.Screen name="planner"  options={{ title: 'Planner',  tabBarIcon: (p) => <TabIcon icon="📅" color={p.color} focused={!!p.focused} /> }} />
+      <Tabs.Screen name="profile"  options={{ title: 'Profile',  tabBarIcon: (p) => <TabIcon icon="👤" color={p.color} focused={!!p.focused} /> }} />
 
       {/* Hidden tabs — accessible via router.push() from Home/Profile */}
       <Tabs.Screen name="voice"    options={{ href: null }} />
@@ -51,3 +65,27 @@ export default function TabsLayout() {
     </Tabs>
   );
 }
+
+const styles = StyleSheet.create({
+  iconContainer: {
+    width: 36,
+    height: 28,
+    borderRadius: Radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  iconContainerActive: {
+    backgroundColor: Colors.primaryGhost,
+    borderRadius: Radius.full,
+    width: 44,
+    height: 28,
+  },
+  iconText: {
+    fontSize: 18,
+    opacity: 0.6,
+  },
+  iconTextActive: {
+    fontSize: 20,
+    opacity: 1,
+  },
+});

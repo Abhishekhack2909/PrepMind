@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { router } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Colors, Spacing, Radius } from '@/constants/theme';
+import { Colors, Spacing, Radius, Shadows, Typography } from '@/constants/theme';
 
 const { width } = Dimensions.get('window');
 
@@ -16,6 +16,7 @@ export default function OnboardingScreen() {
   
   // Custom pulse animation for splash & mic button
   const pulseAnim = useRef(new Animated.Value(0.95)).current;
+  const floatAnim = useRef(new Animated.Value(0)).current;
 
   // On web, skip splash immediately to save time, or show it
   const [splashDone, setSplashDone] = useState(Platform.OS === 'web');
@@ -32,6 +33,22 @@ export default function OnboardingScreen() {
         Animated.timing(pulseAnim, {
           toValue: 0.95,
           duration: 1000,
+          useNativeDriver: false,
+        }),
+      ])
+    ).start();
+
+    // Float animation for decorative elements
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(floatAnim, {
+          toValue: 1,
+          duration: 3000,
+          useNativeDriver: false,
+        }),
+        Animated.timing(floatAnim, {
+          toValue: 0,
+          duration: 3000,
           useNativeDriver: false,
         }),
       ])
@@ -73,11 +90,18 @@ export default function OnboardingScreen() {
     router.replace('/(auth)/login');
   }
 
+  const floatY = floatAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0, -12],
+  });
+
   return (
     <View style={styles.container}>
       {/* ── Splash Screen Overlay ── */}
       {!splashDone && (
         <Animated.View style={[styles.splash, { opacity: splashOpacity }]}>
+          {/* Gradient simulation with layered views */}
+          <View style={styles.splashGradientOverlay} />
           <View style={styles.splashContent}>
             <Animated.View style={[
               styles.splashIconWrapper, 
@@ -88,6 +112,10 @@ export default function OnboardingScreen() {
             <Text style={styles.splashTitle}>PrepMind</Text>
             <Text style={styles.splashSubtitle}>Your AI Study Companion</Text>
           </View>
+          {/* Decorative floating particles */}
+          <Animated.View style={[styles.particle, styles.particle1, { transform: [{ translateY: floatY }] }]} />
+          <Animated.View style={[styles.particle, styles.particle2, { transform: [{ translateY: floatAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 8] }) }] }]} />
+          <Animated.View style={[styles.particle, styles.particle3, { transform: [{ translateY: floatY }] }]} />
         </Animated.View>
       )}
 
@@ -109,9 +137,13 @@ export default function OnboardingScreen() {
               {/* Slide 1: AI Answer Evaluation */}
               <View style={styles.slide}>
                 <View style={styles.graphicsWrapper}>
-                  {/* Decorative backgrounds */}
-                  <View style={styles.slide1BgOuter} />
-                  <View style={styles.slide1BgInner} />
+                  {/* Gradient-tinted decorative backgrounds */}
+                  <View style={[styles.slideBgOuter, { backgroundColor: Colors.primaryGhost }]} />
+                  <View style={[styles.slideBgInner, { backgroundColor: Colors.surfaceContainerHigh }]} />
+                  
+                  {/* Floating decorative dots */}
+                  <Animated.View style={[styles.floatingDot, styles.floatingDot1, { transform: [{ translateY: floatY }] }]} />
+                  <Animated.View style={[styles.floatingDot, styles.floatingDot2, { transform: [{ translateY: floatAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 10] }) }] }]} />
                   
                   {/* Main Icon Card */}
                   <View style={styles.mainIconCard}>
@@ -136,8 +168,11 @@ export default function OnboardingScreen() {
               <View style={styles.slide}>
                 <View style={styles.graphicsWrapper}>
                   {/* Decorative background shapes */}
-                  <View style={styles.slide2BgOuter} />
-                  <View style={styles.slide2BgInner} />
+                  <View style={[styles.slideBgOuter, { backgroundColor: Colors.accentGhost, borderRadius: Radius.xxl }]} />
+                  <View style={[styles.slideBgInner, { backgroundColor: Colors.accentGhost, borderRadius: Radius.xl }]} />
+                  
+                  <Animated.View style={[styles.floatingDot, styles.floatingDot1, { backgroundColor: Colors.accentLight, transform: [{ translateY: floatY }] }]} />
+                  <Animated.View style={[styles.floatingDot, styles.floatingDot2, { backgroundColor: Colors.accentLight, transform: [{ translateY: floatAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 10] }) }] }]} />
                   
                   {/* Main Mic Card */}
                   <Animated.View style={[
@@ -176,9 +211,9 @@ export default function OnboardingScreen() {
                   {/* Bento Grid layout decoration */}
                   <View style={styles.bentoGridBackground}>
                     <View style={[styles.bentoItem, { backgroundColor: Colors.primary }]} />
-                    <View style={[styles.bentoItem, { backgroundColor: Colors.secondary, opacity: 0.6 }]} />
-                    <View style={[styles.bentoItem, { backgroundColor: '#5c5f60', opacity: 0.4 }]} />
-                    <View style={[styles.bentoItem, { backgroundColor: Colors.primary, opacity: 0.8 }]} />
+                    <View style={[styles.bentoItem, { backgroundColor: Colors.accent, opacity: 0.6 }]} />
+                    <View style={[styles.bentoItem, { backgroundColor: Colors.onSurfaceMuted, opacity: 0.3 }]} />
+                    <View style={[styles.bentoItem, { backgroundColor: Colors.primary, opacity: 0.7 }]} />
                   </View>
                   
                   {/* Main Planning Box */}
@@ -224,7 +259,7 @@ export default function OnboardingScreen() {
               ))}
             </View>
 
-            {/* Action Button */}
+            {/* Action Button — Gradient-style */}
             <TouchableOpacity style={styles.actionButton} onPress={goNext} activeOpacity={0.9}>
               <Text style={styles.actionButtonText}>
                 {currentSlide === 2 ? 'Get Started  🚀' : 'Continue  →'}
@@ -246,7 +281,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   
-  // Splash Overlay
+  // Splash Overlay — gradient simulation
   splash: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: Colors.primary,
@@ -254,39 +289,65 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     zIndex: 999,
   },
+  splashGradientOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: Colors.accent,
+    opacity: 0.3,
+  },
   splashContent: {
     alignItems: 'center',
+    zIndex: 10,
   },
   splashIconWrapper: {
-    width: 128,
-    height: 128,
-    borderRadius: 64,
+    width: 136,
+    height: 136,
+    borderRadius: 68,
     backgroundColor: '#ffffff',
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: Spacing.lg,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
-    elevation: 8,
+    ...Shadows.elevated,
   },
   splashIcon: {
-    fontSize: 56,
+    fontSize: 60,
   },
   splashTitle: {
-    fontSize: 36,
-    fontFamily: 'PlusJakartaSans_700Bold',
+    fontSize: 40,
+    fontFamily: 'PlusJakartaSans_800ExtraBold',
     color: '#ffffff',
     fontWeight: '800',
-    letterSpacing: -0.5,
+    letterSpacing: -1,
   },
   splashSubtitle: {
     fontSize: 16,
     fontFamily: 'Inter_400Regular',
-    color: '#cde5ff',
+    color: 'rgba(255, 255, 255, 0.85)',
     marginTop: Spacing.xs,
-    opacity: 0.9,
+  },
+
+  // Floating particles on splash
+  particle: {
+    position: 'absolute',
+    borderRadius: 999,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+  },
+  particle1: {
+    width: 8,
+    height: 8,
+    top: '20%',
+    left: '15%',
+  },
+  particle2: {
+    width: 12,
+    height: 12,
+    top: '35%',
+    right: '10%',
+  },
+  particle3: {
+    width: 6,
+    height: 6,
+    bottom: '25%',
+    left: '25%',
   },
 
   // Onboarding Header Skip Button
@@ -297,6 +358,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.xs,
     borderRadius: Radius.full,
+    backgroundColor: Colors.surfaceContainer,
   },
   skipText: {
     fontFamily: 'Inter_500Medium',
@@ -324,124 +386,108 @@ const styles = StyleSheet.create({
 
   // Graphics Layout
   graphicsWrapper: {
-    width: 260,
-    height: 260,
+    width: 300,
+    height: 300,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: Spacing.xl,
     position: 'relative',
   },
 
-  // Slide 1 Graphics (Evaluation)
-  slide1BgOuter: {
+  // Shared slide backgrounds
+  slideBgOuter: {
     position: 'absolute',
-    width: 250,
-    height: 250,
-    borderRadius: 125,
-    backgroundColor: Colors.surfaceContainer,
-    opacity: 0.5,
+    width: 280,
+    height: 280,
+    borderRadius: 140,
+    opacity: 0.6,
     transform: [{ scale: 1.1 }],
   },
-  slide1BgInner: {
+  slideBgInner: {
     position: 'absolute',
-    width: 210,
-    height: 210,
-    borderRadius: 105,
-    backgroundColor: Colors.surfaceContainerHigh,
-    opacity: 0.7,
+    width: 230,
+    height: 230,
+    borderRadius: 115,
+    opacity: 0.8,
   },
+
+  // Floating decorative dots
+  floatingDot: {
+    position: 'absolute',
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: Colors.primaryLight,
+    opacity: 0.5,
+  },
+  floatingDot1: {
+    top: 20,
+    right: 30,
+  },
+  floatingDot2: {
+    bottom: 40,
+    left: 20,
+  },
+
+  // Slide 1 — Evaluation icon
   mainIconCard: {
-    width: 128,
-    height: 128,
-    borderRadius: Radius.xl,
+    width: 136,
+    height: 136,
+    borderRadius: Radius.xxl,
     backgroundColor: '#ffffff',
-    borderWidth: 1,
-    borderColor: 'rgba(190, 199, 211, 0.2)',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.08,
-    shadowRadius: 20,
-    elevation: 5,
+    ...Shadows.elevated,
     zIndex: 10,
     position: 'relative',
   },
   mainIconText: {
-    fontSize: 56,
+    fontSize: 60,
   },
   floatingGreenBadge: {
     position: 'absolute',
     top: -16,
-    right: -24,
-    backgroundColor: '#d1fae5',
-    borderColor: '#a7f3d0',
+    right: -28,
+    backgroundColor: Colors.successContainer,
+    borderColor: '#A7F3D0',
     borderWidth: 1,
     borderRadius: Radius.md,
     paddingHorizontal: 8,
     paddingVertical: 4,
     flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    ...Shadows.subtle,
     transform: [{ rotate: '12deg' }],
   },
   badgeCheckIcon: {
-    color: '#059669',
+    color: Colors.success,
     fontWeight: 'bold',
     fontSize: 12,
     marginRight: 4,
   },
   badgeText: {
-    color: '#065f46',
+    color: '#065F46',
     fontWeight: '700',
     fontSize: 10,
     fontFamily: 'Inter_600SemiBold',
   },
 
-  // Slide 2 Graphics (Voice)
-  slide2BgOuter: {
-    position: 'absolute',
-    width: 240,
-    height: 240,
-    borderRadius: Radius.xxl,
-    backgroundColor: Colors.secondary + '18',
-    opacity: 0.5,
-    transform: [{ rotate: '12deg' }, { scale: 1.05 }],
-  },
-  slide2BgInner: {
-    position: 'absolute',
-    width: 220,
-    height: 220,
-    borderRadius: Radius.xl,
-    backgroundColor: Colors.secondary + '24',
-    opacity: 0.7,
-    transform: [{ rotate: '3deg' }],
-  },
+  // Slide 2 — Voice mic
   mainMicCard: {
-    width: 128,
-    height: 128,
-    borderRadius: 64,
+    width: 136,
+    height: 136,
+    borderRadius: 68,
     backgroundColor: '#ffffff',
-    borderWidth: 1,
-    borderColor: Colors.secondary + '20',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: Colors.secondary,
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.15,
-    shadowRadius: 20,
-    elevation: 6,
+    ...Shadows.accentGlow,
     zIndex: 10,
     position: 'relative',
   },
   soundWavesLeft: {
     position: 'absolute',
     left: -32,
-    top: 52,
+    top: 56,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
@@ -449,7 +495,7 @@ const styles = StyleSheet.create({
   soundWavesRight: {
     position: 'absolute',
     right: -32,
-    top: 52,
+    top: 56,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
@@ -457,23 +503,22 @@ const styles = StyleSheet.create({
   soundBar: {
     width: 4,
     borderRadius: Radius.full,
-    backgroundColor: Colors.secondary,
-    opacity: 0.6,
+    backgroundColor: Colors.accent,
+    opacity: 0.5,
   },
 
-  // Slide 3 Graphics (Planner)
+  // Slide 3 — Planner bento
   bentoGridBackground: {
     position: 'absolute',
     width: 220,
     height: 220,
-    gridGap: 8,
     padding: 16,
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
     alignContent: 'center',
     transform: [{ rotate: '6deg' }],
-    opacity: 0.3,
+    opacity: 0.25,
   },
   bentoItem: {
     width: 90,
@@ -482,29 +527,23 @@ const styles = StyleSheet.create({
     borderRadius: Radius.xl,
   },
   mainPlanningCard: {
-    width: 160,
-    height: 160,
-    borderRadius: Radius.xl,
+    width: 170,
+    height: 170,
+    borderRadius: Radius.xxl,
     backgroundColor: '#ffffff',
-    borderWidth: 1,
-    borderColor: 'rgba(190, 199, 211, 0.2)',
     padding: Spacing.md,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.08,
-    shadowRadius: 20,
-    elevation: 5,
+    ...Shadows.elevated,
     zIndex: 10,
   },
   planningRobotIcon: {
-    fontSize: 48,
+    fontSize: 52,
     marginBottom: Spacing.xs,
   },
   planningProgressBarTrack: {
     width: '100%',
-    height: 6,
+    height: 8,
     backgroundColor: Colors.surfaceVariant,
     borderRadius: Radius.full,
     overflow: 'hidden',
@@ -518,29 +557,23 @@ const styles = StyleSheet.create({
   },
   planningCalendarIcon: {
     fontSize: 16,
-    color: Colors.outline,
+    color: Colors.onSurfaceMuted,
   },
 
   // Text details
   textContainer: {
     alignItems: 'center',
-    marginTop: Spacing.md,
+    marginTop: Spacing.lg,
     maxWidth: 320,
   },
   slideTitle: {
-    fontSize: 28,
-    fontFamily: 'PlusJakartaSans_700Bold',
-    color: Colors.onSurface,
-    fontWeight: '700',
+    ...Typography.h2,
     textAlign: 'center',
     marginBottom: Spacing.sm,
   },
   slideDescription: {
-    fontSize: 15,
-    fontFamily: 'Inter_400Regular',
-    color: Colors.onSurfaceVariant,
+    ...Typography.body,
     textAlign: 'center',
-    lineHeight: 22,
   },
 
   // Bottom controls
@@ -559,10 +592,9 @@ const styles = StyleSheet.create({
   paginationDot: {
     height: 6,
     borderRadius: 3,
-    transition: 'all 0.3s',
   },
   paginationDotActive: {
-    width: 32,
+    width: 36,
     backgroundColor: Colors.primary,
   },
   paginationDotInactive: {
@@ -577,16 +609,9 @@ const styles = StyleSheet.create({
     borderRadius: Radius.full,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: Colors.primary,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 10,
-    elevation: 4,
+    ...Shadows.primaryGlow,
   },
   actionButtonText: {
-    fontFamily: 'PlusJakartaSans_600SemiBold',
-    fontSize: 16,
-    color: '#ffffff',
-    fontWeight: '600',
+    ...Typography.button,
   },
 });

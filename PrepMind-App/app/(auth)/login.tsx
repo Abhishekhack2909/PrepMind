@@ -5,7 +5,7 @@ import {
   ActivityIndicator, SafeAreaView,
 } from 'react-native';
 import { supabase } from '@/lib/supabase';
-import { Colors, Spacing, Radius } from '@/constants/theme';
+import { Colors, Spacing, Radius, Shadows, Typography } from '@/constants/theme';
 
 type Mode = 'signin' | 'signup';
 
@@ -106,13 +106,21 @@ export default function LoginScreen() {
           contentContainerStyle={styles.scroll}
           keyboardShouldPersistTaps="handled"
         >
+          {/* Gradient-like background glow */}
+          <View style={styles.bgGlow} />
+          <View style={styles.bgGlow2} />
+
           {/* Main Auth Card */}
           <View style={styles.card}>
-            {/* Subtle top right blob decoration */}
+            {/* Decorative gradient blob */}
             <View style={styles.blob} />
+            <View style={styles.blob2} />
 
             {/* Header */}
             <View style={styles.header}>
+              <View style={styles.logoIcon}>
+                <Text style={styles.logoEmoji}>🧠</Text>
+              </View>
               <Text style={styles.brand}>PrepMind</Text>
               <Text style={styles.subtitle}>
                 {mode === 'signin'
@@ -140,7 +148,7 @@ export default function LoginScreen() {
                     <TextInput
                       style={styles.input}
                       placeholder="Abhishek Kumar"
-                      placeholderTextColor="rgba(111, 120, 130, 0.6)"
+                      placeholderTextColor={Colors.onSurfaceMuted}
                       value={name}
                       onChangeText={setName}
                       autoCapitalize="words"
@@ -158,7 +166,7 @@ export default function LoginScreen() {
                   <TextInput
                     style={styles.input}
                     placeholder="you@example.com"
-                    placeholderTextColor="rgba(111, 120, 130, 0.6)"
+                    placeholderTextColor={Colors.onSurfaceMuted}
                     value={email}
                     onChangeText={setEmail}
                     autoCapitalize="none"
@@ -183,7 +191,7 @@ export default function LoginScreen() {
                   <TextInput
                     style={styles.input}
                     placeholder="••••••••"
-                    placeholderTextColor="rgba(111, 120, 130, 0.6)"
+                    placeholderTextColor={Colors.onSurfaceMuted}
                     value={password}
                     onChangeText={setPassword}
                     secureTextEntry={!showPassword}
@@ -220,7 +228,7 @@ export default function LoginScreen() {
               <View style={styles.dividerLine} />
             </View>
 
-            {/* Guest Sign-In (Customized to match premium Google button) */}
+            {/* Guest Sign-In */}
             <View style={styles.socialContainer}>
               <TouchableOpacity
                 style={styles.socialBtn}
@@ -260,7 +268,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: '#f8f9ff',
+    backgroundColor: Colors.background,
   },
   flex: {
     flex: 1,
@@ -269,32 +277,61 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: 'center',
     padding: Spacing.gutter,
+    position: 'relative',
+  },
+
+  // Background glow blobs
+  bgGlow: {
+    position: 'absolute',
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    backgroundColor: Colors.primary,
+    opacity: 0.04,
+    top: '10%',
+    right: -100,
+  },
+  bgGlow2: {
+    position: 'absolute',
+    width: 250,
+    height: 250,
+    borderRadius: 125,
+    backgroundColor: Colors.accent,
+    opacity: 0.04,
+    bottom: '5%',
+    left: -80,
   },
   
   // Card
   card: {
-    backgroundColor: '#ffffff',
+    backgroundColor: Colors.surfaceCard,
     borderRadius: Radius.xxl,
     borderWidth: 1,
-    borderColor: '#bec7d3',
+    borderColor: Colors.outlineFaint,
     padding: Spacing.xl,
     overflow: 'hidden',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 12,
-    elevation: 4,
+    ...Shadows.elevated,
     position: 'relative',
   },
   blob: {
     position: 'absolute',
-    top: -96,
-    right: -96,
-    width: 192,
-    height: 192,
-    borderRadius: 96,
-    backgroundColor: '#006399',
-    opacity: 0.05,
+    top: -100,
+    right: -100,
+    width: 220,
+    height: 220,
+    borderRadius: 110,
+    backgroundColor: Colors.primary,
+    opacity: 0.06,
+  },
+  blob2: {
+    position: 'absolute',
+    bottom: -80,
+    left: -80,
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    backgroundColor: Colors.accent,
+    opacity: 0.04,
   },
 
   // Header
@@ -302,32 +339,46 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: Spacing.xl,
   },
+  logoIcon: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: Colors.primaryGhost,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.sm,
+  },
+  logoEmoji: {
+    fontSize: 28,
+  },
   brand: {
-    fontSize: 40,
-    fontFamily: 'PlusJakartaSans_700Bold',
-    color: '#006399',
+    fontSize: 36,
+    fontFamily: 'PlusJakartaSans_800ExtraBold',
+    color: Colors.primary,
     fontWeight: '800',
     letterSpacing: -0.5,
-    marginBottom: Spacing.base,
+    marginBottom: Spacing.xs,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: 'Inter_400Regular',
-    color: '#3f4851',
+    color: Colors.onSurfaceVariant,
     textAlign: 'center',
   },
 
   // Error Banner
   errorBanner: {
-    backgroundColor: '#ffdad6',
+    backgroundColor: Colors.errorContainer,
     borderRadius: Radius.lg,
     padding: Spacing.sm,
     marginBottom: Spacing.md,
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.15)',
   },
   errorText: {
     fontFamily: 'Inter_400Regular',
     fontSize: 13,
-    color: '#ba1a1a',
+    color: Colors.error,
   },
 
   // Form Fields
@@ -338,10 +389,8 @@ const styles = StyleSheet.create({
     gap: Spacing.xs,
   },
   label: {
-    fontFamily: 'Inter_500Medium',
-    fontSize: 14,
-    color: '#121c2a',
-    fontWeight: '500',
+    ...Typography.bodyMedium,
+    color: Colors.onSurface,
   },
   labelRow: {
     flexDirection: 'row',
@@ -351,59 +400,53 @@ const styles = StyleSheet.create({
   forgotText: {
     fontFamily: 'Inter_500Medium',
     fontSize: 14,
-    color: '#006399',
+    color: Colors.primary,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#bec7d3',
+    borderWidth: 1.5,
+    borderColor: Colors.outlineVariant,
     borderRadius: Radius.lg,
-    backgroundColor: '#f8f9ff',
+    backgroundColor: Colors.surfaceContainerLow,
     paddingHorizontal: Spacing.md,
     height: 52,
   },
   inputIcon: {
     fontSize: 18,
     marginRight: Spacing.xs,
-    color: '#6f7882',
+    color: Colors.onSurfaceMuted,
   },
   input: {
     flex: 1,
     fontFamily: 'Inter_400Regular',
     fontSize: 16,
-    color: '#121c2a',
+    color: Colors.onSurface,
   },
   eyeBtn: {
     paddingHorizontal: Spacing.xs,
   },
   eyeIcon: {
     fontSize: 18,
-    color: '#6f7882',
+    color: Colors.onSurfaceMuted,
   },
 
   // Action Buttons
   submitBtn: {
-    backgroundColor: '#006399',
+    backgroundColor: Colors.primary,
     borderRadius: Radius.full,
-    height: 52,
+    height: 54,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: Spacing.sm,
-    shadowColor: '#006399',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 3,
+    ...Shadows.primaryGlow,
   },
   submitBtnDisabled: {
     opacity: 0.75,
   },
   submitText: {
-    fontFamily: 'PlusJakartaSans_600SemiBold',
-    fontSize: 18,
-    color: '#ffffff',
-    fontWeight: '600',
+    ...Typography.button,
+    fontSize: 17,
   },
 
   // Divider
@@ -416,12 +459,12 @@ const styles = StyleSheet.create({
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: 'rgba(190, 199, 211, 0.3)',
+    backgroundColor: Colors.outlineFaint,
   },
   dividerText: {
     fontFamily: 'Inter_400Regular',
     fontSize: 14,
-    color: '#3f4851',
+    color: Colors.onSurfaceMuted,
   },
 
   // Social / Guest buttons
@@ -433,12 +476,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#bec7d3',
+    borderWidth: 1.5,
+    borderColor: Colors.outlineVariant,
     borderRadius: Radius.full,
     height: 52,
     gap: 12,
-    backgroundColor: '#f8f9ff',
+    backgroundColor: Colors.surfaceContainerLow,
   },
   socialIcon: {
     fontSize: 20,
@@ -446,7 +489,7 @@ const styles = StyleSheet.create({
   socialText: {
     fontFamily: 'Inter_500Medium',
     fontSize: 16,
-    color: '#121c2a',
+    color: Colors.onSurface,
     fontWeight: '500',
   },
 
@@ -460,12 +503,12 @@ const styles = StyleSheet.create({
   toggleBase: {
     fontFamily: 'Inter_400Regular',
     fontSize: 14,
-    color: '#3f4851',
+    color: Colors.onSurfaceVariant,
   },
   toggleLink: {
     fontFamily: 'PlusJakartaSans_600SemiBold',
     fontSize: 14,
-    color: '#006399',
+    color: Colors.primary,
     fontWeight: '600',
   },
 });

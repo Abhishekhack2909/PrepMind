@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, ScrollView,
-  SafeAreaView, ActivityIndicator, TextInput, Platform,
+  SafeAreaView, ActivityIndicator, TextInput, Platform, Alert,
 } from 'react-native';
-import { Colors, Spacing, Radius } from '@/constants/theme';
+import { Colors, Spacing, Radius, Shadows, Typography } from '@/constants/theme';
 import { useAuth } from '@/hooks/useAuth';
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:8000';
@@ -38,6 +38,17 @@ const PRESET_TOPICS = [
   'Art & Culture',
   'Current Affairs',
 ];
+
+const TOPIC_ICONS: Record<string, string> = {
+  'Indian Polity & Constitution': '⚖️',
+  'Modern Indian History': '🏛️',
+  'Physical Geography of India': '🌍',
+  'Indian Economy': '📈',
+  'Environment & Ecology': '🌿',
+  'Science & Technology': '🔬',
+  'Art & Culture': '🎨',
+  'Current Affairs': '📰',
+};
 
 export default function MCQScreen() {
   const { session } = useAuth();
@@ -193,15 +204,15 @@ export default function MCQScreen() {
           </View>
           
           {/* Timer Component */}
-          <View style={styles.timerChip}>
+          <View style={[styles.timerChip, timeLeft < 60 && styles.timerChipUrgent]}>
             <Text style={styles.timerIcon}>⏱️</Text>
-            <Text style={[styles.timerText, timeLeft < 60 && { color: '#ba1a1a' }]}>
+            <Text style={[styles.timerText, timeLeft < 60 && { color: Colors.error }]}>
               {formatTime(timeLeft)}
             </Text>
           </View>
         </View>
 
-        {/* Progress Bar */}
+        {/* Gradient Progress Bar */}
         <View style={styles.progressBarTrack}>
           <View style={[styles.progressBarFill, { width: `${progressPercent}%` as any }]} />
         </View>
@@ -209,7 +220,9 @@ export default function MCQScreen() {
         <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
           
           <View style={styles.questionHeader}>
-            <Text style={styles.questionCounter}>Question {currentIdx + 1} of {questions.length}</Text>
+            <View style={styles.questionCounterBadge}>
+              <Text style={styles.questionCounter}>Question {currentIdx + 1} of {questions.length}</Text>
+            </View>
             <View style={styles.actionIcons}>
               <TouchableOpacity style={styles.actionIconBtn} activeOpacity={0.7}>
                 <Text style={styles.actionIcon}>🔖</Text>
@@ -232,8 +245,8 @@ export default function MCQScreen() {
               const isCorrectOpt = key === correct;
               
               // Color styles
-              let btnStyle = styles.optionBtn;
-              let bubbleStyle = styles.optionBubble;
+              let btnStyle: any = styles.optionBtn;
+              let bubbleStyle: any = styles.optionBubble;
               let bubbleText = key;
               
               if (isSubmitted) {
@@ -262,7 +275,7 @@ export default function MCQScreen() {
                   activeOpacity={0.8}
                 >
                   <View style={bubbleStyle}>
-                    <Text style={styles.optionBubbleText}>{bubbleText}</Text>
+                    <Text style={[styles.optionBubbleText, (isSubmitted && (isCorrectOpt || isSelected)) && { color: '#fff' }]}>{bubbleText}</Text>
                   </View>
                   <Text style={styles.optionText}>{value}</Text>
                 </TouchableOpacity>
@@ -293,7 +306,7 @@ export default function MCQScreen() {
                 <Text style={styles.feedbackBannerIcon}>
                   {selectedOption === correct ? '✓' : '✕'}
                 </Text>
-                <Text style={styles.feedbackBannerText}>
+                <Text style={[styles.feedbackBannerText, { color: selectedOption === correct ? Colors.success : Colors.error }]}>
                   {selectedOption === correct ? 'Correct!' : 'Incorrect'}
                 </Text>
               </View>
@@ -317,6 +330,7 @@ export default function MCQScreen() {
             </View>
           )}
 
+          <View style={{ height: 80 }} />
         </ScrollView>
       </SafeAreaView>
     );
@@ -350,7 +364,7 @@ export default function MCQScreen() {
               value={customTopic}
               onChangeText={setCustomTopic}
               placeholder="e.g. Maurya Empire, GST, Paris Agreement"
-              placeholderTextColor={Colors.outline}
+              placeholderTextColor={Colors.onSurfaceMuted}
             />
             <TouchableOpacity
               style={[styles.startBtn, !customTopic.trim() && styles.startBtnDisabled]}
@@ -372,11 +386,16 @@ export default function MCQScreen() {
               onPress={() => startQuiz(topic)}
               activeOpacity={0.8}
             >
+              <View style={styles.topicIconContainer}>
+                <Text style={styles.topicIcon}>{TOPIC_ICONS[topic] || '📖'}</Text>
+              </View>
               <Text style={styles.topicText}>{topic}</Text>
               <Text style={styles.topicArrow}>→</Text>
             </TouchableOpacity>
           ))}
         </View>
+
+        <View style={{ height: 80 }} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -386,7 +405,7 @@ export default function MCQScreen() {
 
 function ResultsView({ results, onReset }: { results: any; onReset: () => void }) {
   const gradeColors: Record<string, string> = {
-    Excellent: '#22c55e', Good: '#3b82f6', Average: '#f59e0b', Poor: '#ef4444'
+    Excellent: '#10B981', Good: '#3B82F6', Average: '#F59E0B', Poor: '#EF4444'
   };
   const color = gradeColors[results.grade] ?? Colors.primary;
 
@@ -416,9 +435,9 @@ function ResultsView({ results, onReset }: { results: any; onReset: () => void }
         {/* Question breakdown */}
         <Text style={styles.sectionLabel}>Question Breakdown</Text>
         {results.results?.map((r: QuizResult, i: number) => (
-          <View key={i} style={[styles.resultItem, { borderColor: r.is_correct ? '#10b98130' : '#ba1a1a30' }]}>
+          <View key={i} style={[styles.resultItem, { borderLeftColor: r.is_correct ? Colors.success : Colors.error }]}>
             <Text style={styles.resultQ}>Q{i + 1}. {r.question}</Text>
-            <Text style={[styles.resultAns, { color: r.is_correct ? '#10b981' : '#ba1a1a' }]}>
+            <Text style={[styles.resultAns, { color: r.is_correct ? Colors.success : Colors.error }]}>
               Your answer: {r.user_answer} {r.is_correct ? '✓' : `✕ (Correct: ${r.correct_answer})`}
             </Text>
             {!r.is_correct && (
@@ -430,6 +449,8 @@ function ResultsView({ results, onReset }: { results: any; onReset: () => void }
         <TouchableOpacity style={styles.nextBtn} onPress={onReset} activeOpacity={0.85}>
           <Text style={styles.nextBtnText}>Try Another Topic</Text>
         </TouchableOpacity>
+
+        <View style={{ height: 80 }} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -438,11 +459,11 @@ function ResultsView({ results, onReset }: { results: any; onReset: () => void }
 function LoadingView() {
   return (
     <View style={[styles.safe, { justifyContent: 'center', alignItems: 'center' }]}>
-      <ActivityIndicator size="large" color={Colors.primary} />
+      <View style={styles.loadingIconContainer}>
+        <ActivityIndicator size="large" color={Colors.primary} />
+      </View>
       <Text style={styles.loadingText}>AI is generating your questions...</Text>
-      <Text style={{ color: Colors.outline, fontFamily: 'Inter_400Regular', fontSize: 13, marginTop: 4 }}>
-        Usually takes 5–10 seconds
-      </Text>
+      <Text style={styles.loadingSubtext}>Usually takes 5–10 seconds</Text>
     </View>
   );
 }
@@ -451,7 +472,7 @@ function LoadingView() {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: '#f8f9ff',
+    backgroundColor: Colors.background,
   },
   scroll: {
     padding: Spacing.md,
@@ -463,36 +484,29 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
   },
   title: {
-    fontFamily: 'PlusJakartaSans_700Bold',
+    ...Typography.h2,
     fontSize: 28,
-    color: Colors.onSurface,
   },
   subtitle: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 14,
-    color: Colors.onSurfaceVariant,
+    ...Typography.body,
     marginTop: 4,
   },
   sectionLabel: {
-    fontFamily: 'PlusJakartaSans_600SemiBold',
-    fontSize: 12,
-    color: Colors.onSurfaceVariant,
+    ...Typography.overline,
     marginBottom: 10,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
   },
   errorBanner: {
-    backgroundColor: '#ffdad6',
+    backgroundColor: Colors.errorContainer,
     borderRadius: Radius.lg,
     padding: Spacing.sm,
     marginBottom: Spacing.md,
     borderWidth: 1,
-    borderColor: 'rgba(186, 26, 26, 0.3)',
+    borderColor: 'rgba(239, 68, 68, 0.15)',
   },
   errorText: {
     fontFamily: 'Inter_400Regular',
     fontSize: 13,
-    color: '#ba1a1a',
+    color: Colors.error,
   },
   customSection: {
     marginBottom: Spacing.lg,
@@ -503,52 +517,63 @@ const styles = StyleSheet.create({
   },
   customInput: {
     flex: 1,
-    borderWidth: 1,
-    borderColor: '#bec7d3',
+    borderWidth: 1.5,
+    borderColor: Colors.outlineVariant,
     borderRadius: Radius.lg,
     padding: 12,
     fontFamily: 'Inter_400Regular',
     fontSize: 14,
     color: Colors.onSurface,
-    backgroundColor: '#ffffff',
+    backgroundColor: Colors.surfaceCard,
   },
   startBtn: {
-    backgroundColor: '#006399',
+    backgroundColor: Colors.primary,
     borderRadius: Radius.lg,
     paddingHorizontal: 20,
     justifyContent: 'center',
+    ...Shadows.primaryGlow,
   },
   startBtnDisabled: {
     opacity: 0.4,
   },
   startBtnText: {
-    fontFamily: 'PlusJakartaSans_600SemiBold',
+    ...Typography.button,
     fontSize: 16,
-    color: '#ffffff',
   },
   topicsGrid: {
     gap: 8,
   },
   topicCard: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#ffffff',
+    backgroundColor: Colors.surfaceCard,
     borderRadius: Radius.xl,
     padding: Spacing.md,
-    borderWidth: 1,
-    borderColor: 'rgba(190, 199, 211, 0.3)',
+    ...Shadows.subtle,
+    gap: Spacing.sm,
+  },
+  topicIconContainer: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: Colors.surfaceContainer,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  topicIcon: {
+    fontSize: 16,
   },
   topicText: {
     fontFamily: 'Inter_500Medium',
     fontSize: 14,
     color: Colors.onSurface,
     flex: 1,
+    fontWeight: '500',
   },
   topicArrow: {
     fontFamily: 'Inter_400Regular',
     fontSize: 16,
-    color: '#006399',
+    color: Colors.primary,
   },
 
   // Quiz Mode Styles
@@ -558,9 +583,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
-    backgroundColor: '#ffffff',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(190, 199, 211, 0.15)',
+    backgroundColor: Colors.surfaceCard,
+    ...Shadows.subtle,
   },
   quizHeaderLeft: {
     flexDirection: 'row',
@@ -569,49 +593,54 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   backBtn: {
-    padding: Spacing.xs,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: Colors.surfaceContainer,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   backBtnText: {
-    fontSize: 22,
-    color: '#3f4851',
+    fontSize: 18,
+    color: Colors.onSurfaceVariant,
   },
   quizHeaderTitle: {
-    fontFamily: 'PlusJakartaSans_700Bold',
+    ...Typography.subtitle,
     fontSize: 16,
-    color: '#121c2a',
-    fontWeight: '700',
   },
   quizHeaderSubtitle: {
-    fontFamily: 'Inter_400Regular',
+    ...Typography.caption,
     fontSize: 12,
-    color: '#6f7882',
   },
   timerChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#eff4ff',
+    backgroundColor: Colors.surfaceContainer,
     borderRadius: Radius.full,
     paddingHorizontal: 12,
-    paddingVertical: 4,
+    paddingVertical: 5,
     gap: 4,
+  },
+  timerChipUrgent: {
+    backgroundColor: Colors.errorContainer,
   },
   timerIcon: {
     fontSize: 14,
   },
   timerText: {
-    fontFamily: 'Inter_500Medium',
+    fontFamily: 'Inter_600SemiBold',
     fontSize: 13,
-    color: '#121c2a',
+    color: Colors.onSurface,
     fontWeight: '700',
   },
   progressBarTrack: {
     width: '100%',
     height: 4,
-    backgroundColor: '#e6eeff',
+    backgroundColor: Colors.surfaceContainerHigh,
   },
   progressBarFill: {
     height: 4,
-    backgroundColor: '#006399',
+    backgroundColor: Colors.primary,
   },
   questionHeader: {
     flexDirection: 'row',
@@ -620,14 +649,17 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
     marginTop: Spacing.xs,
   },
-  questionCounter: {
-    fontFamily: 'Inter_500Medium',
-    fontSize: 12,
-    color: '#006399',
-    backgroundColor: '#cde5ff',
+  questionCounterBadge: {
+    backgroundColor: Colors.primaryGhost,
     paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingVertical: 5,
     borderRadius: Radius.sm,
+  },
+  questionCounter: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 12,
+    color: Colors.primary,
+    fontWeight: '600',
   },
   actionIcons: {
     flexDirection: 'row',
@@ -638,27 +670,18 @@ const styles = StyleSheet.create({
   },
   actionIcon: {
     fontSize: 16,
-    color: '#6f7882',
+    color: Colors.onSurfaceMuted,
   },
   questionCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: Colors.surfaceCard,
     borderRadius: Radius.xl,
     padding: Spacing.lg,
     marginBottom: Spacing.md,
-    borderWidth: 1,
-    borderColor: 'rgba(190, 199, 211, 0.3)',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 6,
-    elevation: 1,
+    ...Shadows.card,
   },
   questionText: {
-    fontFamily: 'PlusJakartaSans_600SemiBold',
-    fontSize: 16,
-    color: '#121c2a',
+    ...Typography.subtitle,
     lineHeight: 24,
-    fontWeight: '600',
   },
   optionsContainer: {
     gap: Spacing.sm,
@@ -668,60 +691,60 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    borderWidth: 1,
-    borderColor: '#bec7d3',
-    borderRadius: Radius.lg,
-    padding: Spacing.sm,
-    backgroundColor: '#ffffff',
-    minHeight: 56,
+    borderWidth: 1.5,
+    borderColor: Colors.outlineVariant,
+    borderRadius: Radius.xl,
+    padding: Spacing.md,
+    backgroundColor: Colors.surfaceCard,
+    minHeight: 58,
   },
   optionBtnSelected: {
-    borderColor: '#006399',
-    backgroundColor: '#eff4ff',
+    borderColor: Colors.primary,
+    backgroundColor: Colors.primaryGhost,
   },
   optionBtnCorrect: {
-    borderColor: '#10b981',
-    backgroundColor: '#d1fae5',
+    borderColor: Colors.success,
+    backgroundColor: Colors.successContainer,
   },
   optionBtnIncorrect: {
-    borderColor: '#ba1a1a',
-    backgroundColor: '#ffdad6',
+    borderColor: Colors.error,
+    backgroundColor: Colors.errorContainer,
   },
   optionBtnDimmed: {
     opacity: 0.5,
   },
   optionBubble: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#6f7882',
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    borderWidth: 1.5,
+    borderColor: Colors.onSurfaceMuted,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'transparent',
   },
   optionBubbleSelected: {
-    borderColor: '#006399',
-    backgroundColor: '#006399',
+    borderColor: Colors.primary,
+    backgroundColor: Colors.primary,
   },
   optionBubbleCorrect: {
-    borderColor: '#10b981',
-    backgroundColor: '#10b981',
+    borderColor: Colors.success,
+    backgroundColor: Colors.success,
   },
   optionBubbleIncorrect: {
-    borderColor: '#ba1a1a',
-    backgroundColor: '#ba1a1a',
+    borderColor: Colors.error,
+    backgroundColor: Colors.error,
   },
   optionBubbleText: {
-    fontFamily: 'Inter_500Medium',
+    fontFamily: 'Inter_600SemiBold',
     fontSize: 12,
-    color: '#121c2a',
+    color: Colors.onSurface,
     fontWeight: '600',
   },
   optionText: {
     fontFamily: 'Inter_400Regular',
     fontSize: 14,
-    color: '#121c2a',
+    color: Colors.onSurface,
     flex: 1,
     lineHeight: 20,
   },
@@ -732,20 +755,19 @@ const styles = StyleSheet.create({
     marginTop: Spacing.sm,
   },
   submitBtn: {
-    backgroundColor: '#006399',
+    backgroundColor: Colors.primary,
     borderRadius: Radius.full,
-    paddingVertical: 10,
+    paddingVertical: 12,
     paddingHorizontal: Spacing.xl,
-    elevation: 2,
+    ...Shadows.primaryGlow,
   },
   submitBtnDisabled: {
-    backgroundColor: 'rgba(0, 99, 153, 0.4)',
+    opacity: 0.4,
+    shadowOpacity: 0,
   },
   submitBtnText: {
-    fontFamily: 'PlusJakartaSans_600SemiBold',
+    ...Typography.button,
     fontSize: 15,
-    color: '#ffffff',
-    fontWeight: '600',
   },
 
   // Feedback details
@@ -755,16 +777,16 @@ const styles = StyleSheet.create({
   },
   feedbackBanner: {
     padding: Spacing.md,
-    borderRadius: Radius.lg,
+    borderRadius: Radius.xl,
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.sm,
   },
   bannerCorrect: {
-    backgroundColor: '#d1fae5',
+    backgroundColor: Colors.successContainer,
   },
   bannerIncorrect: {
-    backgroundColor: '#ffdad6',
+    backgroundColor: Colors.errorContainer,
   },
   feedbackBannerIcon: {
     fontSize: 18,
@@ -776,9 +798,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   explanationCard: {
-    backgroundColor: '#eff4ff',
-    borderWidth: 1,
-    borderColor: 'rgba(0, 99, 153, 0.1)',
+    backgroundColor: Colors.surfaceContainer,
     borderRadius: Radius.xl,
     padding: Spacing.md,
     position: 'relative',
@@ -791,7 +811,7 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     width: 4,
-    backgroundColor: '#006399',
+    backgroundColor: Colors.primary,
   },
   explanationHeader: {
     flexDirection: 'row',
@@ -805,38 +825,32 @@ const styles = StyleSheet.create({
   explanationTitle: {
     fontFamily: 'PlusJakartaSans_600SemiBold',
     fontSize: 15,
-    color: '#006399',
+    color: Colors.primary,
     fontWeight: '600',
   },
   explanationText: {
     fontFamily: 'Inter_400Regular',
     fontSize: 14,
-    color: '#121c2a',
+    color: Colors.onSurface,
     lineHeight: 20,
   },
   nextBtn: {
-    backgroundColor: '#632ce5',
+    backgroundColor: Colors.accent,
     borderRadius: Radius.full,
     paddingVertical: 14,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#632ce5',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 3,
+    ...Shadows.accentGlow,
   },
   nextBtnText: {
-    fontFamily: 'PlusJakartaSans_600SemiBold',
+    ...Typography.button,
     fontSize: 16,
-    color: '#ffffff',
-    fontWeight: '600',
   },
 
   // Results Styles
   scoreBanner: {
     alignItems: 'center',
-    borderRadius: Radius.xl,
+    borderRadius: Radius.xxl,
     padding: Spacing.xl,
     marginBottom: Spacing.md,
   },
@@ -858,17 +872,18 @@ const styles = StyleSheet.create({
   },
   resultProgressTrack: {
     width: '80%',
-    height: 6,
-    backgroundColor: '#e5e7eb',
-    borderRadius: 3,
+    height: 8,
+    backgroundColor: Colors.outlineVariant,
+    borderRadius: 4,
     marginTop: 12,
+    overflow: 'hidden',
   },
   resultProgressFill: {
-    height: 6,
-    borderRadius: 3,
+    height: 8,
+    borderRadius: 4,
   },
   weakCard: {
-    backgroundColor: 'rgba(186, 26, 26, 0.05)',
+    backgroundColor: 'rgba(239, 68, 68, 0.06)',
     borderRadius: Radius.xl,
     padding: Spacing.md,
     marginBottom: Spacing.md,
@@ -876,19 +891,22 @@ const styles = StyleSheet.create({
   weakTopic: {
     fontFamily: 'Inter_400Regular',
     fontSize: 14,
-    color: '#121c2a',
+    color: Colors.onSurface,
     lineHeight: 24,
   },
   resultItem: {
-    borderWidth: 1,
-    borderRadius: Radius.xl,
+    borderLeftWidth: 3,
+    borderLeftColor: Colors.outlineVariant,
+    backgroundColor: Colors.surfaceCard,
+    borderRadius: Radius.lg,
     padding: Spacing.md,
     marginBottom: 8,
+    ...Shadows.subtle,
   },
   resultQ: {
     fontFamily: 'Inter_500Medium',
     fontSize: 14,
-    color: '#121c2a',
+    color: Colors.onSurface,
     marginBottom: 4,
     lineHeight: 20,
   },
@@ -900,13 +918,27 @@ const styles = StyleSheet.create({
   resultExp: {
     fontFamily: 'Inter_400Regular',
     fontSize: 12,
-    color: '#3f4851',
+    color: Colors.onSurfaceVariant,
     lineHeight: 18,
   },
+
+  // Loading
+  loadingIconContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: Colors.surfaceContainer,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 4,
+  },
   loadingText: {
-    fontFamily: 'PlusJakartaSans_600SemiBold',
+    ...Typography.subtitle,
     fontSize: 18,
-    color: '#121c2a',
     marginTop: 16,
+  },
+  loadingSubtext: {
+    ...Typography.caption,
+    marginTop: 4,
   },
 });

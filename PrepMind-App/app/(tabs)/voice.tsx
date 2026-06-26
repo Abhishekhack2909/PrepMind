@@ -4,7 +4,7 @@ import {
   SafeAreaView, Platform, ActivityIndicator, Animated, TextInput, KeyboardAvoidingView,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Colors, Spacing, Radius } from '@/constants/theme';
+import { Colors, Spacing, Radius, Shadows, Typography } from '@/constants/theme';
 import { askQuestion, type AskResult } from '@/services/api';
 
 type State = 'idle' | 'listening' | 'thinking' | 'result' | 'error';
@@ -147,7 +147,7 @@ export default function VoiceScreen() {
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        {/* ── Top Header (Transactional style) ── */}
+        {/* ── Top Header ── */}
         <View style={styles.header}>
           <TouchableOpacity
             style={styles.headerCircleBtn}
@@ -258,14 +258,13 @@ export default function VoiceScreen() {
           </View>
         )}
 
-        {/* ── Sticky Bottom Input Bar ── */}
+        {/* ── Sticky Bottom Input Bar — frosted glass feel ── */}
         <View style={styles.bottomBar}>
-          <View style={styles.bottomBarBorder} />
           <View style={styles.inputContainer}>
             <TextInput
               style={styles.input}
               placeholder={state === 'listening' ? 'Listening...' : 'Try asking by voice...'}
-              placeholderTextColor="#3f485180"
+              placeholderTextColor={Colors.onSurfaceMuted}
               value={inputText}
               onChangeText={setInputText}
               onSubmitEditing={handleSendText}
@@ -299,7 +298,7 @@ export default function VoiceScreen() {
                 </Text>
               </TouchableOpacity>
 
-              {/* Send Button */}
+              {/* Send Button — primary glow */}
               <TouchableOpacity
                 style={styles.sendBtn}
                 onPress={handleSendText}
@@ -319,7 +318,7 @@ export default function VoiceScreen() {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: '#f8f9ff',
+    backgroundColor: Colors.background,
   },
   header: {
     flexDirection: 'row',
@@ -327,26 +326,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
-    backgroundColor: 'rgba(248, 249, 255, 0.8)',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(190, 199, 211, 0.15)',
+    backgroundColor: Colors.surfaceCard,
+    ...Shadows.subtle,
   },
   headerCircleBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#eff4ff',
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: Colors.surfaceContainer,
     alignItems: 'center',
     justifyContent: 'center',
   },
   headerBtnText: {
     fontSize: 14,
-    color: '#3f4851',
+    color: Colors.onSurfaceVariant,
   },
   queriesLeftBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#e8deff',
+    backgroundColor: Colors.accentGhost,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: Radius.full,
@@ -355,12 +353,12 @@ const styles = StyleSheet.create({
   queriesLeftText: {
     fontFamily: 'Inter_400Regular',
     fontSize: 12,
-    color: '#20005f',
+    color: Colors.onSurface,
   },
   upgradeText: {
-    fontFamily: 'Inter_500Medium',
+    fontFamily: 'Inter_600SemiBold',
     fontSize: 12,
-    color: '#632ce5',
+    color: Colors.accent,
     fontWeight: '700',
   },
 
@@ -368,7 +366,7 @@ const styles = StyleSheet.create({
   scroll: {
     paddingHorizontal: Spacing.md,
     paddingTop: Spacing.lg,
-    paddingBottom: 120, // space for sticky footer
+    paddingBottom: 120,
   },
   scrollCenter: {
     flexGrow: 1,
@@ -376,39 +374,30 @@ const styles = StyleSheet.create({
     paddingBottom: 150,
   },
 
-  // Idle Central Brand Box
+  // Idle Central Brand Box — gradient icon
   brandContainer: {
     alignItems: 'center',
-    textAlign: 'center',
   },
   brandIconContainer: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: '#006399',
+    width: 68,
+    height: 68,
+    borderRadius: 34,
+    backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: Spacing.md,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 2,
+    ...Shadows.primaryGlow,
   },
   brandIcon: {
     fontSize: 32,
     color: '#ffffff',
   },
   brandTitle: {
-    fontFamily: 'PlusJakartaSans_700Bold',
-    fontSize: 22,
-    color: '#006399',
-    fontWeight: '700',
+    ...Typography.h3,
+    color: Colors.primary,
   },
   brandSubtitle: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 14,
-    color: '#3f4851',
+    ...Typography.body,
     marginTop: 6,
     textAlign: 'center',
     maxWidth: '80%',
@@ -421,31 +410,29 @@ const styles = StyleSheet.create({
   },
   userBubble: {
     alignSelf: 'flex-end',
-    backgroundColor: '#eff4ff',
+    backgroundColor: Colors.surfaceContainer,
     borderRadius: Radius.xl,
-    borderTopRightRadius: 2,
+    borderTopRightRadius: 4,
     paddingHorizontal: Spacing.md,
     paddingVertical: 10,
     maxWidth: '85%',
-    borderWidth: 1,
-    borderColor: 'rgba(190, 199, 211, 0.2)',
+    ...Shadows.subtle,
   },
   userText: {
     fontFamily: 'Inter_400Regular',
     fontSize: 15,
-    color: '#121c2a',
+    color: Colors.onSurface,
     lineHeight: 22,
   },
   aiCard: {
     alignSelf: 'flex-start',
-    backgroundColor: '#ffffff',
+    backgroundColor: Colors.surfaceCard,
     borderRadius: Radius.xl,
-    borderTopLeftRadius: 2,
+    borderTopLeftRadius: 4,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.md,
     maxWidth: '90%',
-    borderWidth: 1,
-    borderColor: 'rgba(190, 199, 211, 0.2)',
+    ...Shadows.card,
     position: 'relative',
     marginTop: 12,
   },
@@ -453,14 +440,14 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: -12,
     top: -12,
-    backgroundColor: '#006399',
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    backgroundColor: Colors.primary,
+    width: 26,
+    height: 26,
+    borderRadius: 13,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: '#f8f9ff',
+    borderColor: Colors.background,
   },
   robotIcon: {
     fontSize: 12,
@@ -473,9 +460,7 @@ const styles = StyleSheet.create({
     paddingLeft: 8,
   },
   thinkingText: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 14,
-    color: '#3f4851',
+    ...Typography.body,
   },
   aiResponseContent: {
     paddingLeft: 4,
@@ -484,34 +469,26 @@ const styles = StyleSheet.create({
   aiText: {
     fontFamily: 'Inter_400Regular',
     fontSize: 14,
-    color: '#3f4851',
+    color: Colors.onSurfaceVariant,
     lineHeight: 22,
   },
   sourcesContainer: {
     marginTop: 10,
     borderTopWidth: 1,
-    borderTopColor: '#eff4ff',
+    borderTopColor: Colors.outlineFaint,
     paddingTop: 8,
   },
   sourcesLabel: {
-    fontFamily: 'Inter_500Medium',
-    fontSize: 11,
-    color: '#6f7882',
-    fontWeight: '700',
-    textTransform: 'uppercase',
+    ...Typography.overline,
     marginBottom: 4,
   },
   sourceText: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 12,
-    color: '#6f7882',
+    ...Typography.caption,
     marginBottom: 2,
   },
   speakBtn: {
     marginTop: 12,
-    backgroundColor: '#eff4ff',
-    borderWidth: 1,
-    borderColor: 'rgba(190, 199, 211, 0.2)',
+    backgroundColor: Colors.surfaceContainer,
     borderRadius: Radius.full,
     paddingHorizontal: 12,
     paddingVertical: 5,
@@ -520,13 +497,13 @@ const styles = StyleSheet.create({
   speakBtnText: {
     fontFamily: 'Inter_500Medium',
     fontSize: 12,
-    color: '#006399',
+    color: Colors.primary,
     fontWeight: '500',
   },
 
   // Error inside card
   errorLabel: {
-    fontFamily: 'Inter_500Medium',
+    fontFamily: 'Inter_600SemiBold',
     fontSize: 13,
     color: Colors.error,
     fontWeight: '700',
@@ -540,7 +517,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   retryBtn: {
-    backgroundColor: '#ffdad6',
+    backgroundColor: Colors.errorContainer,
     borderRadius: Radius.md,
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -553,7 +530,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
 
-  // Suggestion Chips (placed in middle when idle)
+  // Suggestion Chips — glass feel
   suggestionsContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -566,68 +543,50 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.md,
   },
   suggestionChip: {
-    backgroundColor: '#ffffff',
+    backgroundColor: Colors.surfaceCard,
     borderWidth: 1,
-    borderColor: 'rgba(190, 199, 211, 0.2)',
+    borderColor: Colors.outlineFaint,
     borderRadius: Radius.full,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 4,
-    elevation: 1,
+    ...Shadows.card,
   },
   suggestionEmoji: {
     fontSize: 14,
   },
   suggestionText: {
-    fontFamily: 'Inter_400Regular',
+    fontFamily: 'Inter_500Medium',
     fontSize: 13,
-    color: '#121c2a',
+    color: Colors.onSurface,
   },
 
-  // Bottom Input Bar
+  // Bottom Input Bar — frosted glass
   bottomBar: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#f8f9ff',
+    backgroundColor: 'rgba(248, 250, 255, 0.92)',
     paddingHorizontal: Spacing.md,
-    paddingTop: Spacing.xs,
+    paddingTop: Spacing.sm,
     paddingBottom: Platform.OS === 'ios' ? 24 : 16,
   },
-  bottomBarBorder: {
-    height: 2,
-    backgroundColor: 'rgba(0, 99, 153, 0.2)',
-    alignSelf: 'center',
-    width: '40%',
-    borderRadius: 1,
-    marginBottom: 8,
-  },
   inputContainer: {
-    backgroundColor: '#ffffff',
+    backgroundColor: Colors.surfaceCard,
     borderRadius: Radius.full,
-    borderWidth: 1,
-    borderColor: 'rgba(190, 199, 211, 0.2)',
     flexDirection: 'row',
     alignItems: 'center',
     padding: 6,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 2,
+    ...Shadows.card,
   },
   input: {
     flex: 1,
     fontFamily: 'Inter_400Regular',
     fontSize: 14,
-    color: '#121c2a',
+    color: Colors.onSurface,
     paddingHorizontal: Spacing.md,
     height: 40,
   },
@@ -637,36 +596,36 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   micBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#eff4ff',
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: Colors.surfaceContainer,
     alignItems: 'center',
     justifyContent: 'center',
     position: 'relative',
   },
   micPulse: {
     position: 'absolute',
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: '#ba1a1a',
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    backgroundColor: Colors.error,
   },
   micIconText: {
     fontSize: 16,
-    color: '#006399',
+    color: Colors.primary,
   },
   sendBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: '#006399',
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
+    ...Shadows.primaryGlow,
   },
   sendIcon: {
     fontSize: 14,
     color: '#ffffff',
   },
 });
-

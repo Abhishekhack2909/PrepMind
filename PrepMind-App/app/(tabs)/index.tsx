@@ -4,7 +4,7 @@ import {
   TouchableOpacity, ActivityIndicator, RefreshControl, Image,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Colors, Spacing, Radius } from '@/constants/theme';
+import { Colors, Spacing, Radius, Shadows, Typography } from '@/constants/theme';
 import { useAuth } from '@/hooks/useAuth';
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:8000';
@@ -87,7 +87,7 @@ export default function HomeScreen() {
         {/* ── Promotional Banners Section ── */}
         <View style={styles.promoSection}>
           
-          {/* Super Promo Card */}
+          {/* Super Promo Card — vibrant gradient-like purple */}
           <TouchableOpacity style={styles.promoCardSuper} activeOpacity={0.9}>
             <View style={styles.promoSuperContent}>
               <Text style={styles.promoSuperTitle}>Try SUPER at just ₹7</Text>
@@ -99,9 +99,11 @@ export default function HomeScreen() {
             <View style={styles.promoSuperBlob}>
               <Text style={styles.promoSuperBlobIcon}>⚡</Text>
             </View>
+            {/* Shimmer overlay simulation */}
+            <View style={styles.shimmerOverlay} />
           </TouchableOpacity>
 
-          {/* Prelims Answer Key Card */}
+          {/* Prelims Answer Key Card — deep blue */}
           <TouchableOpacity style={styles.promoCardAnswerKey} activeOpacity={0.9}>
             <View style={styles.answerKeyContent}>
               <Text style={styles.answerKeyTitle}>Prelims '26 Answer Key</Text>
@@ -111,13 +113,13 @@ export default function HomeScreen() {
               </View>
             </View>
             
-            {/* Simulated Answer Key Badge Graphic */}
+            {/* Glass-effect badge */}
             <View style={styles.simulatedBadge}>
               <Text style={styles.simulatedBadgeTitle}>ANSWER{"\n"}KEY</Text>
               <View style={styles.simulatedChart}>
-                <View style={[styles.simulatedBar, { height: '33%', backgroundColor: '#ba1a1a' }]} />
-                <View style={[styles.simulatedBar, { height: '66%', backgroundColor: '#f59e0b' }]} />
-                <View style={[styles.simulatedBar, { height: '100%', backgroundColor: '#006399' }]} />
+                <View style={[styles.simulatedBar, { height: '33%', backgroundColor: Colors.error }]} />
+                <View style={[styles.simulatedBar, { height: '66%', backgroundColor: Colors.warning }]} />
+                <View style={[styles.simulatedBar, { height: '100%', backgroundColor: Colors.primary }]} />
               </View>
             </View>
           </TouchableOpacity>
@@ -127,7 +129,7 @@ export default function HomeScreen() {
         <View style={styles.targetsSection}>
           <Text style={styles.sectionTitle}>My Targets</Text>
           
-          {/* Greeting Card */}
+          {/* Greeting Card — warm amber */}
           <View style={styles.greetingCard}>
             <Text style={styles.greetingSun}>☀️</Text>
             <View style={styles.greetingTextContainer}>
@@ -171,9 +173,9 @@ export default function HomeScreen() {
 
             <View style={styles.cardSeparator} />
 
-            {/* Quote Block */}
+            {/* Quote Block with gradient accent */}
             <View style={styles.quoteBlock}>
-              <Text style={styles.quoteIcon}>“</Text>
+              <View style={styles.quoteAccentBar} />
               <View style={styles.quoteTextContainer}>
                 <Text style={styles.quoteText}>
                   You don't need to study 15 hours a day. You just need to hit the <Text style={styles.quoteTextHighlight}>right goals daily.</Text>
@@ -182,19 +184,19 @@ export default function HomeScreen() {
               </View>
             </View>
 
-            {/* Ask SuperKalam Overlay FAB */}
+            {/* Ask PrepMind Overlay FAB — gradient blue */}
             <TouchableOpacity 
               style={styles.askSuperBtn} 
               activeOpacity={0.85}
               onPress={() => router.push('/(tabs)/voice' as any)}
             >
               <Text style={styles.askSuperBtnIcon}>✨</Text>
-              <Text style={styles.askSuperBtnText}>Ask SuperKalam</Text>
+              <Text style={styles.askSuperBtnText}>Ask PrepMind</Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        {/* Space at the bottom */}
+        {/* Space at the bottom for floating tab bar */}
         <View style={styles.bottomSpacer} />
 
       </ScrollView>
@@ -205,26 +207,25 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: '#f8f9ff',
+    backgroundColor: Colors.background,
   },
   scroll: {
     padding: Spacing.md,
-    paddingBottom: 24,
+    paddingBottom: 100, // extra space for floating tab bar
   },
   bottomSpacer: {
     height: 32,
   },
 
-  // TopAppBar
+  // TopAppBar — clean shadow instead of border
   topAppBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
-    backgroundColor: '#f8f9ff',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(190, 199, 211, 0.15)',
+    backgroundColor: Colors.surfaceCard,
+    ...Shadows.subtle,
   },
   appBarLeft: {
     flexDirection: 'row',
@@ -235,21 +236,22 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(190, 199, 211, 0.3)',
+    borderWidth: 2,
+    borderColor: Colors.primaryGhost,
   },
   superBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#8b5cf6',
+    backgroundColor: Colors.superPurple,
     borderRadius: Radius.full,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    gap: 3,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    gap: 4,
+    ...Shadows.accentGlow,
   },
   superBadgeIcon: {
     color: '#ffffff',
-    fontSize: 10,
+    fontSize: 11,
     fontWeight: 'bold',
   },
   superBadgeText: {
@@ -265,10 +267,10 @@ const styles = StyleSheet.create({
     gap: Spacing.xs,
   },
   iconChip: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#eff4ff',
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: Colors.surfaceContainer,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -278,21 +280,20 @@ const styles = StyleSheet.create({
   streakChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#eff4ff',
+    backgroundColor: Colors.warningContainer,
     borderRadius: Radius.full,
     paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingVertical: 5,
     gap: 4,
   },
   streakIcon: {
     fontSize: 16,
-    color: '#6f7882',
   },
   streakText: {
-    fontFamily: 'Inter_500Medium',
+    fontFamily: 'Inter_600SemiBold',
     fontSize: 13,
-    color: '#3f4851',
-    fontWeight: '500',
+    color: '#92400E',
+    fontWeight: '600',
   },
 
   // Promotional Banners Section
@@ -301,20 +302,24 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
   },
   promoCardSuper: {
-    backgroundColor: '#ede9fe',
-    borderRadius: Radius.xl,
-    padding: Spacing.md,
+    backgroundColor: '#7C3AED',
+    borderRadius: Radius.xxl,
+    padding: Spacing.lg,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(139, 92, 246, 0.1)',
-    shadowColor: '#8b5cf6',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 2,
     overflow: 'hidden',
+    ...Shadows.accentGlow,
+    position: 'relative',
+  },
+  shimmerOverlay: {
+    position: 'absolute',
+    top: 0,
+    right: '30%',
+    width: 60,
+    height: '100%',
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    transform: [{ skewX: '-15deg' }],
   },
   promoSuperContent: {
     width: '65%',
@@ -322,63 +327,59 @@ const styles = StyleSheet.create({
   },
   promoSuperTitle: {
     fontFamily: 'PlusJakartaSans_700Bold',
-    fontSize: 18,
-    color: '#121c2a',
+    fontSize: 19,
+    color: '#ffffff',
     fontWeight: '700',
   },
   promoSuperSubtitle: {
     fontFamily: 'Inter_400Regular',
     fontSize: 13,
-    color: '#3f4851',
+    color: 'rgba(255, 255, 255, 0.8)',
     marginTop: 4,
     marginBottom: Spacing.md,
   },
   promoSuperBtn: {
-    backgroundColor: '#8b5cf6',
-    borderRadius: Radius.md,
+    backgroundColor: '#ffffff',
+    borderRadius: Radius.lg,
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.xs,
     alignSelf: 'flex-start',
   },
   promoSuperBtnText: {
-    fontFamily: 'Inter_500Medium',
+    fontFamily: 'Inter_600SemiBold',
     fontSize: 13,
-    color: '#ffffff',
-    fontWeight: '500',
+    color: Colors.superPurple,
+    fontWeight: '600',
   },
   promoSuperBlob: {
     position: 'absolute',
-    right: 0,
+    right: -16,
     top: '50%',
-    transform: [{ translateY: -64 }, { translateX: 16 }],
-    width: 128,
-    height: 128,
-    borderRadius: 64,
-    backgroundColor: '#8b5cf6',
+    transform: [{ translateY: -56 }],
+    width: 112,
+    height: 112,
+    borderRadius: 56,
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#8b5cf6',
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.3,
-    shadowRadius: 15,
-    elevation: 4,
   },
   promoSuperBlobIcon: {
     color: '#ffffff',
-    fontSize: 80,
+    fontSize: 48,
     fontWeight: 'bold',
   },
 
   promoCardAnswerKey: {
-    backgroundColor: '#006399',
-    borderRadius: Radius.xl,
-    padding: Spacing.md,
+    backgroundColor: Colors.primary,
+    borderRadius: Radius.xxl,
+    padding: Spacing.lg,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     minHeight: 100,
     position: 'relative',
     overflow: 'hidden',
+    ...Shadows.primaryGlow,
   },
   answerKeyContent: {
     width: '65%',
@@ -399,7 +400,7 @@ const styles = StyleSheet.create({
   answerKeyLinkText: {
     fontFamily: 'Inter_400Regular',
     fontSize: 13,
-    color: '#95ccff',
+    color: 'rgba(255, 255, 255, 0.8)',
   },
   answerKeyChevron: {
     color: '#ffffff',
@@ -410,25 +411,20 @@ const styles = StyleSheet.create({
     right: 16,
     top: '50%',
     transform: [{ translateY: -45 }, { rotate: '6deg' }],
-    backgroundColor: '#ffffff',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
     borderRadius: Radius.md,
     padding: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(190, 199, 211, 0.2)',
     width: 80,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
+    ...Shadows.card,
   },
   simulatedBadgeTitle: {
-    fontFamily: 'Inter_500Medium',
+    fontFamily: 'Inter_600SemiBold',
     fontSize: 8,
     fontWeight: 'bold',
     textAlign: 'center',
-    color: '#006399',
+    color: Colors.primary,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(190, 199, 211, 0.2)',
+    borderBottomColor: Colors.outlineFaint,
     paddingBottom: 4,
     marginBottom: 4,
   },
@@ -441,7 +437,7 @@ const styles = StyleSheet.create({
   },
   simulatedBar: {
     width: 8,
-    borderRadius: 2,
+    borderRadius: 3,
   },
 
   // Targets Section
@@ -449,20 +445,17 @@ const styles = StyleSheet.create({
     gap: Spacing.md,
   },
   sectionTitle: {
-    fontFamily: 'PlusJakartaSans_700Bold',
-    fontSize: 24,
-    color: '#121c2a',
-    fontWeight: '700',
+    ...Typography.h2,
   },
   greetingCard: {
-    backgroundColor: '#fef3c7',
-    borderRadius: Radius.lg,
+    backgroundColor: Colors.warningContainer,
+    borderRadius: Radius.xl,
     padding: Spacing.md,
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.md,
     borderWidth: 1,
-    borderColor: '#fde68a',
+    borderColor: '#FDE68A',
   },
   greetingSun: {
     fontSize: 32,
@@ -473,44 +466,32 @@ const styles = StyleSheet.create({
   greetingUser: {
     fontFamily: 'Inter_400Regular',
     fontSize: 14,
-    color: '#3f4851',
+    color: Colors.onSurfaceVariant,
   },
   greetingMainText: {
-    fontFamily: 'PlusJakartaSans_700Bold',
-    fontSize: 16,
-    color: '#121c2a',
-    fontWeight: '700',
+    ...Typography.subtitle,
     marginTop: 2,
   },
   addTargetsCard: {
-    backgroundColor: '#ffffff',
+    backgroundColor: Colors.surfaceCard,
     borderRadius: Radius.xxl,
-    padding: Spacing.md,
-    borderWidth: 1,
-    borderColor: 'rgba(190, 199, 211, 0.3)',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.03,
-    shadowRadius: 10,
-    elevation: 1,
+    padding: Spacing.lg,
+    borderWidth: 0,
+    ...Shadows.card,
     alignItems: 'center',
     position: 'relative',
-    paddingBottom: 40, // Space for overlapping Ask SuperKalam button
+    paddingBottom: 44,
   },
   addTargetsHeader: {
+    ...Typography.overline,
     alignSelf: 'flex-start',
-    fontFamily: 'Inter_500Medium',
-    fontSize: 11,
-    color: '#6f7882',
-    letterSpacing: 1,
-    fontWeight: '700',
     marginBottom: Spacing.md,
   },
   dashedAddBtn: {
     width: '100%',
     borderWidth: 2,
     borderStyle: 'dashed',
-    borderColor: 'rgba(0, 99, 153, 0.4)',
+    borderColor: Colors.primaryGlow,
     borderRadius: Radius.xl,
     paddingVertical: Spacing.lg,
     alignItems: 'center',
@@ -519,20 +500,20 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   addBtnPlus: {
-    fontSize: 20,
-    color: '#006399',
+    fontSize: 22,
+    color: Colors.primary,
     fontWeight: 'bold',
   },
   addBtnText: {
     fontFamily: 'Inter_500Medium',
     fontSize: 16,
-    color: '#006399',
+    color: Colors.primary,
     fontWeight: '500',
   },
   socialProofRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#eff4ff',
+    backgroundColor: Colors.surfaceContainer,
     borderRadius: Radius.full,
     paddingVertical: 6,
     paddingRight: Spacing.md,
@@ -555,26 +536,25 @@ const styles = StyleSheet.create({
   socialProofText: {
     fontFamily: 'Inter_400Regular',
     fontSize: 12,
-    color: '#3f4851',
+    color: Colors.onSurfaceVariant,
   },
   cardSeparator: {
     width: '100%',
     height: 1,
-    backgroundColor: 'rgba(190, 199, 211, 0.2)',
+    backgroundColor: Colors.outlineFaint,
     marginVertical: Spacing.md,
   },
   quoteBlock: {
     flexDirection: 'row',
     gap: Spacing.sm,
-    paddingHorizontal: Spacing.sm,
     paddingBottom: Spacing.lg,
     alignSelf: 'flex-start',
   },
-  quoteIcon: {
-    fontSize: 32,
-    color: 'rgba(0, 99, 153, 0.3)',
-    fontWeight: 'bold',
-    transform: [{ rotate: '180deg' }],
+  quoteAccentBar: {
+    width: 3,
+    backgroundColor: Colors.primary,
+    borderRadius: Radius.full,
+    opacity: 0.5,
   },
   quoteTextContainer: {
     flex: 1,
@@ -582,35 +562,29 @@ const styles = StyleSheet.create({
   quoteText: {
     fontFamily: 'Inter_400Regular',
     fontSize: 14,
-    color: '#121c2a',
+    color: Colors.onSurface,
     lineHeight: 20,
     fontStyle: 'italic',
   },
   quoteTextHighlight: {
-    color: '#006399',
-    fontWeight: '500',
+    color: Colors.primary,
+    fontWeight: '600',
   },
   quoteAuthor: {
-    fontFamily: 'Inter_500Medium',
-    fontSize: 12,
-    color: '#6f7882',
+    ...Typography.caption,
     marginTop: Spacing.xs,
   },
   askSuperBtn: {
     position: 'absolute',
-    bottom: -20,
-    backgroundColor: '#006399',
+    bottom: -22,
+    backgroundColor: Colors.primary,
     borderRadius: Radius.full,
     paddingHorizontal: Spacing.lg,
-    paddingVertical: 10,
+    paddingVertical: 12,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    shadowColor: '#006399',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 5,
+    ...Shadows.primaryGlow,
     zIndex: 20,
   },
   askSuperBtnIcon: {
@@ -618,9 +592,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   askSuperBtnText: {
-    fontFamily: 'Inter_500Medium',
+    fontFamily: 'Inter_600SemiBold',
     fontSize: 14,
     color: '#ffffff',
-    fontWeight: '500',
+    fontWeight: '600',
   },
 });

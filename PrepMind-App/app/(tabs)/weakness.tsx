@@ -4,7 +4,7 @@ import {
   TouchableOpacity, ActivityIndicator, RefreshControl,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Colors, Spacing, Radius } from '@/constants/theme';
+import { Colors, Spacing, Radius, Shadows, Typography } from '@/constants/theme';
 import { useAuth } from '@/hooks/useAuth';
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:8000';
@@ -22,9 +22,9 @@ type Summary = {
 };
 
 const STATUS_COLORS = {
-  weak: '#ba1a1a',      // Red
-  moderate: '#f59e0b',  // Yellow
-  strong: '#10b981',    // Green
+  weak: Colors.error,
+  moderate: Colors.warning,
+  strong: Colors.success,
 };
 
 const LEVEL_LABELS = {
@@ -98,7 +98,9 @@ export default function WeaknessScreen() {
     return (
       <SafeAreaView style={styles.safe}>
         <View style={styles.center}>
-          <ActivityIndicator size="large" color={Colors.primary} />
+          <View style={styles.loadingIconContainer}>
+            <ActivityIndicator size="large" color={Colors.primary} />
+          </View>
           <Text style={styles.loadingText}>Loading your analytics...</Text>
         </View>
       </SafeAreaView>
@@ -246,6 +248,8 @@ export default function WeaknessScreen() {
             <Text style={styles.createTestText}>Create Test</Text>
           </TouchableOpacity>
         </View>
+
+        <View style={{ height: 100 }} />
       </ScrollView>
     </SafeAreaView>
   );
@@ -254,7 +258,7 @@ export default function WeaknessScreen() {
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
-    backgroundColor: '#f8f9ff',
+    backgroundColor: Colors.background,
   },
   center: {
     flex: 1,
@@ -262,11 +266,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: Spacing.xl,
   },
+  loadingIconContainer: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    backgroundColor: Colors.surfaceContainer,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
   loadingText: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 15,
-    color: '#3f4851',
-    marginTop: 16,
+    ...Typography.body,
+    marginTop: 12,
   },
   scroll: {
     padding: Spacing.md,
@@ -281,15 +292,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
-    backgroundColor: '#ffffff',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(190, 199, 211, 0.15)',
+    backgroundColor: Colors.surfaceCard,
+    ...Shadows.subtle,
   },
   headerAvatarBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#eff4ff',
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: Colors.surfaceContainer,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -297,25 +307,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   headerTitle: {
-    fontFamily: 'PlusJakartaSans_700Bold',
+    ...Typography.subtitle,
     fontSize: 18,
-    color: '#006399',
-    fontWeight: '700',
+    color: Colors.primary,
   },
   superBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#eff4ff',
+    backgroundColor: Colors.accentGhost,
     borderRadius: Radius.full,
     paddingHorizontal: 10,
     paddingVertical: 5,
-    gap: 3,
+    gap: 4,
   },
   superBadgeIcon: {
     fontSize: 12,
   },
   superBadgeText: {
-    color: '#632ce5',
+    color: Colors.accent,
     fontFamily: 'PlusJakartaSans_700Bold',
     fontSize: 10,
     fontWeight: '800',
@@ -330,40 +339,38 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   pageTitle: {
-    fontFamily: 'PlusJakartaSans_700Bold',
-    fontSize: 20,
-    color: '#121c2a',
+    ...Typography.h3,
     textAlign: 'center',
-    fontWeight: '700',
   },
   pageSubtitle: {
-    fontFamily: 'Inter_400Regular',
+    ...Typography.body,
     fontSize: 13,
-    color: '#3f4851',
     textAlign: 'center',
-    lineHeight: 18,
     paddingHorizontal: Spacing.sm,
   },
 
   // Error block
   errorCard: {
-    backgroundColor: '#ffdad6',
+    backgroundColor: Colors.errorContainer,
     borderRadius: Radius.lg,
     padding: Spacing.md,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.15)',
   },
   errorText: {
     fontFamily: 'Inter_400Regular',
     fontSize: 13,
-    color: '#ba1a1a',
+    color: Colors.error,
     flex: 1,
   },
   retryText: {
     fontFamily: 'Inter_600SemiBold',
     fontSize: 13,
-    color: '#006399',
+    color: Colors.primary,
+    fontWeight: '600',
   },
 
   // Bento Grid Layout
@@ -372,23 +379,16 @@ const styles = StyleSheet.create({
     gap: Spacing.md,
   },
   accuracyCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: Radius.xl,
+    backgroundColor: Colors.surfaceCard,
+    borderRadius: Radius.xxl,
     padding: Spacing.lg,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(190, 199, 211, 0.3)',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.03,
-    shadowRadius: 8,
-    elevation: 1,
+    ...Shadows.card,
   },
   accuracyLabel: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 12,
-    color: '#6f7882',
+    ...Typography.caption,
+    color: Colors.onSurfaceMuted,
   },
   accuracyValueRow: {
     flexDirection: 'row',
@@ -396,22 +396,22 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   accuracyValue: {
-    fontFamily: 'PlusJakartaSans_700Bold',
-    fontSize: 40,
-    color: '#121c2a',
+    fontFamily: 'PlusJakartaSans_800ExtraBold',
+    fontSize: 44,
+    color: Colors.onSurface,
     fontWeight: '800',
   },
   accuracyPercent: {
     fontFamily: 'PlusJakartaSans_700Bold',
     fontSize: 20,
-    color: '#3f4851',
+    color: Colors.onSurfaceVariant,
     fontWeight: '700',
     marginLeft: 1,
   },
   statusChip: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f59e0b1c',
+    backgroundColor: Colors.warningContainer,
     paddingHorizontal: Spacing.sm,
     paddingVertical: 4,
     borderRadius: Radius.full,
@@ -419,27 +419,23 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   statusChipArrow: {
-    color: '#f59e0b',
+    color: Colors.warning,
     fontSize: 11,
   },
   statusChipText: {
-    fontFamily: 'Inter_500Medium',
+    fontFamily: 'Inter_600SemiBold',
     fontSize: 11,
-    color: '#f59e0b',
+    color: '#92400E',
     fontWeight: '600',
   },
 
   criticalCard: {
-    backgroundColor: '#ffdad633',
-    borderRadius: Radius.xl,
+    backgroundColor: 'rgba(239, 68, 68, 0.04)',
+    borderRadius: Radius.xxl,
     padding: Spacing.lg,
     borderWidth: 1,
-    borderColor: 'rgba(186, 26, 26, 0.2)',
-    shadowColor: '#ba1a1a',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.02,
-    shadowRadius: 8,
-    elevation: 1,
+    borderColor: 'rgba(239, 68, 68, 0.12)',
+    ...Shadows.subtle,
   },
   criticalHeader: {
     flexDirection: 'row',
@@ -447,10 +443,10 @@ const styles = StyleSheet.create({
     gap: Spacing.md,
   },
   warningIconContainer: {
-    width: 40,
-    height: 40,
+    width: 42,
+    height: 42,
     borderRadius: Radius.lg,
-    backgroundColor: 'rgba(186, 26, 26, 0.1)',
+    backgroundColor: Colors.errorContainer,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -458,23 +454,18 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   criticalLabel: {
-    fontFamily: 'Inter_500Medium',
-    fontSize: 10,
-    color: '#ba1a1a',
+    ...Typography.overline,
+    color: Colors.error,
     letterSpacing: 1,
-    fontWeight: '700',
   },
   criticalTopic: {
-    fontFamily: 'PlusJakartaSans_700Bold',
+    ...Typography.h3,
     fontSize: 18,
-    color: '#121c2a',
-    fontWeight: '700',
     marginTop: 2,
   },
   criticalDesc: {
-    fontFamily: 'Inter_400Regular',
+    ...Typography.body,
     fontSize: 13,
-    color: '#3f4851',
     lineHeight: 18,
     marginTop: Spacing.md,
     marginBottom: Spacing.md,
@@ -482,23 +473,23 @@ const styles = StyleSheet.create({
   revisionBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#ba1a1a',
+    backgroundColor: Colors.error,
     borderRadius: Radius.lg,
     paddingHorizontal: Spacing.md,
     paddingVertical: 8,
     alignSelf: 'flex-start',
     gap: 6,
-    shadowColor: '#ba1a1a',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 2,
+    shadowColor: Colors.error,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 4,
   },
   revisionBtnIcon: {
     fontSize: 12,
   },
   revisionBtnText: {
-    fontFamily: 'Inter_500Medium',
+    fontFamily: 'Inter_600SemiBold',
     fontSize: 12,
     color: '#ffffff',
     fontWeight: '600',
@@ -506,28 +497,19 @@ const styles = StyleSheet.create({
 
   // Detailed Breakdown Card
   breakdownCard: {
-    backgroundColor: '#ffffff',
-    borderRadius: Radius.xl,
+    backgroundColor: Colors.surfaceCard,
+    borderRadius: Radius.xxl,
     padding: Spacing.lg,
-    borderWidth: 1,
-    borderColor: 'rgba(190, 199, 211, 0.3)',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.03,
-    shadowRadius: 10,
-    elevation: 1,
+    ...Shadows.card,
   },
   breakdownTitle: {
-    fontFamily: 'PlusJakartaSans_700Bold',
-    fontSize: 16,
-    color: '#121c2a',
-    fontWeight: '700',
+    ...Typography.subtitle,
   },
   breakdownHeader: {
     flexDirection: 'column',
     gap: Spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(190, 199, 211, 0.15)',
+    borderBottomColor: Colors.outlineFaint,
     paddingBottom: Spacing.sm,
     marginBottom: Spacing.md,
   },
@@ -546,9 +528,8 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   legendText: {
-    fontFamily: 'Inter_400Regular',
+    ...Typography.caption,
     fontSize: 11,
-    color: '#6f7882',
   },
   breakdownList: {
     gap: Spacing.md,
@@ -572,7 +553,7 @@ const styles = StyleSheet.create({
   subjectName: {
     fontFamily: 'Inter_500Medium',
     fontSize: 14,
-    color: '#121c2a',
+    color: Colors.onSurface,
   },
   subjectScore: {
     fontFamily: 'PlusJakartaSans_700Bold',
@@ -581,7 +562,7 @@ const styles = StyleSheet.create({
   },
   barTrack: {
     height: 8,
-    backgroundColor: '#eff4ff',
+    backgroundColor: Colors.surfaceContainer,
     borderRadius: Radius.full,
     overflow: 'hidden',
   },
@@ -592,12 +573,12 @@ const styles = StyleSheet.create({
 
   // Recommended action banner
   recommendedBanner: {
-    backgroundColor: '#e6eeff',
-    borderRadius: Radius.xl,
+    backgroundColor: Colors.primaryGhost,
+    borderRadius: Radius.xxl,
     padding: Spacing.lg,
     gap: Spacing.md,
     borderWidth: 1,
-    borderColor: 'rgba(0, 99, 153, 0.15)',
+    borderColor: Colors.primaryGlow,
   },
   recommendedHeader: {
     flexDirection: 'row',
@@ -605,42 +586,40 @@ const styles = StyleSheet.create({
     gap: Spacing.md,
   },
   sparkleIconBg: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#006399',
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
+    ...Shadows.primaryGlow,
   },
   sparkleIcon: {
     fontSize: 18,
     color: '#ffffff',
   },
   recommendedTitle: {
-    fontFamily: 'PlusJakartaSans_700Bold',
-    fontSize: 16,
-    color: '#006399',
-    fontWeight: '700',
+    ...Typography.subtitle,
+    color: Colors.primary,
   },
   recommendedDesc: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 13,
-    color: '#3f4851',
+    ...Typography.caption,
+    color: Colors.onSurfaceVariant,
     marginTop: 2,
   },
   createTestBtn: {
-    backgroundColor: '#ffffff',
+    backgroundColor: Colors.surfaceCard,
     borderRadius: Radius.lg,
     paddingVertical: 10,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
-    borderColor: '#006399',
+    borderWidth: 1.5,
+    borderColor: Colors.primary,
   },
   createTestText: {
     fontFamily: 'Inter_600SemiBold',
     fontSize: 13,
-    color: '#006399',
+    color: Colors.primary,
     fontWeight: '600',
   },
 });
