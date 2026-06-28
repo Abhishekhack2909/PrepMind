@@ -19,7 +19,7 @@
 
 ---
 
-## Tech Stack
+## Tech-Stack
 
 ### Frontend (PrepMind-App)
 
