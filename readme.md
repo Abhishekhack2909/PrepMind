@@ -35,7 +35,7 @@
 - **Groq** (`llama-3.1-8b-instant` + `whisper-large-v3-turbo`) — fast text generation + STT
 - **ChromaDB** — vector database for RAG (local persistent)
 - **SentenceTransformers** (`all-MiniLM-L6-v2`) — text embeddings
-- **Supabase** — PostgreSQL + Row Level Security
+- **Supabase** — PostgreSQL +  Row Level Security
 
 ---
 
