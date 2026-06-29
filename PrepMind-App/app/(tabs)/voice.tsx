@@ -1,145 +1,377 @@
-import { useState, useRef } from 'react';
+/**
+ * PrepMind Voice Agent — Phase 10
+ *
+ * Full conversational voice experience: speak → AI answers in voice → continue.
+ *
+ * Architecture (Web):
+ *   STT:  window.SpeechRecognition (Chrome/Edge built-in — no API key needed)
+ *   LLM:  POST /api/voice/chat  (Groq LLM with conversation history)
+ *   TTS:  window.speechSynthesis (browser built-in)
+ *
+ * The agent maintains full multi-turn memory by sending `history` with
+ * every request, so follow-up questions ("Tell me more", "Give an example")
+ * work naturally.
+ *
+ * UI States:
+ *   idle      → Soft ambient glow orb, suggestions visible
+ *   listening → Orb turns red, concentric rings pulse outward
+ *   thinking  → Orb pulses gently, "Thinking..." text
+ *   speaking  → Orb glows blue-violet with wave animation, TTS active
+ */
+
+import { useState, useRef, useEffect, useCallback } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, ScrollView,
-  SafeAreaView, Platform, ActivityIndicator, Animated, TextInput, KeyboardAvoidingView,
+  SafeAreaView, Platform, ActivityIndicator, Animated,
+  TextInput, KeyboardAvoidingView, Easing,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Colors, Spacing, Radius, Shadows, Typography } from '@/constants/theme';
-import { askQuestion, type AskResult } from '@/services/api';
+import { chatWithVoiceAgent, type ConversationTurn } from '@/services/api';
 
-type State = 'idle' | 'listening' | 'thinking' | 'result' | 'error';
+// ── Types ─────────────────────────────────────────────────────────────────────
 
-export default function VoiceScreen() {
+type AgentState = 'idle' | 'listening' | 'thinking' | 'speaking' | 'error';
+
+type Message = {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: Date;
+  sources?: string[];
+};
+
+// ── Suggestion prompts shown when idle ────────────────────────────────────────
+
+const SUGGESTIONS = [
+  { emoji: '🏛️', label: 'Explain Directive Principles', query: 'Explain the Directive Principles of State Policy and their importance.' },
+  { emoji: '📜', label: 'Preamble summary', query: 'Give me a concise summary of the Indian Constitution Preamble.' },
+  { emoji: '🗺️', label: 'Modern India timeline', query: 'Summarize the key events in Modern Indian history from 1857 to 1947.' },
+  { emoji: '🌿', label: 'Environmental acts', query: 'What are the major environmental protection acts in India?' },
+];
+
+// ── Component ─────────────────────────────────────────────────────────────────
+
+export default function VoiceAgentScreen() {
   const router = useRouter();
-  const [state, setState] = useState<State>('idle');
-  const [transcript, setTranscript] = useState('');
-  const [inputText, setInputText] = useState('');
-  const [result, setResult] = useState<AskResult | null>(null);
-  const [error, setError] = useState('');
-  const pulseAnim = useRef(new Animated.Value(1)).current;
+  const scrollRef = useRef<ScrollView>(null);
 
-  // ── Pulse animation for recording state ────────────────────────────────────
-  function startPulse() {
+  // State
+  const [agentState, setAgentState] = useState<AgentState>('idle');
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [history, setHistory] = useState<ConversationTurn[]>([]);
+  const [inputText, setInputText] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
+  const [isSpeechSupported, setIsSpeechSupported] = useState(true);
+  const [autoResume, setAutoResume] = useState(true); // auto-listen after AI speaks
+
+  // Refs for Web Speech / speechSynthesis (avoid re-renders)
+  const recognitionRef = useRef<any>(null);
+  const synthRef = useRef<SpeechSynthesisUtterance | null>(null);
+
+  // ── Animated values ─────────────────────────────────────────────────────────
+  const orbScale  = useRef(new Animated.Value(1)).current;
+  const orbOpacity = useRef(new Animated.Value(0.85)).current;
+  const ring1Scale = useRef(new Animated.Value(1)).current;
+  const ring2Scale = useRef(new Animated.Value(1)).current;
+  const ring3Scale = useRef(new Animated.Value(1)).current;
+
+  // ── Check browser support on mount ─────────────────────────────────────────
+  useEffect(() => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      // @ts-ignore
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) setIsSpeechSupported(false);
+    }
+  }, []);
+
+  // ── Scroll to bottom when new message arrives ───────────────────────────────
+  useEffect(() => {
+    if (messages.length > 0) {
+      setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
+    }
+  }, [messages.length]);
+
+  // ── Animations ─────────────────────────────────────────────────────────────
+
+  const stopAllAnimations = useCallback(() => {
+    orbScale.stopAnimation();
+    orbOpacity.stopAnimation();
+    ring1Scale.stopAnimation();
+    ring2Scale.stopAnimation();
+    ring3Scale.stopAnimation();
+    orbScale.setValue(1);
+    orbOpacity.setValue(0.85);
+    ring1Scale.setValue(1);
+    ring2Scale.setValue(1);
+    ring3Scale.setValue(1);
+  }, [orbScale, orbOpacity, ring1Scale, ring2Scale, ring3Scale]);
+
+  const startIdleAnimation = useCallback(() => {
+    stopAllAnimations();
     Animated.loop(
       Animated.sequence([
-        Animated.timing(pulseAnim, { toValue: 1.15, duration: 600, useNativeDriver: Platform.OS !== 'web' }),
-        Animated.timing(pulseAnim, { toValue: 1, duration: 600, useNativeDriver: Platform.OS !== 'web' }),
+        Animated.timing(orbScale, { toValue: 1.04, duration: 2000, useNativeDriver: true, easing: Easing.inOut(Easing.ease) }),
+        Animated.timing(orbScale, { toValue: 1, duration: 2000, useNativeDriver: true, easing: Easing.inOut(Easing.ease) }),
       ])
     ).start();
-  }
+  }, []);
 
-  function stopPulse() {
-    pulseAnim.stopAnimation();
-    pulseAnim.setValue(1);
-  }
+  const startListeningAnimation = useCallback(() => {
+    stopAllAnimations();
+    // Orb pulses red-ish (handled via color state), rings expand outward
+    const ringLoop = (ring: Animated.Value, delay: number) =>
+      Animated.loop(
+        Animated.sequence([
+          Animated.delay(delay),
+          Animated.timing(ring, { toValue: 1.8, duration: 1200, useNativeDriver: true }),
+          Animated.timing(ring, { toValue: 1, duration: 0, useNativeDriver: true }),
+        ])
+      ).start();
+    ringLoop(ring1Scale, 0);
+    ringLoop(ring2Scale, 400);
+    ringLoop(ring3Scale, 800);
+  }, []);
 
-  // ── Web Speech API ─────────────────────────────────────────────────────────
-  function startWebSpeech() {
-    if (typeof window === 'undefined') return;
+  const startThinkingAnimation = useCallback(() => {
+    stopAllAnimations();
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(orbScale, { toValue: 1.08, duration: 600, useNativeDriver: true }),
+        Animated.timing(orbScale, { toValue: 0.94, duration: 600, useNativeDriver: true }),
+      ])
+    ).start();
+  }, []);
+
+  const startSpeakingAnimation = useCallback(() => {
+    stopAllAnimations();
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(orbScale, { toValue: 1.12, duration: 500, useNativeDriver: true }),
+        Animated.timing(orbScale, { toValue: 1, duration: 500, useNativeDriver: true }),
+      ])
+    ).start();
+  }, []);
+
+  // Run animation when state changes
+  useEffect(() => {
+    switch (agentState) {
+      case 'idle':      startIdleAnimation(); break;
+      case 'listening': startListeningAnimation(); break;
+      case 'thinking':  startThinkingAnimation(); break;
+      case 'speaking':  startSpeakingAnimation(); break;
+      case 'error':     stopAllAnimations(); break;
+    }
+  }, [agentState]);
+
+  // ── Orb color logic ─────────────────────────────────────────────────────────
+  const getOrbColor = () => {
+    switch (agentState) {
+      case 'idle':      return Colors.primary;
+      case 'listening': return '#EF4444'; // red
+      case 'thinking':  return '#F59E0B'; // amber
+      case 'speaking':  return Colors.accent; // violet
+      case 'error':     return '#EF4444';
+    }
+  };
+
+  const getOrbGlow = () => {
+    switch (agentState) {
+      case 'idle':      return 'rgba(0,102,255,0.25)';
+      case 'listening': return 'rgba(239,68,68,0.30)';
+      case 'thinking':  return 'rgba(245,158,11,0.30)';
+      case 'speaking':  return 'rgba(124,58,237,0.35)';
+      case 'error':     return 'rgba(239,68,68,0.20)';
+    }
+  };
+
+  const getOrbEmoji = () => {
+    switch (agentState) {
+      case 'idle':      return '🎙️';
+      case 'listening': return '👂';
+      case 'thinking':  return '💭';
+      case 'speaking':  return '🗣️';
+      case 'error':     return '⚠️';
+    }
+  };
+
+  const getStatusLabel = () => {
+    switch (agentState) {
+      case 'idle':      return 'Tap to start conversation';
+      case 'listening': return 'Listening... tap to stop';
+      case 'thinking':  return 'Thinking...';
+      case 'speaking':  return 'Speaking... tap to interrupt';
+      case 'error':     return errorMsg;
+    }
+  };
+
+  // ── Speech Synthesis (TTS) ─────────────────────────────────────────────────
+  const speakText = useCallback((text: string, onEnd?: () => void) => {
+    if (typeof window === 'undefined' || !window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+    utterance.lang = 'en-IN';
+    // Prefer a natural-sounding voice
+    const voices = window.speechSynthesis.getVoices();
+    const preferred = voices.find(v => v.lang === 'en-IN') ||
+                      voices.find(v => v.lang.startsWith('en')) ||
+                      voices[0];
+    if (preferred) utterance.voice = preferred;
+    utterance.onend = () => {
+      setAgentState('idle');
+      onEnd?.();
+    };
+    utterance.onerror = () => setAgentState('idle');
+    synthRef.current = utterance;
+    window.speechSynthesis.speak(utterance);
+  }, []);
+
+  const stopSpeaking = () => {
+    if (typeof window !== 'undefined' && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    }
+    setAgentState('idle');
+  };
+
+  // ── Speech Recognition (STT) ───────────────────────────────────────────────
+  const startListening = useCallback(() => {
+    if (Platform.OS !== 'web' || typeof window === 'undefined') return;
     // @ts-ignore
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SpeechRecognition) {
-      setError('Speech recognition not supported in this browser. Try Chrome or Edge.');
-      setState('error');
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) {
+      setErrorMsg('Speech recognition not supported. Use Chrome or Edge, or type below.');
+      setAgentState('error');
       return;
     }
 
-    const recognition = new SpeechRecognition();
+    const recognition = new SR();
     recognition.continuous = false;
     recognition.lang = 'en-IN';
     recognition.interimResults = false;
+    recognitionRef.current = recognition;
 
-    recognition.onstart = () => {
-      setState('listening');
-      startPulse();
-    };
+    recognition.onstart = () => setAgentState('listening');
 
     recognition.onresult = async (event: any) => {
-      const text = event.results[0][0].transcript;
-      setTranscript(text);
-      stopPulse();
-      setState('thinking');
-      await getAnswer(text);
+      const text = event.results[0][0].transcript.trim();
+      if (!text) return;
+      await handleUserMessage(text);
     };
 
     recognition.onerror = (event: any) => {
-      stopPulse();
-      setError(`Mic error: ${event.error}. Make sure mic is allowed.`);
-      setState('error');
+      if (event.error === 'aborted') return; // user manually stopped
+      setErrorMsg(`Microphone error: ${event.error}. Please allow mic access.`);
+      setAgentState('error');
     };
 
-    recognition.onend = () => stopPulse();
+    recognition.onend = () => {
+      if (agentState === 'listening') setAgentState('idle');
+    };
+
     recognition.start();
-  }
+  }, [history]);
 
-  // ── Get RAG answer for query ────────────────────────────────────────────────
-  async function getAnswer(question: string) {
+  const stopListening = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.abort();
+      recognitionRef.current = null;
+    }
+    setAgentState('idle');
+  };
+
+  // ── Core agent logic ────────────────────────────────────────────────────────
+  const handleUserMessage = useCallback(async (question: string) => {
+    setAgentState('thinking');
+
+    // Immediately show user message in the log
+    const userMsg: Message = {
+      id: `u_${Date.now()}`,
+      role: 'user',
+      content: question,
+      timestamp: new Date(),
+    };
+    setMessages(prev => [...prev, userMsg]);
+
     try {
-      const data = await askQuestion(question, true);
-      setResult(data);
-      setState('result');
+      const result = await chatWithVoiceAgent(question, history);
+
+      const aiMsg: Message = {
+        id: `a_${Date.now()}`,
+        role: 'assistant',
+        content: result.answer,
+        timestamp: new Date(),
+        sources: result.sources,
+      };
+      setMessages(prev => [...prev, aiMsg]);
+      setHistory(result.updated_history);
+
+      // Speak the answer
+      setAgentState('speaking');
+      speakText(result.answer, () => {
+        if (autoResume) startListening();
+      });
+
     } catch (err: any) {
-      setError(err.message || 'Could not get answer. Is the backend running?');
-      setState('error');
+      const msg = err.message || 'Could not reach the backend. Is it running?';
+      setErrorMsg(msg);
+      setAgentState('error');
     }
-  }
+  }, [history, autoResume, speakText, startListening]);
 
-  function handleMicPress() {
-    if (state === 'listening') {
-      // Toggle off / stop
-      stopPulse();
-      setState('idle');
-      return;
+  // ── Orb press handler ───────────────────────────────────────────────────────
+  const handleOrbPress = () => {
+    switch (agentState) {
+      case 'idle':
+        setErrorMsg('');
+        startListening();
+        break;
+      case 'listening':
+        stopListening();
+        break;
+      case 'speaking':
+        stopSpeaking();
+        break;
+      case 'thinking':
+        // Do nothing while thinking
+        break;
+      case 'error':
+        setAgentState('idle');
+        setErrorMsg('');
+        break;
     }
+  };
 
-    setTranscript('');
-    setResult(null);
-    setError('');
-    if (Platform.OS === 'web') {
-      startWebSpeech();
-    } else {
-      // Fallback/Simulated voice query for demo in Native
-      setState('listening');
-      startPulse();
-      setTimeout(() => {
-        stopPulse();
-        const demoQ = "What is the significance of the Dandi March?";
-        setTranscript(demoQ);
-        setState('thinking');
-        getAnswer(demoQ);
-      }, 2000);
-    }
-  }
-
-  async function handleSendText() {
-    if (!inputText.trim()) return;
-    const query = inputText.trim();
+  // ── Text input send ─────────────────────────────────────────────────────────
+  const handleSendText = async () => {
+    const q = inputText.trim();
+    if (!q || agentState === 'thinking') return;
     setInputText('');
-    setTranscript(query);
-    setResult(null);
-    setError('');
-    setState('thinking');
-    await getAnswer(query);
-  }
+    stopSpeaking();
+    await handleUserMessage(q);
+  };
 
-  function handleSuggestionPress(query: string) {
+  // ── Suggestion press ────────────────────────────────────────────────────────
+  const handleSuggestion = async (query: string) => {
+    if (agentState === 'thinking') return;
+    stopSpeaking();
+    await handleUserMessage(query);
+  };
+
+  // ── Reset ────────────────────────────────────────────────────────────────────
+  const reset = () => {
+    stopListening();
+    stopSpeaking();
+    setMessages([]);
+    setHistory([]);
     setInputText('');
-    setTranscript(query);
-    setResult(null);
-    setError('');
-    setState('thinking');
-    getAnswer(query);
-  }
+    setErrorMsg('');
+    setAgentState('idle');
+  };
 
-  function reset() {
-    setState('idle');
-    setTranscript('');
-    setInputText('');
-    setResult(null);
-    setError('');
-  }
-
-  const showChat = state !== 'idle' || transcript !== '';
+  // ── Render ──────────────────────────────────────────────────────────────────
+  const hasMessages = messages.length > 0;
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -149,187 +381,180 @@ export default function VoiceScreen() {
       >
         {/* ── Top Header ── */}
         <View style={styles.header}>
-          <TouchableOpacity
-            style={styles.headerCircleBtn}
-            onPress={() => router.back()}
-            activeOpacity={0.8}
-          >
+          <TouchableOpacity style={styles.headerBtn} onPress={() => router.back()} activeOpacity={0.8}>
             <Text style={styles.headerBtnText}>✕</Text>
           </TouchableOpacity>
 
-          <View style={styles.queriesLeftBadge}>
-            <Text style={styles.queriesLeftText}>1/2 queries left today</Text>
-            <TouchableOpacity activeOpacity={0.7}>
-              <Text style={styles.upgradeText}>Upgrade ⚡</Text>
-            </TouchableOpacity>
+          <View style={styles.headerCenter}>
+            <Text style={styles.headerTitle}>Voice Agent</Text>
+            <View style={[styles.liveDot, agentState !== 'idle' && styles.liveDotActive]} />
           </View>
 
-          <TouchableOpacity style={styles.headerCircleBtn} activeOpacity={0.8} onPress={reset}>
+          <TouchableOpacity style={styles.headerBtn} onPress={reset} activeOpacity={0.8}>
             <Text style={styles.headerBtnText}>🔄</Text>
           </TouchableOpacity>
         </View>
 
-        {/* ── Main Chat / Idle Content ── */}
-        <ScrollView
-          contentContainerStyle={[styles.scroll, !showChat && styles.scrollCenter]}
-          showsVerticalScrollIndicator={false}
-          keyboardShouldPersistTaps="handled"
-        >
-          {!showChat ? (
-            /* Idle Central Brand Box */
-            <View style={styles.brandContainer}>
-              <View style={styles.brandIconContainer}>
-                <Text style={styles.brandIcon}>🧪</Text>
-              </View>
-              <Text style={styles.brandTitle}>Ask PrepMind</Text>
-              <Text style={styles.brandSubtitle}>Clear your UPSC doubts instantly by voice or text</Text>
-            </View>
-          ) : (
-            /* Active Chat Messages */
-            <View style={styles.chatWrapper}>
-              {/* User transcribed text */}
-              <View style={styles.userBubble}>
-                <Text style={styles.userText}>{transcript}</Text>
-              </View>
+        {/* ── Auto-resume toggle ── */}
+        <View style={styles.autoResumeRow}>
+          <Text style={styles.autoResumeLabel}>Auto-listen after response</Text>
+          <TouchableOpacity
+            style={[styles.toggle, autoResume && styles.toggleActive]}
+            onPress={() => setAutoResume(v => !v)}
+            activeOpacity={0.8}
+          >
+            <View style={[styles.toggleThumb, autoResume && styles.toggleThumbActive]} />
+          </TouchableOpacity>
+        </View>
 
-              {/* AI response card */}
-              <View style={styles.aiCard}>
-                {/* Robot badge overlay */}
-                <View style={styles.robotOverlay}>
-                  <Text style={styles.robotIcon}>🤖</Text>
-                </View>
-
-                {state === 'thinking' ? (
-                  <View style={styles.thinkingContainer}>
-                    <ActivityIndicator size="small" color={Colors.primary} />
-                    <Text style={styles.thinkingText}>Thinking...</Text>
-                  </View>
-                ) : state === 'error' ? (
-                  <View>
-                    <Text style={styles.errorLabel}>⚠️ Error</Text>
-                    <Text style={styles.errorText}>{error}</Text>
-                    <TouchableOpacity onPress={reset} style={styles.retryBtn}>
-                      <Text style={styles.retryText}>Retry</Text>
-                    </TouchableOpacity>
-                  </View>
-                ) : (
-                  <View style={styles.aiResponseContent}>
-                    <Text style={styles.aiText}>{result?.answer}</Text>
-
-                    {result?.sources && result.sources.length > 0 && (
-                      <View style={styles.sourcesContainer}>
-                        <Text style={styles.sourcesLabel}>📚 Context Sources:</Text>
-                        {result.sources.map((src, idx) => (
-                          <Text key={idx} style={styles.sourceText}>• {src}</Text>
-                        ))}
-                      </View>
-                    )}
-
-                    <TouchableOpacity style={styles.speakBtn} activeOpacity={0.7}>
-                      <Text style={styles.speakBtnText}>🔊 Read Aloud</Text>
-                    </TouchableOpacity>
-                  </View>
+        {/* ── Conversation log OR Idle content ── */}
+        {hasMessages ? (
+          <ScrollView
+            ref={scrollRef}
+            style={styles.logScroll}
+            contentContainerStyle={styles.logContent}
+            showsVerticalScrollIndicator={false}
+          >
+            {messages.map(msg => (
+              <View
+                key={msg.id}
+                style={[
+                  styles.messageBubble,
+                  msg.role === 'user' ? styles.userBubble : styles.aiBubble,
+                ]}
+              >
+                <Text style={styles.bubbleRole}>
+                  {msg.role === 'user' ? '🧑 You' : '🤖 PrepMind'}
+                </Text>
+                <Text style={[
+                  styles.bubbleText,
+                  msg.role === 'assistant' && styles.aiText,
+                ]}>
+                  {msg.content}
+                </Text>
+                {msg.sources && msg.sources.length > 0 && (
+                  <Text style={styles.sourcesText}>📚 {msg.sources.join(', ')}</Text>
                 )}
               </View>
+            ))}
+
+            {/* Thinking indicator inside chat */}
+            {agentState === 'thinking' && (
+              <View style={[styles.messageBubble, styles.aiBubble, styles.thinkingBubble]}>
+                <ActivityIndicator size="small" color={Colors.accent} />
+                <Text style={styles.thinkingText}>PrepMind is thinking...</Text>
+              </View>
+            )}
+          </ScrollView>
+        ) : (
+          /* Idle hero section */
+          <View style={styles.heroContainer}>
+            <Text style={styles.heroTitle}>Ask PrepMind Anything</Text>
+            <Text style={styles.heroSubtitle}>
+              Your personal UPSC voice tutor — multi-turn conversation powered by AI
+            </Text>
+            <View style={styles.suggestionsGrid}>
+              {SUGGESTIONS.map(s => (
+                <TouchableOpacity
+                  key={s.label}
+                  style={styles.suggestionChip}
+                  onPress={() => handleSuggestion(s.query)}
+                  activeOpacity={0.8}
+                >
+                  <Text style={styles.suggestionEmoji}>{s.emoji}</Text>
+                  <Text style={styles.suggestionLabel}>{s.label}</Text>
+                </TouchableOpacity>
+              ))}
             </View>
-          )}
-        </ScrollView>
-
-        {/* ── Float Suggestions (Idle only) ── */}
-        {!showChat && (
-          <View style={styles.suggestionsContainer}>
-            <TouchableOpacity
-              style={styles.suggestionChip}
-              activeOpacity={0.8}
-              onPress={() => handleSuggestionPress('Give me a daily prep strategy for Mains.')}
-            >
-              <Text style={styles.suggestionEmoji}>💡</Text>
-              <Text style={styles.suggestionText}>Prep strategy</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.suggestionChip}
-              activeOpacity={0.8}
-              onPress={() => handleSuggestionPress('Suggest major study topics for Art & Culture.')}
-            >
-              <Text style={styles.suggestionEmoji}>📖</Text>
-              <Text style={styles.suggestionText}>Study Topics</Text>
-            </TouchableOpacity>
           </View>
         )}
 
-        {/* ── Sticky Bottom Input Bar — frosted glass feel ── */}
-        <View style={styles.bottomBar}>
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.input}
-              placeholder={state === 'listening' ? 'Listening...' : 'Try asking by voice...'}
-              placeholderTextColor={Colors.onSurfaceMuted}
-              value={inputText}
-              onChangeText={setInputText}
-              onSubmitEditing={handleSendText}
-              editable={state !== 'thinking'}
-            />
+        {/* ── Orb Section ── */}
+        <View style={styles.orbSection}>
+          {/* Ring animations (listening only) */}
+          {agentState === 'listening' && (
+            <>
+              <Animated.View style={[styles.ring, { transform: [{ scale: ring1Scale }], opacity: ring1Scale.interpolate({ inputRange: [1, 1.8], outputRange: [0.4, 0] }) }]} />
+              <Animated.View style={[styles.ring, styles.ring2, { transform: [{ scale: ring2Scale }], opacity: ring2Scale.interpolate({ inputRange: [1, 1.8], outputRange: [0.3, 0] }) }]} />
+              <Animated.View style={[styles.ring, styles.ring3, { transform: [{ scale: ring3Scale }], opacity: ring3Scale.interpolate({ inputRange: [1, 1.8], outputRange: [0.2, 0] }) }]} />
+            </>
+          )}
 
-            <View style={styles.actionRow}>
-              {/* Mic Icon with pulse background */}
-              <TouchableOpacity
-                style={styles.micBtn}
-                onPress={handleMicPress}
-                activeOpacity={0.8}
-                disabled={state === 'thinking'}
-              >
-                {state === 'listening' && (
-                  <Animated.View
-                    style={[
-                      styles.micPulse,
-                      {
-                        transform: [{ scale: pulseAnim }],
-                        opacity: pulseAnim.interpolate({
-                          inputRange: [1, 1.15],
-                          outputRange: [0.6, 0.2]
-                        })
-                      }
-                    ]}
-                  />
-                )}
-                <Text style={[styles.micIconText, state === 'listening' && { color: Colors.error }]}>
-                  {state === 'listening' ? '⏹️' : '🎙️'}
-                </Text>
-              </TouchableOpacity>
+          {/* Main Orb */}
+          <TouchableOpacity onPress={handleOrbPress} activeOpacity={0.85} disabled={agentState === 'thinking'}>
+            <Animated.View
+              style={[
+                styles.orb,
+                {
+                  backgroundColor: getOrbColor(),
+                  shadowColor: getOrbGlow(),
+                  transform: [{ scale: orbScale }],
+                },
+              ]}
+            >
+              <Text style={styles.orbEmoji}>{getOrbEmoji()}</Text>
+            </Animated.View>
+          </TouchableOpacity>
 
-              {/* Send Button — primary glow */}
-              <TouchableOpacity
-                style={styles.sendBtn}
-                onPress={handleSendText}
-                activeOpacity={0.8}
-                disabled={!inputText.trim() || state === 'thinking'}
-              >
-                <Text style={styles.sendIcon}>⬆️</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+          {/* Status label */}
+          <Text style={[styles.statusLabel, agentState === 'error' && styles.statusError]}>
+            {getStatusLabel()}
+          </Text>
+
+          {!isSpeechSupported && (
+            <Text style={styles.unsupportedNote}>
+              ℹ️ No mic detected — use text input below
+            </Text>
+          )}
+        </View>
+
+        {/* ── Text Input Bar ── */}
+        <View style={styles.inputBar}>
+          <TextInput
+            style={styles.input}
+            placeholder="Or type your question..."
+            placeholderTextColor={Colors.onSurfaceMuted}
+            value={inputText}
+            onChangeText={setInputText}
+            onSubmitEditing={handleSendText}
+            editable={agentState !== 'thinking'}
+            returnKeyType="send"
+          />
+          <TouchableOpacity
+            style={[styles.sendBtn, (!inputText.trim() || agentState === 'thinking') && styles.sendBtnDisabled]}
+            onPress={handleSendText}
+            activeOpacity={0.8}
+            disabled={!inputText.trim() || agentState === 'thinking'}
+          >
+            <Text style={styles.sendBtnText}>⬆</Text>
+          </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
+// ── Styles ────────────────────────────────────────────────────────────────────
+
+const ORB_SIZE = 100;
+
 const styles = StyleSheet.create({
   safe: {
     flex: 1,
     backgroundColor: Colors.background,
   },
+
+  // ── Header ────────────────────────────────────────────────────────────────
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.sm,
     backgroundColor: Colors.surfaceCard,
     ...Shadows.subtle,
   },
-  headerCircleBtn: {
+  headerBtn: {
     width: 38,
     height: 38,
     borderRadius: 19,
@@ -341,214 +566,102 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: Colors.onSurfaceVariant,
   },
-  queriesLeftBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: Colors.accentGhost,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: Radius.full,
-    gap: 6,
-  },
-  queriesLeftText: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 12,
-    color: Colors.onSurface,
-  },
-  upgradeText: {
-    fontFamily: 'Inter_600SemiBold',
-    fontSize: 12,
-    color: Colors.accent,
-    fontWeight: '700',
-  },
-
-  // Main scroll content
-  scroll: {
-    paddingHorizontal: Spacing.md,
-    paddingTop: Spacing.lg,
-    paddingBottom: 120,
-  },
-  scrollCenter: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    paddingBottom: 150,
-  },
-
-  // Idle Central Brand Box — gradient icon
-  brandContainer: {
-    alignItems: 'center',
-  },
-  brandIconContainer: {
-    width: 68,
-    height: 68,
-    borderRadius: 34,
-    backgroundColor: Colors.primary,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: Spacing.md,
-    ...Shadows.primaryGlow,
-  },
-  brandIcon: {
-    fontSize: 32,
-    color: '#ffffff',
-  },
-  brandTitle: {
-    ...Typography.h3,
-    color: Colors.primary,
-  },
-  brandSubtitle: {
-    ...Typography.body,
-    marginTop: 6,
-    textAlign: 'center',
-    maxWidth: '80%',
-  },
-
-  // Chat wrapper
-  chatWrapper: {
-    gap: Spacing.lg,
-    width: '100%',
-  },
-  userBubble: {
-    alignSelf: 'flex-end',
-    backgroundColor: Colors.surfaceContainer,
-    borderRadius: Radius.xl,
-    borderTopRightRadius: 4,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: 10,
-    maxWidth: '85%',
-    ...Shadows.subtle,
-  },
-  userText: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 15,
-    color: Colors.onSurface,
-    lineHeight: 22,
-  },
-  aiCard: {
-    alignSelf: 'flex-start',
-    backgroundColor: Colors.surfaceCard,
-    borderRadius: Radius.xl,
-    borderTopLeftRadius: 4,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.md,
-    maxWidth: '90%',
-    ...Shadows.card,
-    position: 'relative',
-    marginTop: 12,
-  },
-  robotOverlay: {
-    position: 'absolute',
-    left: -12,
-    top: -12,
-    backgroundColor: Colors.primary,
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: Colors.background,
-  },
-  robotIcon: {
-    fontSize: 12,
-  },
-  thinkingContainer: {
+  headerCenter: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    paddingVertical: 6,
-    paddingLeft: 8,
   },
-  thinkingText: {
-    ...Typography.body,
-  },
-  aiResponseContent: {
-    paddingLeft: 4,
-    paddingTop: 4,
-  },
-  aiText: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 14,
-    color: Colors.onSurfaceVariant,
-    lineHeight: 22,
-  },
-  sourcesContainer: {
-    marginTop: 10,
-    borderTopWidth: 1,
-    borderTopColor: Colors.outlineFaint,
-    paddingTop: 8,
-  },
-  sourcesLabel: {
-    ...Typography.overline,
-    marginBottom: 4,
-  },
-  sourceText: {
-    ...Typography.caption,
-    marginBottom: 2,
-  },
-  speakBtn: {
-    marginTop: 12,
-    backgroundColor: Colors.surfaceContainer,
-    borderRadius: Radius.full,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    alignSelf: 'flex-start',
-  },
-  speakBtnText: {
-    fontFamily: 'Inter_500Medium',
-    fontSize: 12,
-    color: Colors.primary,
-    fontWeight: '500',
-  },
-
-  // Error inside card
-  errorLabel: {
-    fontFamily: 'Inter_600SemiBold',
-    fontSize: 13,
-    color: Colors.error,
+  headerTitle: {
+    fontFamily: 'PlusJakartaSans_700Bold',
+    fontSize: 17,
+    color: Colors.onSurface,
     fontWeight: '700',
-    marginBottom: 4,
   },
-  errorText: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 13,
-    color: Colors.error,
-    lineHeight: 18,
-    marginBottom: 10,
+  liveDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: Colors.outline,
   },
-  retryBtn: {
-    backgroundColor: Colors.errorContainer,
-    borderRadius: Radius.md,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    alignSelf: 'flex-start',
-  },
-  retryText: {
-    fontFamily: 'Inter_500Medium',
-    fontSize: 12,
-    color: Colors.error,
-    fontWeight: '600',
+  liveDotActive: {
+    backgroundColor: Colors.success,
   },
 
-  // Suggestion Chips — glass feel
-  suggestionsContainer: {
+  // ── Auto-resume toggle ────────────────────────────────────────────────────
+  autoResumeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 10,
+    backgroundColor: Colors.surfaceCard,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.outlineFaint,
+  },
+  autoResumeLabel: {
+    fontFamily: 'Inter_400Regular',
+    fontSize: 13,
+    color: Colors.onSurfaceVariant,
+  },
+  toggle: {
+    width: 42,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: Colors.surfaceContainer,
+    justifyContent: 'center',
+    paddingHorizontal: 2,
+  },
+  toggleActive: {
+    backgroundColor: Colors.primary,
+  },
+  toggleThumb: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: '#fff',
+    ...Shadows.subtle,
+  },
+  toggleThumbActive: {
+    alignSelf: 'flex-end',
+  },
+
+  // ── Hero (idle) ───────────────────────────────────────────────────────────
+  heroContainer: {
+    flex: 1,
+    alignItems: 'center',
+    paddingTop: Spacing.xl,
+    paddingHorizontal: Spacing.md,
+  },
+  heroTitle: {
+    fontFamily: 'PlusJakartaSans_800ExtraBold',
+    fontSize: 22,
+    color: Colors.onSurface,
+    fontWeight: '800',
+    textAlign: 'center',
+    marginBottom: 6,
+  },
+  heroSubtitle: {
+    fontFamily: 'Inter_400Regular',
+    fontSize: 13,
+    color: Colors.onSurfaceMuted,
+    textAlign: 'center',
+    maxWidth: 280,
+    lineHeight: 20,
+    marginBottom: Spacing.lg,
+  },
+  suggestionsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'center',
     gap: 10,
-    position: 'absolute',
-    bottom: 100,
-    left: 0,
-    right: 0,
-    paddingHorizontal: Spacing.md,
+    justifyContent: 'center',
   },
   suggestionChip: {
     backgroundColor: Colors.surfaceCard,
     borderWidth: 1,
-    borderColor: Colors.outlineFaint,
+    borderColor: Colors.outlineVariant,
     borderRadius: Radius.full,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
@@ -557,75 +670,172 @@ const styles = StyleSheet.create({
   suggestionEmoji: {
     fontSize: 14,
   },
-  suggestionText: {
+  suggestionLabel: {
     fontFamily: 'Inter_500Medium',
-    fontSize: 13,
+    fontSize: 12,
     color: Colors.onSurface,
+    fontWeight: '500',
   },
 
-  // Bottom Input Bar — frosted glass
-  bottomBar: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: 'rgba(248, 250, 255, 0.92)',
-    paddingHorizontal: Spacing.md,
-    paddingTop: Spacing.sm,
-    paddingBottom: Platform.OS === 'ios' ? 24 : 16,
+  // ── Conversation log ──────────────────────────────────────────────────────
+  logScroll: {
+    flex: 1,
   },
-  inputContainer: {
+  logContent: {
+    paddingHorizontal: Spacing.md,
+    paddingTop: Spacing.md,
+    paddingBottom: 8,
+    gap: 12,
+  },
+  messageBubble: {
+    borderRadius: Radius.xl,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 12,
+    maxWidth: '88%',
+    gap: 4,
+  },
+  userBubble: {
+    alignSelf: 'flex-end',
+    backgroundColor: Colors.primary,
+    borderTopRightRadius: 4,
+    ...Shadows.primaryGlow,
+  },
+  aiBubble: {
+    alignSelf: 'flex-start',
     backgroundColor: Colors.surfaceCard,
-    borderRadius: Radius.full,
+    borderTopLeftRadius: 4,
+    ...Shadows.card,
+  },
+  bubbleRole: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 11,
+    color: 'rgba(255,255,255,0.75)',
+    fontWeight: '700',
+    marginBottom: 2,
+  },
+  bubbleText: {
+    fontFamily: 'Inter_400Regular',
+    fontSize: 14,
+    color: '#fff',
+    lineHeight: 21,
+  },
+  aiText: {
+    color: Colors.onSurface,
+  },
+  sourcesText: {
+    fontFamily: 'Inter_400Regular',
+    fontSize: 11,
+    color: Colors.onSurfaceMuted,
+    marginTop: 4,
+  },
+  thinkingBubble: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 6,
-    ...Shadows.card,
+    gap: 8,
+    paddingVertical: 14,
+  },
+  thinkingText: {
+    fontFamily: 'Inter_400Regular',
+    fontSize: 13,
+    color: Colors.onSurfaceVariant,
+  },
+
+  // ── Orb section ───────────────────────────────────────────────────────────
+  orbSection: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: Spacing.lg,
+    position: 'relative',
+  },
+  ring: {
+    position: 'absolute',
+    width: ORB_SIZE + 20,
+    height: ORB_SIZE + 20,
+    borderRadius: (ORB_SIZE + 20) / 2,
+    borderWidth: 2,
+    borderColor: '#EF4444',
+  },
+  ring2: {
+    width: ORB_SIZE + 40,
+    height: ORB_SIZE + 40,
+    borderRadius: (ORB_SIZE + 40) / 2,
+  },
+  ring3: {
+    width: ORB_SIZE + 60,
+    height: ORB_SIZE + 60,
+    borderRadius: (ORB_SIZE + 60) / 2,
+  },
+  orb: {
+    width: ORB_SIZE,
+    height: ORB_SIZE,
+    borderRadius: ORB_SIZE / 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.5,
+    shadowRadius: 24,
+    elevation: 12,
+  },
+  orbEmoji: {
+    fontSize: 38,
+  },
+  statusLabel: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 13,
+    color: Colors.onSurfaceMuted,
+    marginTop: 14,
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  statusError: {
+    color: Colors.error,
+  },
+  unsupportedNote: {
+    fontFamily: 'Inter_400Regular',
+    fontSize: 12,
+    color: Colors.onSurfaceMuted,
+    marginTop: 6,
+    textAlign: 'center',
+  },
+
+  // ── Input bar ──────────────────────────────────────────────────────────────
+  inputBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    paddingBottom: Platform.OS === 'ios' ? 28 : 16,
+    backgroundColor: Colors.surfaceCard,
+    borderTopWidth: 1,
+    borderTopColor: Colors.outlineFaint,
+    gap: 8,
   },
   input: {
     flex: 1,
+    backgroundColor: Colors.surfaceContainer,
+    borderRadius: Radius.full,
+    paddingHorizontal: Spacing.md,
+    height: 42,
     fontFamily: 'Inter_400Regular',
     fontSize: 14,
     color: Colors.onSurface,
-    paddingHorizontal: Spacing.md,
-    height: 40,
-  },
-  actionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  micBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: Colors.surfaceContainer,
-    alignItems: 'center',
-    justifyContent: 'center',
-    position: 'relative',
-  },
-  micPulse: {
-    position: 'absolute',
-    width: 46,
-    height: 46,
-    borderRadius: 23,
-    backgroundColor: Colors.error,
-  },
-  micIconText: {
-    fontSize: 16,
-    color: Colors.primary,
   },
   sendBtn: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
     backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
     ...Shadows.primaryGlow,
   },
-  sendIcon: {
-    fontSize: 14,
-    color: '#ffffff',
+  sendBtnDisabled: {
+    backgroundColor: Colors.surfaceContainerHigh,
+    shadowOpacity: 0,
+    elevation: 0,
+  },
+  sendBtnText: {
+    fontSize: 16,
+    color: '#fff',
   },
 });

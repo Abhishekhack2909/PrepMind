@@ -80,3 +80,45 @@ export async function askQuestion(
   return await response.json() as AskResult;
 }
 
+
+// ── Phase 10: Conversational Voice Agent ─────────────────────────────────────
+
+export type ConversationTurn = {
+  role: 'user' | 'assistant';
+  content: string;
+};
+
+export type VoiceChatResult = {
+  success: boolean;
+  answer: string;
+  sources: string[];
+  updated_history: ConversationTurn[];
+  context_used: number;
+};
+
+/**
+ * Send a question + conversation history to the voice agent.
+ * Returns a short, spoken-friendly answer and the updated history.
+ *
+ * The caller is responsible for:
+ *   1. Speaking the returned `answer` via speechSynthesis
+ *   2. Passing `updated_history` back on the next call
+ */
+export async function chatWithVoiceAgent(
+  question: string,
+  history: ConversationTurn[] = [],
+  useRag: boolean = true,
+): Promise<VoiceChatResult> {
+  const response = await fetch(`${BASE_URL}/api/voice/chat`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question, history, use_rag: useRag }),
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.detail || `Voice agent error: ${response.status}`);
+  }
+
+  return await response.json() as VoiceChatResult;
+}
