@@ -17,7 +17,7 @@
 | **Home Dashboard**            | Stats overview, today's schedule, quick actions                             | —                     |
 | **Profile**                   | Performance history, badges, sign out                                       | —                     |
 
----
+
 
 ## Tech-Stack
 
