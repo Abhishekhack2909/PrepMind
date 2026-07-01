@@ -14,10 +14,19 @@ The GROQ API is OpenAI-compatible, so the client looks familiar.
 """
 
 import os
-from typing import List, Dict
-from groq import Groq
+from typing import List, Dict, Optional
+from groq import AsyncGroq
 
-groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+_groq_client: Optional[AsyncGroq] = None
+
+def _get_groq_client() -> AsyncGroq:
+    global _groq_client
+    if _groq_client is None:
+        api_key = os.getenv("GROQ_API_KEY")
+        if not api_key:
+            raise RuntimeError("GROQ_API_KEY environment variable is not set")
+        _groq_client = AsyncGroq(api_key=api_key)
+    return _groq_client
 
 RAG_SYSTEM_PROMPT = """You are an expert UPSC tutor with deep knowledge of Indian history, 
 polity, geography, economy, and current affairs. 
@@ -77,13 +86,14 @@ QUESTION: {question}
 Please answer based on the context above."""
 
     try:
-        response = groq_client.chat.completions.create(
-            model="llama-3.1-8b-instant",   # Fast, free tier (llama3-8b-8192 decommissioned)
+        client = _get_groq_client()
+        response = await client.chat.completions.create(
+            model="llama-3.1-8b-instant",
             messages=[
                 {"role": "system", "content": RAG_SYSTEM_PROMPT},
                 {"role": "user", "content": user_message},
             ],
-            temperature=0.3,   # Low temp = factual, consistent answers
+            temperature=0.3,
             max_tokens=400,
         )
 
@@ -106,7 +116,8 @@ async def generate_simple_answer(question: str) -> dict:
     Used as fallback when knowledge base is empty.
     """
     try:
-        response = groq_client.chat.completions.create(
+        client = _get_groq_client()
+        response = await client.chat.completions.create(
             model="llama-3.1-8b-instant",
             messages=[
                 {"role": "system", "content": "You are an expert UPSC tutor. Answer concisely in 150-200 words."},
@@ -166,11 +177,12 @@ async def generate_conversational_answer(
     messages.append({"role": "user", "content": user_content})
 
     try:
-        response = groq_client.chat.completions.create(
+        client = _get_groq_client()
+        response = await client.chat.completions.create(
             model="llama-3.1-8b-instant",
             messages=messages,
-            temperature=0.5,    # Slightly higher for conversational warmth
-            max_tokens=200,     # Hard cap — keep it spoken-length
+            temperature=0.5,
+            max_tokens=200,
         )
         answer = response.choices[0].message.content.strip()
         return {

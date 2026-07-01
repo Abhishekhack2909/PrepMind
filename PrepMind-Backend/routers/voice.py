@@ -24,7 +24,7 @@ from fastapi import APIRouter, UploadFile, File, HTTPException, Form
 from pydantic import BaseModel
 from typing import List, Dict, Optional
 import os
-from groq import Groq
+from groq import AsyncGroq
 from services.rag_service import retrieve_context
 from services.llm_service import (
     generate_rag_answer,
@@ -33,7 +33,17 @@ from services.llm_service import (
 )
 
 router = APIRouter(prefix="/api/voice", tags=["Voice"])
-groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+
+_groq_client: AsyncGroq | None = None
+
+def _get_groq_client() -> AsyncGroq:
+    global _groq_client
+    if _groq_client is None:
+        api_key = os.getenv("GROQ_API_KEY")
+        if not api_key:
+            raise RuntimeError("GROQ_API_KEY environment variable is not set")
+        _groq_client = AsyncGroq(api_key=api_key)
+    return _groq_client
 
 
 # ── Request/Response Models ────────────────────────────────────────────────────
@@ -139,9 +149,9 @@ async def transcribe_audio(
         raise HTTPException(status_code=400, detail="Audio file too large (max 25MB)")
 
     try:
-        # Groq Whisper — same interface as OpenAI but faster
-        transcription = groq_client.audio.transcriptions.create(
-            model="whisper-large-v3-turbo",  # Best quality/speed balance
+        client = _get_groq_client()
+        transcription = await client.audio.transcriptions.create(
+            model="whisper-large-v3-turbo",
             file=(audio.filename or "audio.wav", audio_bytes),
             language=language,
             response_format="json",
@@ -176,7 +186,8 @@ async def voice_ask(
         raise HTTPException(status_code=400, detail="Empty audio file")
 
     try:
-        transcription = groq_client.audio.transcriptions.create(
+        client = _get_groq_client()
+        transcription = await client.audio.transcriptions.create(
             model="whisper-large-v3-turbo",
             file=(audio.filename or "audio.wav", audio_bytes),
             language=language,

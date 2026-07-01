@@ -1,24 +1,3 @@
-/**
- * PrepMind Voice Agent — Phase 10
- *
- * Full conversational voice experience: speak → AI answers in voice → continue.
- *
- * Architecture (Web):
- *   STT:  window.SpeechRecognition (Chrome/Edge built-in — no API key needed)
- *   LLM:  POST /api/voice/chat  (Groq LLM with conversation history)
- *   TTS:  window.speechSynthesis (browser built-in)
- *
- * The agent maintains full multi-turn memory by sending `history` with
- * every request, so follow-up questions ("Tell me more", "Give an example")
- * work naturally.
- *
- * UI States:
- *   idle      → Soft ambient glow orb, suggestions visible
- *   listening → Orb turns red, concentric rings pulse outward
- *   thinking  → Orb pulses gently, "Thinking..." text
- *   speaking  → Orb glows blue-violet with wave animation, TTS active
- */
-
 import { useState, useRef, useEffect, useCallback } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, ScrollView,
@@ -26,10 +5,9 @@ import {
   TextInput, KeyboardAvoidingView, Easing,
 } from 'react-native';
 import { useRouter } from 'expo-router';
+import * as Speech from 'expo-speech';
 import { Colors, Spacing, Radius, Shadows, Typography } from '@/constants/theme';
 import { chatWithVoiceAgent, type ConversationTurn } from '@/services/api';
-
-// ── Types ─────────────────────────────────────────────────────────────────────
 
 type AgentState = 'idle' | 'listening' | 'thinking' | 'speaking' | 'error';
 
@@ -41,8 +19,6 @@ type Message = {
   sources?: string[];
 };
 
-// ── Suggestion prompts shown when idle ────────────────────────────────────────
-
 const SUGGESTIONS = [
   { emoji: '🏛️', label: 'Explain Directive Principles', query: 'Explain the Directive Principles of State Policy and their importance.' },
   { emoji: '📜', label: 'Preamble summary', query: 'Give me a concise summary of the Indian Constitution Preamble.' },
@@ -50,49 +26,73 @@ const SUGGESTIONS = [
   { emoji: '🌿', label: 'Environmental acts', query: 'What are the major environmental protection acts in India?' },
 ];
 
-// ── Component ─────────────────────────────────────────────────────────────────
+let ExpoWebSpeechRecognitionCtor: any = null;
+try {
+  ExpoWebSpeechRecognitionCtor = require('expo-speech-recognition').ExpoWebSpeechRecognition;
+} catch {}
+
+function isWebSpeechSupported(): boolean {
+  if (Platform.OS === 'web' && typeof window !== 'undefined') {
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    return !!SR;
+  }
+  return !!ExpoWebSpeechRecognitionCtor;
+}
+
+function createSpeechRecognizer(): any {
+  if (Platform.OS === 'web' && typeof window !== 'undefined') {
+    const SR = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SR) return new SR();
+  }
+  if (ExpoWebSpeechRecognitionCtor) {
+    return new ExpoWebSpeechRecognitionCtor();
+  }
+  return null;
+}
+
+function isTtsSupported(): boolean {
+  if (Platform.OS === 'web' && typeof window !== 'undefined') {
+    return !!window.speechSynthesis;
+  }
+  return true;
+}
 
 export default function VoiceAgentScreen() {
   const router = useRouter();
   const scrollRef = useRef<ScrollView>(null);
 
-  // State
   const [agentState, setAgentState] = useState<AgentState>('idle');
   const [messages, setMessages] = useState<Message[]>([]);
   const [history, setHistory] = useState<ConversationTurn[]>([]);
   const [inputText, setInputText] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [isSpeechSupported, setIsSpeechSupported] = useState(true);
-  const [autoResume, setAutoResume] = useState(true); // auto-listen after AI speaks
+  const [autoResume, setAutoResume] = useState(true);
 
-  // Refs for Web Speech / speechSynthesis (avoid re-renders)
   const recognitionRef = useRef<any>(null);
-  const synthRef = useRef<SpeechSynthesisUtterance | null>(null);
+  const agentStateRef = useRef(agentState);
+  const historyRef = useRef(history);
+  const autoResumeRef = useRef(autoResume);
 
-  // ── Animated values ─────────────────────────────────────────────────────────
+  agentStateRef.current = agentState;
+  historyRef.current = history;
+  autoResumeRef.current = autoResume;
+
   const orbScale  = useRef(new Animated.Value(1)).current;
   const orbOpacity = useRef(new Animated.Value(0.85)).current;
   const ring1Scale = useRef(new Animated.Value(1)).current;
   const ring2Scale = useRef(new Animated.Value(1)).current;
   const ring3Scale = useRef(new Animated.Value(1)).current;
 
-  // ── Check browser support on mount ─────────────────────────────────────────
   useEffect(() => {
-    if (Platform.OS === 'web' && typeof window !== 'undefined') {
-      // @ts-ignore
-      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SR) setIsSpeechSupported(false);
-    }
+    setIsSpeechSupported(isWebSpeechSupported());
   }, []);
 
-  // ── Scroll to bottom when new message arrives ───────────────────────────────
   useEffect(() => {
     if (messages.length > 0) {
       setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
     }
   }, [messages.length]);
-
-  // ── Animations ─────────────────────────────────────────────────────────────
 
   const stopAllAnimations = useCallback(() => {
     orbScale.stopAnimation();
@@ -119,7 +119,6 @@ export default function VoiceAgentScreen() {
 
   const startListeningAnimation = useCallback(() => {
     stopAllAnimations();
-    // Orb pulses red-ish (handled via color state), rings expand outward
     const ringLoop = (ring: Animated.Value, delay: number) =>
       Animated.loop(
         Animated.sequence([
@@ -153,7 +152,6 @@ export default function VoiceAgentScreen() {
     ).start();
   }, []);
 
-  // Run animation when state changes
   useEffect(() => {
     switch (agentState) {
       case 'idle':      startIdleAnimation(); break;
@@ -164,13 +162,12 @@ export default function VoiceAgentScreen() {
     }
   }, [agentState]);
 
-  // ── Orb color logic ─────────────────────────────────────────────────────────
   const getOrbColor = () => {
     switch (agentState) {
       case 'idle':      return Colors.primary;
-      case 'listening': return '#EF4444'; // red
-      case 'thinking':  return '#F59E0B'; // amber
-      case 'speaking':  return Colors.accent; // violet
+      case 'listening': return '#EF4444';
+      case 'thinking':  return '#F59E0B';
+      case 'speaking':  return Colors.accent;
       case 'error':     return '#EF4444';
     }
   };
@@ -205,87 +202,9 @@ export default function VoiceAgentScreen() {
     }
   };
 
-  // ── Speech Synthesis (TTS) ─────────────────────────────────────────────────
-  const speakText = useCallback((text: string, onEnd?: () => void) => {
-    if (typeof window === 'undefined' || !window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.rate = 1.0;
-    utterance.pitch = 1.0;
-    utterance.lang = 'en-IN';
-    // Prefer a natural-sounding voice
-    const voices = window.speechSynthesis.getVoices();
-    const preferred = voices.find(v => v.lang === 'en-IN') ||
-                      voices.find(v => v.lang.startsWith('en')) ||
-                      voices[0];
-    if (preferred) utterance.voice = preferred;
-    utterance.onend = () => {
-      setAgentState('idle');
-      onEnd?.();
-    };
-    utterance.onerror = () => setAgentState('idle');
-    synthRef.current = utterance;
-    window.speechSynthesis.speak(utterance);
-  }, []);
-
-  const stopSpeaking = () => {
-    if (typeof window !== 'undefined' && window.speechSynthesis) {
-      window.speechSynthesis.cancel();
-    }
-    setAgentState('idle');
-  };
-
-  // ── Speech Recognition (STT) ───────────────────────────────────────────────
-  const startListening = useCallback(() => {
-    if (Platform.OS !== 'web' || typeof window === 'undefined') return;
-    // @ts-ignore
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) {
-      setErrorMsg('Speech recognition not supported. Use Chrome or Edge, or type below.');
-      setAgentState('error');
-      return;
-    }
-
-    const recognition = new SR();
-    recognition.continuous = false;
-    recognition.lang = 'en-IN';
-    recognition.interimResults = false;
-    recognitionRef.current = recognition;
-
-    recognition.onstart = () => setAgentState('listening');
-
-    recognition.onresult = async (event: any) => {
-      const text = event.results[0][0].transcript.trim();
-      if (!text) return;
-      await handleUserMessage(text);
-    };
-
-    recognition.onerror = (event: any) => {
-      if (event.error === 'aborted') return; // user manually stopped
-      setErrorMsg(`Microphone error: ${event.error}. Please allow mic access.`);
-      setAgentState('error');
-    };
-
-    recognition.onend = () => {
-      if (agentState === 'listening') setAgentState('idle');
-    };
-
-    recognition.start();
-  }, [history]);
-
-  const stopListening = () => {
-    if (recognitionRef.current) {
-      recognitionRef.current.abort();
-      recognitionRef.current = null;
-    }
-    setAgentState('idle');
-  };
-
-  // ── Core agent logic ────────────────────────────────────────────────────────
   const handleUserMessage = useCallback(async (question: string) => {
     setAgentState('thinking');
 
-    // Immediately show user message in the log
     const userMsg: Message = {
       id: `u_${Date.now()}`,
       role: 'user',
@@ -295,7 +214,7 @@ export default function VoiceAgentScreen() {
     setMessages(prev => [...prev, userMsg]);
 
     try {
-      const result = await chatWithVoiceAgent(question, history);
+      const result = await chatWithVoiceAgent(question, historyRef.current);
 
       const aiMsg: Message = {
         id: `a_${Date.now()}`,
@@ -307,10 +226,11 @@ export default function VoiceAgentScreen() {
       setMessages(prev => [...prev, aiMsg]);
       setHistory(result.updated_history);
 
-      // Speak the answer
       setAgentState('speaking');
-      speakText(result.answer, () => {
-        if (autoResume) startListening();
+      speakTextFn(result.answer, () => {
+        if (autoResumeRef.current && agentStateRef.current === 'speaking') {
+          startListeningFn();
+        }
       });
 
     } catch (err: any) {
@@ -318,14 +238,102 @@ export default function VoiceAgentScreen() {
       setErrorMsg(msg);
       setAgentState('error');
     }
-  }, [history, autoResume, speakText, startListening]);
+  }, []);
 
-  // ── Orb press handler ───────────────────────────────────────────────────────
-  const handleOrbPress = () => {
+  const speakTextFn = useCallback((text: string, onEnd?: () => void) => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined' && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = 1.0;
+      utterance.pitch = 1.0;
+      utterance.lang = 'en-IN';
+      const voices = window.speechSynthesis.getVoices();
+      const preferred = voices.find(v => v.lang === 'en-IN') ||
+                        voices.find(v => v.lang.startsWith('en')) ||
+                        voices[0];
+      if (preferred) utterance.voice = preferred;
+      utterance.onend = () => {
+        setAgentState('idle');
+        onEnd?.();
+      };
+      utterance.onerror = () => setAgentState('idle');
+      window.speechSynthesis.speak(utterance);
+    } else {
+      Speech.speak(text, {
+        rate: 1.0,
+        pitch: 1.0,
+        language: 'en-IN',
+        onDone: () => {
+          setAgentState('idle');
+          onEnd?.();
+        },
+        onError: () => setAgentState('idle'),
+      });
+    }
+  }, []);
+
+  const stopSpeaking = useCallback(() => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined' && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    } else {
+      Speech.stop();
+    }
+    setAgentState('idle');
+  }, []);
+
+  const startListeningFn = useCallback(() => {
+    if (!isSpeechSupported) {
+      setErrorMsg('Speech recognition not supported on this device. Use text input below.');
+      setAgentState('error');
+      return;
+    }
+
+    const recognizer = createSpeechRecognizer();
+    if (!recognizer) {
+      setErrorMsg('Speech recognition not supported on this device. Use text input below.');
+      setAgentState('error');
+      return;
+    }
+
+    recognizer.continuous = false;
+    recognizer.lang = 'en-IN';
+    recognizer.interimResults = false;
+    recognitionRef.current = recognizer;
+
+    recognizer.onstart = () => setAgentState('listening');
+
+    recognizer.onresult = async (event: any) => {
+      const text = event.results[0][0].transcript.trim();
+      if (!text) return;
+      await handleUserMessage(text);
+    };
+
+    recognizer.onerror = (event: any) => {
+      if (event.error === 'aborted' || event.error === 'no_match') return;
+      setErrorMsg(`Microphone error: ${event.error}. Please allow mic access.`);
+      setAgentState('error');
+    };
+
+    recognizer.onend = () => {
+      if (agentStateRef.current === 'listening') setAgentState('idle');
+    };
+
+    recognizer.start();
+  }, [handleUserMessage, isSpeechSupported]);
+
+  const stopListening = useCallback(() => {
+    if (recognitionRef.current) {
+      try { recognitionRef.current.abort(); } catch {}
+      recognitionRef.current = null;
+    }
+    setAgentState('idle');
+  }, []);
+
+  const handleOrbPress = useCallback(() => {
     switch (agentState) {
       case 'idle':
         setErrorMsg('');
-        startListening();
+        startListeningFn();
         break;
       case 'listening':
         stopListening();
@@ -334,33 +342,40 @@ export default function VoiceAgentScreen() {
         stopSpeaking();
         break;
       case 'thinking':
-        // Do nothing while thinking
         break;
       case 'error':
         setAgentState('idle');
         setErrorMsg('');
         break;
     }
-  };
+  }, [agentState, startListeningFn, stopListening, stopSpeaking]);
 
-  // ── Text input send ─────────────────────────────────────────────────────────
-  const handleSendText = async () => {
+  const handleRetry = useCallback(async () => {
+    setAgentState('idle');
+    setErrorMsg('');
+    if (messages.length > 0) {
+      const lastUserMsg = [...messages].reverse().find(m => m.role === 'user');
+      if (lastUserMsg) {
+        await handleUserMessage(lastUserMsg.content);
+      }
+    }
+  }, [messages, handleUserMessage]);
+
+  const handleSendText = useCallback(async () => {
     const q = inputText.trim();
     if (!q || agentState === 'thinking') return;
     setInputText('');
     stopSpeaking();
     await handleUserMessage(q);
-  };
+  }, [inputText, agentState, stopSpeaking, handleUserMessage]);
 
-  // ── Suggestion press ────────────────────────────────────────────────────────
-  const handleSuggestion = async (query: string) => {
+  const handleSuggestion = useCallback(async (query: string) => {
     if (agentState === 'thinking') return;
     stopSpeaking();
     await handleUserMessage(query);
-  };
+  }, [agentState, stopSpeaking, handleUserMessage]);
 
-  // ── Reset ────────────────────────────────────────────────────────────────────
-  const reset = () => {
+  const reset = useCallback(() => {
     stopListening();
     stopSpeaking();
     setMessages([]);
@@ -368,9 +383,8 @@ export default function VoiceAgentScreen() {
     setInputText('');
     setErrorMsg('');
     setAgentState('idle');
-  };
+  }, [stopListening, stopSpeaking]);
 
-  // ── Render ──────────────────────────────────────────────────────────────────
   const hasMessages = messages.length > 0;
 
   return (
@@ -379,7 +393,6 @@ export default function VoiceAgentScreen() {
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        {/* ── Top Header ── */}
         <View style={styles.header}>
           <TouchableOpacity style={styles.headerBtn} onPress={() => router.back()} activeOpacity={0.8}>
             <Text style={styles.headerBtnText}>✕</Text>
@@ -395,7 +408,6 @@ export default function VoiceAgentScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* ── Auto-resume toggle ── */}
         <View style={styles.autoResumeRow}>
           <Text style={styles.autoResumeLabel}>Auto-listen after response</Text>
           <TouchableOpacity
@@ -407,7 +419,6 @@ export default function VoiceAgentScreen() {
           </TouchableOpacity>
         </View>
 
-        {/* ── Conversation log OR Idle content ── */}
         {hasMessages ? (
           <ScrollView
             ref={scrollRef}
@@ -438,7 +449,6 @@ export default function VoiceAgentScreen() {
               </View>
             ))}
 
-            {/* Thinking indicator inside chat */}
             {agentState === 'thinking' && (
               <View style={[styles.messageBubble, styles.aiBubble, styles.thinkingBubble]}>
                 <ActivityIndicator size="small" color={Colors.accent} />
@@ -447,7 +457,6 @@ export default function VoiceAgentScreen() {
             )}
           </ScrollView>
         ) : (
-          /* Idle hero section */
           <View style={styles.heroContainer}>
             <Text style={styles.heroTitle}>Ask PrepMind Anything</Text>
             <Text style={styles.heroSubtitle}>
@@ -469,9 +478,7 @@ export default function VoiceAgentScreen() {
           </View>
         )}
 
-        {/* ── Orb Section ── */}
         <View style={styles.orbSection}>
-          {/* Ring animations (listening only) */}
           {agentState === 'listening' && (
             <>
               <Animated.View style={[styles.ring, { transform: [{ scale: ring1Scale }], opacity: ring1Scale.interpolate({ inputRange: [1, 1.8], outputRange: [0.4, 0] }) }]} />
@@ -480,7 +487,6 @@ export default function VoiceAgentScreen() {
             </>
           )}
 
-          {/* Main Orb */}
           <TouchableOpacity onPress={handleOrbPress} activeOpacity={0.85} disabled={agentState === 'thinking'}>
             <Animated.View
               style={[
@@ -496,10 +502,15 @@ export default function VoiceAgentScreen() {
             </Animated.View>
           </TouchableOpacity>
 
-          {/* Status label */}
           <Text style={[styles.statusLabel, agentState === 'error' && styles.statusError]}>
             {getStatusLabel()}
           </Text>
+
+          {agentState === 'error' && (
+            <TouchableOpacity style={styles.retryBtn} onPress={handleRetry} activeOpacity={0.8}>
+              <Text style={styles.retryBtnText}>↻ Retry</Text>
+            </TouchableOpacity>
+          )}
 
           {!isSpeechSupported && (
             <Text style={styles.unsupportedNote}>
@@ -508,7 +519,6 @@ export default function VoiceAgentScreen() {
           )}
         </View>
 
-        {/* ── Text Input Bar ── */}
         <View style={styles.inputBar}>
           <TextInput
             style={styles.input}
@@ -534,8 +544,6 @@ export default function VoiceAgentScreen() {
   );
 }
 
-// ── Styles ────────────────────────────────────────────────────────────────────
-
 const ORB_SIZE = 100;
 
 const styles = StyleSheet.create({
@@ -543,8 +551,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.background,
   },
-
-  // ── Header ────────────────────────────────────────────────────────────────
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -586,8 +592,6 @@ const styles = StyleSheet.create({
   liveDotActive: {
     backgroundColor: Colors.success,
   },
-
-  // ── Auto-resume toggle ────────────────────────────────────────────────────
   autoResumeRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -624,8 +628,6 @@ const styles = StyleSheet.create({
   toggleThumbActive: {
     alignSelf: 'flex-end',
   },
-
-  // ── Hero (idle) ───────────────────────────────────────────────────────────
   heroContainer: {
     flex: 1,
     alignItems: 'center',
@@ -676,8 +678,6 @@ const styles = StyleSheet.create({
     color: Colors.onSurface,
     fontWeight: '500',
   },
-
-  // ── Conversation log ──────────────────────────────────────────────────────
   logScroll: {
     flex: 1,
   },
@@ -739,8 +739,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: Colors.onSurfaceVariant,
   },
-
-  // ── Orb section ───────────────────────────────────────────────────────────
   orbSection: {
     alignItems: 'center',
     justifyContent: 'center',
@@ -790,6 +788,21 @@ const styles = StyleSheet.create({
   statusError: {
     color: Colors.error,
   },
+  retryBtn: {
+    marginTop: 10,
+    paddingHorizontal: 24,
+    paddingVertical: 8,
+    borderRadius: Radius.full,
+    backgroundColor: Colors.surfaceCard,
+    borderWidth: 1,
+    borderColor: Colors.primary,
+  },
+  retryBtnText: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 13,
+    color: Colors.primary,
+    fontWeight: '600',
+  },
   unsupportedNote: {
     fontFamily: 'Inter_400Regular',
     fontSize: 12,
@@ -797,8 +810,6 @@ const styles = StyleSheet.create({
     marginTop: 6,
     textAlign: 'center',
   },
-
-  // ── Input bar ──────────────────────────────────────────────────────────────
   inputBar: {
     flexDirection: 'row',
     alignItems: 'center',
