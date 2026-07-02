@@ -1,12 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { appStorage } from './storage';
 
 const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;
 const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
-    storage: AsyncStorage,       // Persist session to device storage
+    storage: appStorage,         // Persist session via SecureStore / localStorage
     autoRefreshToken: true,      // Auto-refresh when token expires
     persistSession: true,        // Keep user logged in between app opens
     detectSessionInUrl: false,   // Not needed for mobile
