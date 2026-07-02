@@ -5,6 +5,7 @@
 fastapi==0.136.3
 uvicorn==0.48.0
 python-multipart==0.0.20     # Required for file uploads (voice endpoint)
+websockets==13.1             # WebSocket client for Deepgram Voice Agent proxy
 
 # ── AI & LLM ──────────────────────────────────────────────────────────────────
 google-genai==2.7.0          # Phase 2: Gemini Vision (answer evaluation)

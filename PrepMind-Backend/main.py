@@ -44,6 +44,10 @@ app.include_router(knowledge.router)
 from routers import voice
 app.include_router(voice.router)
 
+# ── Phase 11: Deepgram Voice Agent (real-time WebSocket) ──────────────────────
+from routers import voice_agent
+app.include_router(voice_agent.router)
+
 # ── Phase 5: MCQ Engine ────────────────────────────────────────────────────────
 from routers import mcq
 app.include_router(mcq.router)
