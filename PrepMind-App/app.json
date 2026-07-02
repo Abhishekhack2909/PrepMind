@@ -11,7 +11,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#006399"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.prepmind.app",
@@ -45,7 +47,7 @@
       "expo-router",
       "expo-camera",
       [
-        "expo-av",
+        "expo-audio",
         {
           "microphonePermission": "PrepMind uses your microphone to record voice questions."
         }
