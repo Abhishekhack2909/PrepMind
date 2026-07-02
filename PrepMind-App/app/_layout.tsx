@@ -78,8 +78,9 @@ export default function RootLayout() {
 
   return (
     <AuthGuard>
-      <StatusBar style="dark" backgroundColor={Colors.surface} />
+      <StatusBar style="dark" />
       <Stack screenOptions={{ headerShown: false }}>
+
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(tabs)" />
       </Stack>

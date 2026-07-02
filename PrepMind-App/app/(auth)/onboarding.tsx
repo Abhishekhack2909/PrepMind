@@ -4,8 +4,9 @@ import {
   TouchableOpacity, SafeAreaView, Platform,
 } from 'react-native';
 import { router } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Colors, Spacing, Radius, Shadows, Typography } from '@/constants/theme';
+import { appStorage } from '../../lib/storage';
+
 
 const { width } = Dimensions.get('window');
 
@@ -85,10 +86,12 @@ export default function OnboardingScreen() {
     finishOnboarding();
   }
 
-  function finishOnboarding() {
-    AsyncStorage.setItem('onboarding_done', 'true');
+  async function finishOnboarding() {
+    await appStorage.setItem('onboarding_done', 'true');
     router.replace('/(auth)/login');
   }
+
+
 
   const floatY = floatAnim.interpolate({
     inputRange: [0, 1],
@@ -283,17 +286,18 @@ const styles = StyleSheet.create({
   
   // Splash Overlay — gradient simulation
   splash: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: Colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 999,
   },
   splashGradientOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: Colors.accent,
     opacity: 0.3,
   },
+
   splashContent: {
     alignItems: 'center',
     zIndex: 10,
