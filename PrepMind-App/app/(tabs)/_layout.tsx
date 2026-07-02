@@ -2,13 +2,14 @@ import { Tabs } from 'expo-router';
 import { View, Text, StyleSheet, Platform } from 'react-native';
 import { Colors, Shadows, Radius, Spacing } from '@/constants/theme';
 
-function TabIcon({ icon, focused }: { icon: string; color: string; focused: boolean }) {
+function TabIcon({ icon, color, focused }: { icon: string; color?: any; focused: boolean }) {
   return (
     <View style={[styles.iconContainer, focused && styles.iconContainerActive]}>
       <Text style={[styles.iconText, focused && styles.iconTextActive]}>{icon}</Text>
     </View>
   );
 }
+
 
 /**
  * Tab Navigation — 5 core tabs (max comfortable on mobile)

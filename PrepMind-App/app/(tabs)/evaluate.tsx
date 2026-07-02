@@ -508,7 +508,8 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   scannerRing: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
+
     borderRadius: 42,
     borderWidth: 2,
     borderColor: Colors.primaryGlow,
