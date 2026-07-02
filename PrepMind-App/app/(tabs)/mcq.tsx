@@ -70,8 +70,9 @@ export default function MCQScreen() {
   const [timeLeft, setTimeLeft] = useState(14 * 60 + 59);
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
+    let timer: any;
     if (quizState === 'quiz' && timeLeft > 0) {
+
       timer = setInterval(() => {
         setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0));
       }, 1000);

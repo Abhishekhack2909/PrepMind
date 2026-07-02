@@ -101,7 +101,7 @@ export default function PlannerScreen() {
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Add',
-        onPress: (text) => {
+        onPress: (text?: string) => {
           if (text && text.trim()) {
             setFocusTopics([...focusTopics, text.trim()]);
           }
@@ -109,6 +109,7 @@ export default function PlannerScreen() {
       }
     ], 'plain-text');
   }
+
 
   function removeTopic(index: number) {
     setFocusTopics(focusTopics.filter((_, i) => i !== index));
@@ -685,13 +686,14 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   circleProgressPlaceholder: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     borderRadius: 40,
     borderWidth: 6,
     borderColor: Colors.primary,
     borderBottomColor: 'transparent',
     borderRightColor: 'transparent',
   },
+
   circleTextContainer: {
     alignItems: 'center',
   },
