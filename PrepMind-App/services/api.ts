@@ -122,3 +122,49 @@ export async function chatWithVoiceAgent(
 
   return await response.json() as VoiceChatResult;
 }
+
+
+// ── Voice ASK: upload recorded audio → get transcription + answer ─────────────
+
+export type VoiceAskResult = {
+  success: boolean;
+  transcription: string;
+  answer: string;
+  sources: string[];
+  context_used: number;
+};
+
+/**
+ * Send a recorded audio file (from expo-av) to the backend for transcription
+ * + RAG answer. Works from native — the backend runs Groq Whisper for STT
+ * and llama-3 for the answer.
+ */
+export async function askByVoice(
+  audioUri: string,
+  mimeType: string = 'audio/m4a',
+  fileName: string = 'recording.m4a',
+  language: string = 'en',
+): Promise<VoiceAskResult> {
+  const form = new FormData();
+  // React Native FormData accepts { uri, name, type } directly.
+  form.append('audio', {
+    uri: audioUri,
+    name: fileName,
+    type: mimeType,
+    // @ts-ignore — RN-only FormData shape
+  } as any);
+  form.append('language', language);
+
+  const response = await fetch(`${BASE_URL}/api/voice/ask`, {
+    method: 'POST',
+    body: form,
+    // Do NOT set Content-Type — RN sets the multipart boundary itself.
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.detail || `Voice ask error: ${response.status}`);
+  }
+
+  return await response.json() as VoiceAskResult;
+}

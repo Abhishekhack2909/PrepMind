@@ -6,8 +6,19 @@ import {
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as Speech from 'expo-speech';
+import {
+  AudioModule,
+  RecordingPresets,
+  setAudioModeAsync,
+  useAudioRecorder,
+} from 'expo-audio';
 import { Colors, Spacing, Radius, Shadows, Typography } from '@/constants/theme';
-import { chatWithVoiceAgent, type ConversationTurn } from '@/services/api';
+import { chatWithVoiceAgent, askByVoice, type ConversationTurn } from '@/services/api';
+import {
+  DeepgramVoiceClient,
+  isDeepgramSupported,
+  type AgentState as DeepgramState,
+} from '@/services/deepgramVoice';
 
 type AgentState = 'idle' | 'listening' | 'thinking' | 'speaking' | 'error';
 
@@ -57,9 +68,12 @@ function isTtsSupported(): boolean {
   return true;
 }
 
+const IS_NATIVE = Platform.OS !== 'web';
+
 export default function VoiceAgentScreen() {
   const router = useRouter();
   const scrollRef = useRef<ScrollView>(null);
+  const inputRef = useRef<TextInput>(null);
 
   const [agentState, setAgentState] = useState<AgentState>('idle');
   const [messages, setMessages] = useState<Message[]>([]);
@@ -68,8 +82,16 @@ export default function VoiceAgentScreen() {
   const [errorMsg, setErrorMsg] = useState('');
   const [isSpeechSupported, setIsSpeechSupported] = useState(true);
   const [autoResume, setAutoResume] = useState(true);
+  const [useDeepgram, setUseDeepgram] = useState(true);
+  const [deepgramAvailable, setDeepgramAvailable] = useState(false);
 
   const recognitionRef = useRef<any>(null);
+  const deepgramRef = useRef<DeepgramVoiceClient | null>(null);
+  // Native audio recorder lives for the whole screen; we just toggle record/stop.
+  // Called unconditionally to satisfy rules-of-hooks; the recorder is only
+  // driven inside the IS_NATIVE code paths.
+  const audioRecorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
+  const isRecordingRef = useRef(false);
   const agentStateRef = useRef(agentState);
   const historyRef = useRef(history);
   const autoResumeRef = useRef(autoResume);
@@ -86,6 +108,17 @@ export default function VoiceAgentScreen() {
 
   useEffect(() => {
     setIsSpeechSupported(isWebSpeechSupported());
+    const dgOk = Platform.OS === 'web' && isDeepgramSupported();
+    setDeepgramAvailable(dgOk);
+    if (!dgOk) setUseDeepgram(false);
+  }, []);
+
+  // Tear down Deepgram if the screen unmounts.
+  useEffect(() => {
+    return () => {
+      deepgramRef.current?.stop();
+      deepgramRef.current = null;
+    };
   }, []);
 
   useEffect(() => {
@@ -194,8 +227,12 @@ export default function VoiceAgentScreen() {
 
   const getStatusLabel = () => {
     switch (agentState) {
-      case 'idle':      return 'Tap to start conversation';
-      case 'listening': return 'Listening... tap to stop';
+      case 'idle':
+        if (IS_NATIVE) return 'Tap to record your question';
+        return 'Tap to start conversation';
+      case 'listening':
+        if (IS_NATIVE) return 'Recording... tap to send';
+        return 'Listening... tap to stop';
       case 'thinking':  return 'Thinking...';
       case 'speaking':  return 'Speaking... tap to interrupt';
       case 'error':     return errorMsg;
@@ -329,7 +366,213 @@ export default function VoiceAgentScreen() {
     setAgentState('idle');
   }, []);
 
+  const mapDeepgramState = useCallback((s: DeepgramState): AgentState => {
+    if (s === 'connecting') return 'thinking';
+    if (s === 'error') return 'error';
+    return s as AgentState;
+  }, []);
+
+  const startDeepgram = useCallback(async () => {
+    if (deepgramRef.current) return;
+    setErrorMsg('');
+    // Stop any existing web-speech / TTS activity so streams don't collide.
+    try {
+      recognitionRef.current?.abort?.();
+      recognitionRef.current = null;
+    } catch {}
+    if (Platform.OS === 'web' && typeof window !== 'undefined' && window.speechSynthesis) {
+      window.speechSynthesis.cancel();
+    } else {
+      Speech.stop();
+    }
+
+    const client = new DeepgramVoiceClient({
+      onStateChange: (s) => setAgentState(mapDeepgramState(s)),
+      onUserTranscript: (text) => {
+        setMessages((prev) => [
+          ...prev,
+          { id: `u_${Date.now()}`, role: 'user', content: text, timestamp: new Date() },
+        ]);
+      },
+      onAgentTranscript: (text) => {
+        setMessages((prev) => [
+          ...prev,
+          { id: `a_${Date.now()}`, role: 'assistant', content: text, timestamp: new Date() },
+        ]);
+      },
+      onFunctionCall: () => {
+        // Optional: could surface a "consulting knowledge base…" hint.
+      },
+      onError: (msg) => {
+        setErrorMsg(msg);
+        setAgentState('error');
+      },
+      onClose: () => {
+        deepgramRef.current = null;
+        setAgentState('idle');
+      },
+    });
+    deepgramRef.current = client;
+
+    try {
+      await client.start();
+    } catch (e: any) {
+      deepgramRef.current = null;
+      setErrorMsg(e?.message || 'Could not start Deepgram voice agent.');
+      setAgentState('error');
+    }
+  }, [mapDeepgramState]);
+
+  const stopDeepgram = useCallback(async () => {
+    const client = deepgramRef.current;
+    deepgramRef.current = null;
+    if (client) await client.stop();
+    setAgentState('idle');
+  }, []);
+
+  // ── Native: record via expo-audio → transcribe on backend ─────────────────
+  // Works in Expo Go (SDK 56). Tap orb → record; tap again → send.
+
+  const startNativeRecording = useCallback(async () => {
+    if (isRecordingRef.current) return;
+    setErrorMsg('');
+
+    // Mic permission
+    const perm = await AudioModule.requestRecordingPermissionsAsync();
+    if (!perm.granted) {
+      setErrorMsg('Microphone permission denied. Please enable it in Settings.');
+      setAgentState('error');
+      return;
+    }
+
+    // Stop any TTS before opening the mic.
+    Speech.stop();
+
+    await setAudioModeAsync({
+      allowsRecording: true,
+      playsInSilentMode: true,
+    });
+
+    try {
+      await audioRecorder.prepareToRecordAsync();
+      audioRecorder.record();
+      isRecordingRef.current = true;
+      setAgentState('listening');
+    } catch (e: any) {
+      setErrorMsg(`Could not start recording: ${e?.message || e}`);
+      setAgentState('error');
+    }
+  }, [audioRecorder]);
+
+  const stopNativeRecordingAndSend = useCallback(async () => {
+    if (!isRecordingRef.current) return;
+    isRecordingRef.current = false;
+
+    setAgentState('thinking');
+
+    let uri: string | null = null;
+    try {
+      await audioRecorder.stop();
+      uri = audioRecorder.uri;
+    } catch (e: any) {
+      setErrorMsg(`Could not stop recording: ${e?.message || e}`);
+      setAgentState('error');
+      return;
+    }
+
+    // Restore playback-only mode so expo-speech can play through the speaker.
+    try {
+      await setAudioModeAsync({
+        allowsRecording: false,
+        playsInSilentMode: true,
+      });
+    } catch {}
+
+    if (!uri) {
+      setErrorMsg('Recording produced no audio.');
+      setAgentState('error');
+      return;
+    }
+
+    try {
+      // .m4a on both platforms with HIGH_QUALITY preset.
+      const result = await askByVoice(uri, 'audio/m4a', 'recording.m4a', 'en');
+
+      const question = result.transcription?.trim();
+      if (!question) {
+        setErrorMsg('Could not understand — please try again.');
+        setAgentState('error');
+        return;
+      }
+
+      setMessages((prev) => [
+        ...prev,
+        { id: `u_${Date.now()}`, role: 'user', content: question, timestamp: new Date() },
+      ]);
+
+      const aiMsg: Message = {
+        id: `a_${Date.now()}`,
+        role: 'assistant',
+        content: result.answer,
+        timestamp: new Date(),
+        sources: result.sources,
+      };
+      setMessages((prev) => [...prev, aiMsg]);
+
+      // Keep the conversation history in sync so the fallback /chat calls
+      // (typed input) still see context.
+      setHistory((prev) => [
+        ...prev,
+        { role: 'user', content: question },
+        { role: 'assistant', content: result.answer },
+      ]);
+
+      setAgentState('speaking');
+      speakTextFn(result.answer);
+    } catch (e: any) {
+      setErrorMsg(e?.message || 'Voice request failed.');
+      setAgentState('error');
+    }
+  }, []);
+
+  // Clean up any in-progress recording on unmount.
+  useEffect(() => {
+    return () => {
+      if (isRecordingRef.current) {
+        isRecordingRef.current = false;
+        audioRecorder?.stop?.().catch?.(() => {});
+      }
+    };
+  }, [audioRecorder]);
+
   const handleOrbPress = useCallback(() => {
+    // Deepgram primary path (web only).
+    if (useDeepgram && deepgramAvailable) {
+      if (deepgramRef.current) {
+        stopDeepgram();
+      } else {
+        startDeepgram();
+      }
+      return;
+    }
+
+    // Native (Expo Go / mobile): record via expo-av, then upload to the
+    // backend for Whisper STT + RAG answer + TTS. Tap to start, tap to stop.
+    if (IS_NATIVE) {
+      if (agentState === 'speaking') {
+        stopSpeaking();
+        return;
+      }
+      if (agentState === 'thinking') return;
+      if (isRecordingRef.current || agentState === 'listening') {
+        stopNativeRecordingAndSend();
+      } else {
+        startNativeRecording();
+      }
+      return;
+    }
+
+    // Web without Deepgram (toggle off): fall back to Web-Speech + /api/voice/chat.
     switch (agentState) {
       case 'idle':
         setErrorMsg('');
@@ -348,7 +591,11 @@ export default function VoiceAgentScreen() {
         setErrorMsg('');
         break;
     }
-  }, [agentState, startListeningFn, stopListening, stopSpeaking]);
+  }, [
+    agentState, startListeningFn, stopListening, stopSpeaking,
+    useDeepgram, deepgramAvailable, startDeepgram, stopDeepgram,
+    startNativeRecording, stopNativeRecordingAndSend,
+  ]);
 
   const handleRetry = useCallback(async () => {
     setAgentState('idle');
@@ -365,19 +612,49 @@ export default function VoiceAgentScreen() {
     const q = inputText.trim();
     if (!q || agentState === 'thinking') return;
     setInputText('');
+
+    // If a Deepgram session is live, inject the text into that conversation.
+    if (useDeepgram && deepgramAvailable && deepgramRef.current) {
+      setMessages((prev) => [
+        ...prev,
+        { id: `u_${Date.now()}`, role: 'user', content: q, timestamp: new Date() },
+      ]);
+      deepgramRef.current.injectUserText(q);
+      return;
+    }
+
     stopSpeaking();
     await handleUserMessage(q);
-  }, [inputText, agentState, stopSpeaking, handleUserMessage]);
+  }, [inputText, agentState, stopSpeaking, handleUserMessage, useDeepgram, deepgramAvailable]);
 
   const handleSuggestion = useCallback(async (query: string) => {
     if (agentState === 'thinking') return;
+
+    if (useDeepgram && deepgramAvailable) {
+      // Make sure Deepgram is running, then inject the suggested question.
+      if (!deepgramRef.current) await startDeepgram();
+      setMessages((prev) => [
+        ...prev,
+        { id: `u_${Date.now()}`, role: 'user', content: query, timestamp: new Date() },
+      ]);
+      deepgramRef.current?.injectUserText(query);
+      return;
+    }
+
     stopSpeaking();
     await handleUserMessage(query);
-  }, [agentState, stopSpeaking, handleUserMessage]);
+  }, [
+    agentState, stopSpeaking, handleUserMessage,
+    useDeepgram, deepgramAvailable, startDeepgram,
+  ]);
 
   const reset = useCallback(() => {
     stopListening();
     stopSpeaking();
+    if (deepgramRef.current) {
+      deepgramRef.current.stop();
+      deepgramRef.current = null;
+    }
     setMessages([]);
     setHistory([]);
     setInputText('');
@@ -408,16 +685,36 @@ export default function VoiceAgentScreen() {
           </TouchableOpacity>
         </View>
 
-        <View style={styles.autoResumeRow}>
-          <Text style={styles.autoResumeLabel}>Auto-listen after response</Text>
-          <TouchableOpacity
-            style={[styles.toggle, autoResume && styles.toggleActive]}
-            onPress={() => setAutoResume(v => !v)}
-            activeOpacity={0.8}
-          >
-            <View style={[styles.toggleThumb, autoResume && styles.toggleThumbActive]} />
-          </TouchableOpacity>
-        </View>
+        {deepgramAvailable && (
+          <View style={styles.autoResumeRow}>
+            <Text style={styles.autoResumeLabel}>
+              {useDeepgram ? '🎧 Deepgram Voice Agent (Aura-2)' : 'Web Speech fallback'}
+            </Text>
+            <TouchableOpacity
+              style={[styles.toggle, useDeepgram && styles.toggleActive]}
+              onPress={async () => {
+                if (deepgramRef.current) await stopDeepgram();
+                setUseDeepgram((v) => !v);
+              }}
+              activeOpacity={0.8}
+            >
+              <View style={[styles.toggleThumb, useDeepgram && styles.toggleThumbActive]} />
+            </TouchableOpacity>
+          </View>
+        )}
+
+        {!IS_NATIVE && (!useDeepgram || !deepgramAvailable) && (
+          <View style={styles.autoResumeRow}>
+            <Text style={styles.autoResumeLabel}>Auto-listen after response</Text>
+            <TouchableOpacity
+              style={[styles.toggle, autoResume && styles.toggleActive]}
+              onPress={() => setAutoResume(v => !v)}
+              activeOpacity={0.8}
+            >
+              <View style={[styles.toggleThumb, autoResume && styles.toggleThumbActive]} />
+            </TouchableOpacity>
+          </View>
+        )}
 
         {hasMessages ? (
           <ScrollView
@@ -460,7 +757,9 @@ export default function VoiceAgentScreen() {
           <View style={styles.heroContainer}>
             <Text style={styles.heroTitle}>Ask PrepMind Anything</Text>
             <Text style={styles.heroSubtitle}>
-              Your personal UPSC voice tutor — multi-turn conversation powered by AI
+              {IS_NATIVE
+                ? 'Tap the orb below and speak — I\'ll transcribe your question and speak the answer aloud.'
+                : 'Your personal UPSC voice tutor — multi-turn conversation powered by AI'}
             </Text>
             <View style={styles.suggestionsGrid}>
               {SUGGESTIONS.map(s => (
@@ -512,7 +811,7 @@ export default function VoiceAgentScreen() {
             </TouchableOpacity>
           )}
 
-          {!isSpeechSupported && (
+          {!IS_NATIVE && !isSpeechSupported && (
             <Text style={styles.unsupportedNote}>
               ℹ️ No mic detected — use text input below
             </Text>
@@ -521,8 +820,9 @@ export default function VoiceAgentScreen() {
 
         <View style={styles.inputBar}>
           <TextInput
+            ref={inputRef}
             style={styles.input}
-            placeholder="Or type your question..."
+            placeholder={IS_NATIVE ? 'Ask PrepMind anything…' : 'Or type your question...'}
             placeholderTextColor={Colors.onSurfaceMuted}
             value={inputText}
             onChangeText={setInputText}
