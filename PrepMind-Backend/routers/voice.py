@@ -167,6 +167,68 @@ async def transcribe_audio(
         raise HTTPException(status_code=500, detail=f"Transcription failed: {str(e)}")
 
 
+# ── POST /api/voice/ask-json ───────────────────────────────────────────────────
+
+import base64
+
+
+class AskJsonRequest(BaseModel):
+    audio_base64: str                 # Base64-encoded audio file contents
+    mime_type: str = "audio/m4a"
+    file_name: str = "recording.m4a"
+    language: str = "en"
+
+
+@router.post("/ask-json")
+async def voice_ask_json(req: AskJsonRequest):
+    """
+    Same as /ask but takes base64 JSON instead of multipart form data.
+    Mobile clients use this — RN multipart uploads are unreliable across
+    devices (FormData / uploadAsync both fail on some Android builds).
+    """
+    try:
+        audio_bytes = base64.b64decode(req.audio_base64)
+    except Exception:
+        raise HTTPException(status_code=400, detail="Invalid base64 audio")
+
+    if not audio_bytes:
+        raise HTTPException(status_code=400, detail="Empty audio")
+    if len(audio_bytes) > 25 * 1024 * 1024:
+        raise HTTPException(status_code=400, detail="Audio too large (max 25MB)")
+
+    try:
+        client = _get_groq_client()
+        transcription = await client.audio.transcriptions.create(
+            model="whisper-large-v3-turbo",
+            file=(req.file_name, audio_bytes),
+            language=req.language,
+            response_format="json",
+        )
+        question = transcription.text.strip()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Transcription failed: {str(e)}")
+
+    if not question:
+        raise HTTPException(status_code=400, detail="Could not transcribe audio — please speak clearly")
+
+    chunks = retrieve_context(question, top_k=4)
+    if chunks:
+        result = await generate_rag_answer(question, chunks)
+    else:
+        result = await generate_simple_answer(question)
+
+    if not result["success"]:
+        raise HTTPException(status_code=500, detail=result.get("error", "Answer generation failed"))
+
+    return {
+        "success": True,
+        "transcription": question,
+        "answer": result["answer"],
+        "sources": result.get("sources", []),
+        "context_used": len(chunks),
+    }
+
+
 # ── POST /api/voice/ask ────────────────────────────────────────────────────────
 
 @router.post("/ask")

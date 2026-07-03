@@ -1,10 +1,12 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, ScrollView,
-  SafeAreaView, Platform, ActivityIndicator, Animated,
+  Platform, ActivityIndicator, Animated,
   TextInput, KeyboardAvoidingView, Easing,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
 import * as Speech from 'expo-speech';
 import {
   AudioModule,
@@ -31,11 +33,60 @@ type Message = {
 };
 
 const SUGGESTIONS = [
-  { emoji: '🏛️', label: 'Explain Directive Principles', query: 'Explain the Directive Principles of State Policy and their importance.' },
-  { emoji: '📜', label: 'Preamble summary', query: 'Give me a concise summary of the Indian Constitution Preamble.' },
-  { emoji: '🗺️', label: 'Modern India timeline', query: 'Summarize the key events in Modern Indian history from 1857 to 1947.' },
-  { emoji: '🌿', label: 'Environmental acts', query: 'What are the major environmental protection acts in India?' },
+  { label: 'Directive Principles', query: 'Explain the Directive Principles of State Policy and their importance.' },
+  { label: 'Preamble summary', query: 'Give me a concise summary of the Indian Constitution Preamble.' },
+  { label: 'Modern India 1857–1947', query: 'Summarize the key events in Modern Indian history from 1857 to 1947.' },
+  { label: 'Environmental acts', query: 'What are the major environmental protection acts in India?' },
 ];
+
+/** Minimal vector-style glyph drawn with Views — replaces emoji in the orb. */
+function OrbGlyph({ state }: { state: AgentState }) {
+  if (state === 'listening') {
+    return <View style={glyph.recordDot} />;
+  }
+  if (state === 'thinking') {
+    return (
+      <View style={glyph.row}>
+        <View style={[glyph.dot, { opacity: 0.5 }]} />
+        <View style={[glyph.dot, { opacity: 0.75 }]} />
+        <View style={glyph.dot} />
+      </View>
+    );
+  }
+  if (state === 'speaking') {
+    return (
+      <View style={glyph.row}>
+        <View style={[glyph.bar, { height: 14 }]} />
+        <View style={[glyph.bar, { height: 26 }]} />
+        <View style={[glyph.bar, { height: 18 }]} />
+        <View style={[glyph.bar, { height: 24 }]} />
+      </View>
+    );
+  }
+  if (state === 'error') {
+    return <Text style={glyph.errorMark}>!</Text>;
+  }
+  // idle — minimal mic silhouette
+  return (
+    <View style={glyph.micWrap}>
+      <View style={glyph.micBody} />
+      <View style={glyph.micStand} />
+      <View style={glyph.micBase} />
+    </View>
+  );
+}
+
+const glyph = StyleSheet.create({
+  row: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  dot: { width: 9, height: 9, borderRadius: 5, backgroundColor: '#fff' },
+  bar: { width: 5, borderRadius: 3, backgroundColor: '#fff' },
+  recordDot: { width: 26, height: 26, borderRadius: 8, backgroundColor: '#fff' },
+  errorMark: { fontSize: 34, color: '#fff', fontWeight: '800' },
+  micWrap: { alignItems: 'center' },
+  micBody: { width: 18, height: 28, borderRadius: 9, backgroundColor: '#fff' },
+  micStand: { width: 3, height: 8, backgroundColor: '#fff', marginTop: 2, borderRadius: 2 },
+  micBase: { width: 16, height: 3, backgroundColor: '#fff', marginTop: 1, borderRadius: 2 },
+});
 
 let ExpoWebSpeechRecognitionCtor: any = null;
 try {
@@ -195,33 +246,23 @@ export default function VoiceAgentScreen() {
     }
   }, [agentState]);
 
-  const getOrbColor = () => {
+  const getOrbGradient = (): [string, string] => {
     switch (agentState) {
-      case 'idle':      return Colors.primary;
-      case 'listening': return '#EF4444';
-      case 'thinking':  return '#F59E0B';
-      case 'speaking':  return Colors.accent;
-      case 'error':     return '#EF4444';
+      case 'idle':      return [Colors.primaryLight, Colors.accent];
+      case 'listening': return ['#F87171', '#DC2626'];
+      case 'thinking':  return ['#FBBF24', '#F59E0B'];
+      case 'speaking':  return [Colors.accentLight, Colors.accentDark];
+      case 'error':     return ['#F87171', '#B91C1C'];
     }
   };
 
   const getOrbGlow = () => {
     switch (agentState) {
-      case 'idle':      return 'rgba(0,102,255,0.25)';
-      case 'listening': return 'rgba(239,68,68,0.30)';
-      case 'thinking':  return 'rgba(245,158,11,0.30)';
-      case 'speaking':  return 'rgba(124,58,237,0.35)';
-      case 'error':     return 'rgba(239,68,68,0.20)';
-    }
-  };
-
-  const getOrbEmoji = () => {
-    switch (agentState) {
-      case 'idle':      return '🎙️';
-      case 'listening': return '👂';
-      case 'thinking':  return '💭';
-      case 'speaking':  return '🗣️';
-      case 'error':     return '⚠️';
+      case 'idle':      return 'rgba(0,102,255,0.35)';
+      case 'listening': return 'rgba(239,68,68,0.35)';
+      case 'thinking':  return 'rgba(245,158,11,0.35)';
+      case 'speaking':  return 'rgba(124,58,237,0.40)';
+      case 'error':     return 'rgba(239,68,68,0.25)';
     }
   };
 
@@ -671,17 +712,22 @@ export default function VoiceAgentScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <View style={styles.header}>
-          <TouchableOpacity style={styles.headerBtn} onPress={() => router.back()} activeOpacity={0.8}>
-            <Text style={styles.headerBtnText}>✕</Text>
+          <TouchableOpacity style={styles.headerBtn} onPress={() => router.back()} activeOpacity={0.7}>
+            <Text style={styles.headerBtnText}>‹</Text>
           </TouchableOpacity>
 
           <View style={styles.headerCenter}>
-            <Text style={styles.headerTitle}>Voice Agent</Text>
-            <View style={[styles.liveDot, agentState !== 'idle' && styles.liveDotActive]} />
+            <Text style={styles.headerTitle}>Voice Tutor</Text>
+            <View style={[styles.statusPill, agentState !== 'idle' && styles.statusPillActive]}>
+              <View style={[styles.liveDot, agentState !== 'idle' && styles.liveDotActive]} />
+              <Text style={[styles.statusPillText, agentState !== 'idle' && styles.statusPillTextActive]}>
+                {agentState === 'idle' ? 'Ready' : 'Live'}
+              </Text>
+            </View>
           </View>
 
-          <TouchableOpacity style={styles.headerBtn} onPress={reset} activeOpacity={0.8}>
-            <Text style={styles.headerBtnText}>🔄</Text>
+          <TouchableOpacity style={styles.headerBtn} onPress={reset} activeOpacity={0.7}>
+            <Text style={styles.headerBtnReset}>↺</Text>
           </TouchableOpacity>
         </View>
 
@@ -731,8 +777,8 @@ export default function VoiceAgentScreen() {
                   msg.role === 'user' ? styles.userBubble : styles.aiBubble,
                 ]}
               >
-                <Text style={styles.bubbleRole}>
-                  {msg.role === 'user' ? '🧑 You' : '🤖 PrepMind'}
+                <Text style={[styles.bubbleRole, msg.role === 'assistant' && styles.bubbleRoleAi]}>
+                  {msg.role === 'user' ? 'You' : 'PrepMind'}
                 </Text>
                 <Text style={[
                   styles.bubbleText,
@@ -741,7 +787,13 @@ export default function VoiceAgentScreen() {
                   {msg.content}
                 </Text>
                 {msg.sources && msg.sources.length > 0 && (
-                  <Text style={styles.sourcesText}>📚 {msg.sources.join(', ')}</Text>
+                  <View style={styles.sourcesRow}>
+                    {msg.sources.map(src => (
+                      <View key={src} style={styles.sourceChip}>
+                        <Text style={styles.sourceChipText}>{src}</Text>
+                      </View>
+                    ))}
+                  </View>
                 )}
               </View>
             ))}
@@ -761,15 +813,15 @@ export default function VoiceAgentScreen() {
                 ? 'Tap the orb below and speak — I\'ll transcribe your question and speak the answer aloud.'
                 : 'Your personal UPSC voice tutor — multi-turn conversation powered by AI'}
             </Text>
+            <Text style={styles.suggestionsHeading}>TRY ASKING</Text>
             <View style={styles.suggestionsGrid}>
               {SUGGESTIONS.map(s => (
                 <TouchableOpacity
                   key={s.label}
                   style={styles.suggestionChip}
                   onPress={() => handleSuggestion(s.query)}
-                  activeOpacity={0.8}
+                  activeOpacity={0.7}
                 >
-                  <Text style={styles.suggestionEmoji}>{s.emoji}</Text>
                   <Text style={styles.suggestionLabel}>{s.label}</Text>
                 </TouchableOpacity>
               ))}
@@ -789,15 +841,22 @@ export default function VoiceAgentScreen() {
           <TouchableOpacity onPress={handleOrbPress} activeOpacity={0.85} disabled={agentState === 'thinking'}>
             <Animated.View
               style={[
-                styles.orb,
+                styles.orbShadow,
                 {
-                  backgroundColor: getOrbColor(),
                   shadowColor: getOrbGlow(),
                   transform: [{ scale: orbScale }],
                 },
               ]}
             >
-              <Text style={styles.orbEmoji}>{getOrbEmoji()}</Text>
+              <LinearGradient
+                colors={getOrbGradient()}
+                start={{ x: 0.1, y: 0.1 }}
+                end={{ x: 0.9, y: 0.95 }}
+                style={styles.orb}
+              >
+                <View style={styles.orbHighlight} />
+                <OrbGlyph state={agentState} />
+              </LinearGradient>
             </Animated.View>
           </TouchableOpacity>
 
@@ -869,28 +928,60 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   headerBtnText: {
-    fontSize: 14,
+    fontSize: 26,
+    lineHeight: 28,
     color: Colors.onSurfaceVariant,
+    fontWeight: '300',
+    marginTop: -2,
+  },
+  headerBtnReset: {
+    fontSize: 18,
+    color: Colors.onSurfaceVariant,
+    fontWeight: '400',
   },
   headerCenter: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 10,
   },
   headerTitle: {
     fontFamily: 'PlusJakartaSans_700Bold',
     fontSize: 17,
     color: Colors.onSurface,
     fontWeight: '700',
+    letterSpacing: 0.2,
+  },
+  statusPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 9,
+    paddingVertical: 3,
+    borderRadius: Radius.full,
+    backgroundColor: Colors.surfaceContainer,
+  },
+  statusPillActive: {
+    backgroundColor: 'rgba(16,185,129,0.12)',
+  },
+  statusPillText: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 10,
+    color: Colors.onSurfaceMuted,
+    fontWeight: '600',
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+  },
+  statusPillTextActive: {
+    color: '#059669',
   },
   liveDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
     backgroundColor: Colors.outline,
   },
   liveDotActive: {
-    backgroundColor: Colors.success,
+    backgroundColor: '#10B981',
   },
   autoResumeRow: {
     flexDirection: 'row',
@@ -951,6 +1042,14 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     marginBottom: Spacing.lg,
   },
+  suggestionsHeading: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 11,
+    color: Colors.onSurfaceMuted,
+    fontWeight: '600',
+    letterSpacing: 1.4,
+    marginBottom: 12,
+  },
   suggestionsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -962,21 +1061,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.outlineVariant,
     borderRadius: Radius.full,
-    paddingHorizontal: 14,
-    paddingVertical: 9,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    ...Shadows.card,
-  },
-  suggestionEmoji: {
-    fontSize: 14,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
   },
   suggestionLabel: {
     fontFamily: 'Inter_500Medium',
-    fontSize: 12,
-    color: Colors.onSurface,
+    fontSize: 13,
+    color: Colors.onSurfaceVariant,
     fontWeight: '500',
+    letterSpacing: 0.1,
   },
   logScroll: {
     flex: 1,
@@ -1008,10 +1101,15 @@ const styles = StyleSheet.create({
   },
   bubbleRole: {
     fontFamily: 'Inter_600SemiBold',
-    fontSize: 11,
-    color: 'rgba(255,255,255,0.75)',
-    fontWeight: '700',
+    fontSize: 10,
+    color: 'rgba(255,255,255,0.7)',
+    fontWeight: '600',
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
     marginBottom: 2,
+  },
+  bubbleRoleAi: {
+    color: Colors.primary,
   },
   bubbleText: {
     fontFamily: 'Inter_400Regular',
@@ -1022,11 +1120,24 @@ const styles = StyleSheet.create({
   aiText: {
     color: Colors.onSurface,
   },
-  sourcesText: {
-    fontFamily: 'Inter_400Regular',
-    fontSize: 11,
-    color: Colors.onSurfaceMuted,
-    marginTop: 4,
+  sourcesRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginTop: 8,
+  },
+  sourceChip: {
+    backgroundColor: Colors.surfaceContainer,
+    borderRadius: Radius.full,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  sourceChipText: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 10,
+    color: Colors.onSurfaceVariant,
+    fontWeight: '500',
+    letterSpacing: 0.2,
   },
   thinkingBubble: {
     flexDirection: 'row',
@@ -1063,27 +1174,39 @@ const styles = StyleSheet.create({
     height: ORB_SIZE + 60,
     borderRadius: (ORB_SIZE + 60) / 2,
   },
+  orbShadow: {
+    borderRadius: ORB_SIZE / 2,
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.55,
+    shadowRadius: 28,
+    elevation: 14,
+  },
   orb: {
     width: ORB_SIZE,
     height: ORB_SIZE,
     borderRadius: ORB_SIZE / 2,
     alignItems: 'center',
     justifyContent: 'center',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.5,
-    shadowRadius: 24,
-    elevation: 12,
+    overflow: 'hidden',
   },
-  orbEmoji: {
-    fontSize: 38,
+  orbHighlight: {
+    position: 'absolute',
+    top: 8,
+    left: 14,
+    width: ORB_SIZE * 0.45,
+    height: ORB_SIZE * 0.28,
+    borderRadius: ORB_SIZE * 0.25,
+    backgroundColor: 'rgba(255,255,255,0.28)',
+    transform: [{ rotate: '-18deg' }],
   },
   statusLabel: {
     fontFamily: 'Inter_500Medium',
-    fontSize: 13,
+    fontSize: 12,
     color: Colors.onSurfaceMuted,
-    marginTop: 14,
+    marginTop: 16,
     textAlign: 'center',
     fontWeight: '500',
+    letterSpacing: 0.4,
   },
   statusError: {
     color: Colors.error,
