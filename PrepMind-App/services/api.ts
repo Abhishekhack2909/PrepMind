@@ -135,36 +135,60 @@ export type VoiceAskResult = {
 };
 
 /**
- * Send a recorded audio file (from expo-av) to the backend for transcription
- * + RAG answer. Works from native — the backend runs Groq Whisper for STT
- * and llama-3 for the answer.
+ * Send a recorded audio file to the backend for transcription + RAG answer.
+ *
+ * Uses XMLHttpRequest + React Native's FormData, NOT the global fetch:
+ *   - Expo SDK 56's global fetch is expo/fetch (WinterCG), which rejects
+ *     RN's `{ uri, name, type }` FormData parts ("Unsupported FormData part
+ *     implementation").
+ *   - expo-file-system (legacy AND new File API) can't read expo-audio's
+ *     recording in Expo Go — the file lives outside Expo Go's scoped
+ *     directories, so readAsStringAsync/uploadAsync/File.base64() are all
+ *     rejected with location errors.
+ *   - XMLHttpRequest goes through RN core networking, which streams file://
+ *     URIs via the OS content resolver — no Expo scoping involved.
  */
-export async function askByVoice(
+export function askByVoice(
   audioUri: string,
   mimeType: string = 'audio/m4a',
   fileName: string = 'recording.m4a',
   language: string = 'en',
 ): Promise<VoiceAskResult> {
-  const form = new FormData();
-  // React Native FormData accepts { uri, name, type } directly.
-  form.append('audio', {
-    uri: audioUri,
-    name: fileName,
-    type: mimeType,
-    // @ts-ignore — RN-only FormData shape
-  } as any);
-  form.append('language', language);
+  // Android sometimes hands back a bare path without a scheme.
+  const uri = audioUri.startsWith('file://') || audioUri.includes('://')
+    ? audioUri
+    : `file://${audioUri}`;
 
-  const response = await fetch(`${BASE_URL}/api/voice/ask`, {
-    method: 'POST',
-    body: form,
-    // Do NOT set Content-Type — RN sets the multipart boundary itself.
+  return new Promise<VoiceAskResult>((resolve, reject) => {
+    const form = new FormData();
+    form.append('audio', {
+      uri,
+      name: fileName,
+      type: mimeType,
+      // @ts-ignore — RN-native FormData file part shape
+    } as any);
+    form.append('language', language);
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `${BASE_URL}/api/voice/ask`);
+    xhr.timeout = 60000;
+
+    xhr.onload = () => {
+      try {
+        const data = JSON.parse(xhr.responseText);
+        if (xhr.status >= 200 && xhr.status < 300) {
+          resolve(data as VoiceAskResult);
+        } else {
+          reject(new Error(data?.detail || `Voice ask error: ${xhr.status}`));
+        }
+      } catch {
+        reject(new Error(`Voice ask error: ${xhr.status}`));
+      }
+    };
+    xhr.onerror = () => reject(new Error('Network error uploading audio. Is the backend reachable?'));
+    xhr.ontimeout = () => reject(new Error('Voice request timed out.'));
+
+    // Let XHR set the multipart boundary itself — do not set Content-Type.
+    xhr.send(form);
   });
-
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    throw new Error(err.detail || `Voice ask error: ${response.status}`);
-  }
-
-  return await response.json() as VoiceAskResult;
 }
