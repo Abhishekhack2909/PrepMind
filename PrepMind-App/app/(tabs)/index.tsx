@@ -1,8 +1,8 @@
 import { useEffect, useState, useCallback } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, SafeAreaView,
-  TouchableOpacity, ActivityIndicator, RefreshControl, Image,
+  View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl, Image,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Colors, Spacing, Radius, Shadows, Typography } from '@/constants/theme';
 import { useAuth } from '@/hooks/useAuth';

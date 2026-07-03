@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, SafeAreaView,
-  TouchableOpacity, ActivityIndicator, Alert, Image,
+  View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Alert, Image,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Colors, Spacing, Radius, Shadows, Typography } from '@/constants/theme';
 import { useAuth } from '@/hooks/useAuth';
