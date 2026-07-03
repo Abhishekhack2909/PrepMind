@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, ScrollView,
-  TextInput, ActivityIndicator, Image, Alert, SafeAreaView, Platform,
+  TextInput, ActivityIndicator, Image, Alert, Platform,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import * as FileSystem from 'expo-file-system';
 import { evaluateAnswer, type EvaluationResult } from '@/services/api';
