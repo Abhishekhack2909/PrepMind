@@ -20,6 +20,24 @@ router = APIRouter(prefix="/api/analytics", tags=["Analytics"])
 supabase = create_client(os.getenv("SUPABASE_URL", ""), os.getenv("SUPABASE_SERVICE_KEY", ""))
 
 
+def _safe_rows(table: str, select: str, user_id: str, **kwargs) -> list:
+    """
+    Query a table but degrade to [] if the table doesn't exist yet
+    (Supabase PGRST205) or the query fails — analytics should never 500
+    just because a feature hasn't stored data yet.
+    """
+    try:
+        q = supabase.table(table).select(select).eq("user_id", user_id)
+        if kwargs.get("order_desc"):
+            q = q.order(kwargs["order_desc"], desc=True)
+        if kwargs.get("limit"):
+            q = q.limit(kwargs["limit"])
+        return q.execute().data or []
+    except Exception as e:
+        print(f"[WARN] analytics query on '{table}' failed: {e}")
+        return []
+
+
 @router.get("/weakness")
 async def get_weakness_map(user_id: str = Query(...)):
     """
@@ -28,14 +46,13 @@ async def get_weakness_map(user_id: str = Query(...)):
     Returns topics sorted by weakness (lowest score first).
     """
     try:
-        res = supabase.table("mcq_sessions") \
-            .select("topic, percentage, wrong_topics, created_at") \
-            .eq("user_id", user_id) \
-            .order("created_at", desc=True) \
-            .limit(50) \
-            .execute()
-
-        sessions = res.data or []
+        sessions = _safe_rows(
+            "mcq_sessions",
+            "topic, percentage, wrong_topics, created_at",
+            user_id,
+            order_desc="created_at",
+            limit=50,
+        )
 
         # Aggregate per topic
         topic_data: dict = {}
@@ -78,19 +95,11 @@ async def get_summary(user_id: str = Query(...)):
     Full performance summary combining MCQ + evaluations.
     """
     try:
-        # MCQ stats
-        mcq_res = supabase.table("mcq_sessions") \
-            .select("percentage, topic, created_at") \
-            .eq("user_id", user_id) \
-            .execute()
-        mcq_data = mcq_res.data or []
+        # MCQ stats (degrades to empty if table missing)
+        mcq_data = _safe_rows("mcq_sessions", "percentage, topic, created_at", user_id)
 
         # Evaluation stats
-        eval_res = supabase.table("evaluations") \
-            .select("total_marks, grade, created_at") \
-            .eq("user_id", user_id) \
-            .execute()
-        eval_data = eval_res.data or []
+        eval_data = _safe_rows("evaluations", "total_marks, grade, created_at", user_id)
 
         # MCQ averages
         mcq_avg = round(sum(s["percentage"] for s in mcq_data) / len(mcq_data)) if mcq_data else 0
