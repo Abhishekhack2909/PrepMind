@@ -2,8 +2,8 @@ import { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   KeyboardAvoidingView, Platform, ScrollView,
-  ActivityIndicator, SafeAreaView,
-} from 'react-native';
+  ActivityIndicator, } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '@/lib/supabase';
 import { Colors, Spacing, Radius, Shadows, Typography } from '@/constants/theme';
 

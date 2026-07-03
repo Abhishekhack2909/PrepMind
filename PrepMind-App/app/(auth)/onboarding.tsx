@@ -1,8 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
 import {
   View, Text, StyleSheet, Animated, Dimensions,
-  TouchableOpacity, SafeAreaView, Platform,
+  TouchableOpacity, Platform,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Colors, Spacing, Radius, Shadows, Typography } from '@/constants/theme';
 import { appStorage } from '../../lib/storage';
