@@ -1,7 +1,16 @@
 // Design tokens — vibrant, professional, clean
 // Duo-tone system: Electric Blue primary + Violet accent
+//
+// Dark-mode support:
+//   `Colors` starts in light mode. Call `setColorMode('dark' | 'light')`
+//   BEFORE React renders anything (or force a root remount afterwards) —
+//   because `StyleSheet.create` snapshots values at first call, so screens
+//   that already rendered won't reflect a mid-flight switch without a
+//   remount. The root layout handles the remount via a `key` prop.
 
-export const Colors = {
+export type ColorMode = 'light' | 'dark';
+
+const LightPalette = {
   // Primary palette — vibrant electric blue
   primary: '#0066FF',
   primaryDark: '#0052CC',
@@ -71,7 +80,90 @@ export const Colors = {
   streakAmberGlow: 'rgba(245, 158, 11, 0.20)',
   superPurple: '#7C3AED',
   superPurpleGlow: 'rgba(124, 58, 237, 0.25)',
-} as const;
+};
+
+const DarkPalette: typeof LightPalette = {
+  // Primary stays vibrant so brand pops on dark
+  primary: '#3D8BFF',
+  primaryDark: '#0066FF',
+  primaryLight: '#60A5FA',
+  primaryGhost: 'rgba(61, 139, 255, 0.14)',
+  primaryGlow: 'rgba(61, 139, 255, 0.35)',
+
+  accent: '#A78BFA',
+  accentDark: '#7C3AED',
+  accentLight: '#C4B5FD',
+  accentGhost: 'rgba(167, 139, 250, 0.14)',
+  accentGlow: 'rgba(167, 139, 250, 0.30)',
+
+  gradientStart: '#3D8BFF',
+  gradientEnd: '#A78BFA',
+
+  // Surfaces — deep neutrals with a hint of blue
+  surface: '#0B0F1A',
+  surfaceCard: '#141A2A',
+  surfaceElevated: '#1B2236',
+  surfaceContainer: '#182036',
+  surfaceContainerLow: '#141A2A',
+  surfaceContainerHigh: '#212B45',
+  surfaceContainerHighest: '#2A3552',
+  surfaceContainerLowest: '#0B0F1A',
+  surfaceBright: '#1B2236',
+  surfaceDim: '#0B0F1A',
+  surfaceVariant: '#212B45',
+
+  onSurface: '#F8FAFC',
+  onSurfaceVariant: '#CBD5E1',
+  onSurfaceMuted: '#94A3B8',
+
+  outline: '#334155',
+  outlineVariant: '#293145',
+  outlineFaint: 'rgba(148, 163, 184, 0.15)',
+
+  onPrimary: '#0B0F1A',
+  primaryContainer: '#1E3A8A',
+  onPrimaryContainer: '#DBEAFE',
+  secondaryContainer: '#4C1D95',
+  onSecondaryContainer: '#EDE9FE',
+  inverseSurface: '#F1F5F9',
+  inversePrimary: '#0066FF',
+
+  error: '#F87171',
+  errorContainer: 'rgba(239, 68, 68, 0.18)',
+  success: '#34D399',
+  successContainer: 'rgba(16, 185, 129, 0.18)',
+  warning: '#FBBF24',
+  warningContainer: 'rgba(245, 158, 11, 0.18)',
+  info: '#60A5FA',
+  infoContainer: 'rgba(59, 130, 246, 0.18)',
+
+  background: '#0B0F1A',
+  onBackground: '#F8FAFC',
+
+  streakAmber: '#FBBF24',
+  streakAmberGlow: 'rgba(251, 191, 36, 0.24)',
+  superPurple: '#A78BFA',
+  superPurpleGlow: 'rgba(167, 139, 250, 0.28)',
+};
+
+// Mutable Colors singleton. Screens keep `import { Colors } from '@/constants/theme'`.
+// We mutate this object in place so all references stay valid, and force a root
+// remount when the mode changes so StyleSheet.create() re-runs with new values.
+export const Colors: typeof LightPalette = { ...LightPalette };
+
+let currentMode: ColorMode = 'light';
+
+export function getColorMode(): ColorMode {
+  return currentMode;
+}
+
+export function setColorMode(mode: ColorMode) {
+  currentMode = mode;
+  const src = mode === 'dark' ? DarkPalette : LightPalette;
+  for (const k of Object.keys(src) as Array<keyof typeof LightPalette>) {
+    (Colors as any)[k] = src[k];
+  }
+}
 
 export const Gradients = {
   // Gradient color arrays [start, end] — used with LinearGradient or manual overlays

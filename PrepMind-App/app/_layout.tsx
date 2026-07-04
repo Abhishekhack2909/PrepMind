@@ -2,10 +2,11 @@
  * Root Layout — _layout.tsx
  * Fixed for web: fonts are non-blocking, Supabase session has timeout
  */
-import { useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import { Stack, router, useSegments } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { View, ActivityIndicator, Platform } from 'react-native';
+import { View, ActivityIndicator, Platform, Appearance } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   useFonts,
   PlusJakartaSans_400Regular,
@@ -19,7 +20,30 @@ import {
   Inter_600SemiBold,
 } from '@expo-google-fonts/inter';
 import { useAuth } from '@/hooks/useAuth';
-import { Colors } from '@/constants/theme';
+import { Colors, setColorMode, type ColorMode } from '@/constants/theme';
+
+export type AppearancePref = 'system' | 'light' | 'dark';
+
+type ThemeCtxValue = {
+  pref: AppearancePref;
+  effective: ColorMode;
+  setPref: (p: AppearancePref) => Promise<void>;
+};
+
+const ThemeCtx = createContext<ThemeCtxValue>({
+  pref: 'system',
+  effective: 'light',
+  setPref: async () => {},
+});
+
+export function useAppTheme() {
+  return useContext(ThemeCtx);
+}
+
+function resolveEffective(pref: AppearancePref): ColorMode {
+  if (pref === 'light' || pref === 'dark') return pref;
+  return (Appearance.getColorScheme() ?? 'light') as ColorMode;
+}
 
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const { session, loading } = useAuth();
@@ -66,7 +90,52 @@ export default function RootLayout() {
     }
   }, []);
 
-  const ready = fontsLoaded || !!fontError || fontTimeout;
+  // ── Theme (light/dark) — must resolve BEFORE first StyleSheet render ──
+  const [themeReady, setThemeReady] = useState(false);
+  const [pref, setPrefState] = useState<AppearancePref>('system');
+  const [effective, setEffective] = useState<ColorMode>(
+    (Appearance.getColorScheme() ?? 'light') as ColorMode
+  );
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const stored = (await AsyncStorage.getItem('prepmind:appearance')) as AppearancePref | null;
+        const p: AppearancePref = stored === 'light' || stored === 'dark' || stored === 'system' ? stored : 'system';
+        const eff = resolveEffective(p);
+        setColorMode(eff);   // mutate BEFORE anything using Colors mounts
+        setPrefState(p);
+        setEffective(eff);
+      } finally {
+        setThemeReady(true);
+      }
+    })();
+  }, []);
+
+  // Follow OS changes when the user picked "system"
+  useEffect(() => {
+    if (pref !== 'system') return;
+    const sub = Appearance.addChangeListener(({ colorScheme }) => {
+      const eff = (colorScheme ?? 'light') as ColorMode;
+      setColorMode(eff);
+      setEffective(eff);
+    });
+    return () => sub.remove();
+  }, [pref]);
+
+  const themeValue = useMemo<ThemeCtxValue>(() => ({
+    pref,
+    effective,
+    setPref: async (next) => {
+      await AsyncStorage.setItem('prepmind:appearance', next);
+      const eff = resolveEffective(next);
+      setColorMode(eff);
+      setPrefState(next);
+      setEffective(eff);
+    },
+  }), [pref, effective]);
+
+  const ready = (fontsLoaded || !!fontError || fontTimeout) && themeReady;
 
   if (!ready) {
     return (
@@ -77,13 +146,15 @@ export default function RootLayout() {
   }
 
   return (
-    <AuthGuard>
-      <StatusBar style="dark" />
-      <Stack screenOptions={{ headerShown: false }}>
-
-        <Stack.Screen name="(auth)" />
-        <Stack.Screen name="(tabs)" />
-      </Stack>
-    </AuthGuard>
+    <ThemeCtx.Provider value={themeValue}>
+      {/* key remounts the tree when theme flips, so StyleSheet.create() re-runs. */}
+      <AuthGuard key={effective}>
+        <StatusBar style={effective === 'dark' ? 'light' : 'dark'} />
+        <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: Colors.background } }}>
+          <Stack.Screen name="(auth)" />
+          <Stack.Screen name="(tabs)" />
+        </Stack>
+      </AuthGuard>
+    </ThemeCtx.Provider>
   );
 }
