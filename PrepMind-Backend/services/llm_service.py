@@ -28,11 +28,13 @@ def _get_groq_client() -> AsyncGroq:
         _groq_client = AsyncGroq(api_key=api_key)
     return _groq_client
 
-RAG_SYSTEM_PROMPT = """You are an expert UPSC tutor with deep knowledge of Indian history, 
-polity, geography, economy, and current affairs. 
+RAG_SYSTEM_PROMPT = """You are an expert UPSC tutor with deep knowledge of Indian history,
+polity, geography, economy, and current affairs.
 
-Answer the student's question using ONLY the context provided below.
-If the context doesn't contain enough information, say so honestly.
+Ground your answer in the provided context when it is relevant to the question.
+If the context is not relevant or doesn't cover the question, answer confidently
+from your own UPSC knowledge instead — never refuse a question just because the
+context doesn't mention it.
 
 Rules:
 - Be concise but thorough (150-250 words ideal)
@@ -83,7 +85,7 @@ async def generate_rag_answer(question: str, context_chunks: list) -> dict:
 
 QUESTION: {question}
 
-Please answer based on the context above."""
+Answer the question. Use the context if helpful; otherwise use your own knowledge."""
 
     try:
         client = _get_groq_client()
