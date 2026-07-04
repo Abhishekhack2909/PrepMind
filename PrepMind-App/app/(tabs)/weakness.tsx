@@ -78,21 +78,16 @@ export default function WeaknessScreen() {
     fetchData();
   }
 
-  // Fallback data matching mockup design if database is empty
-  const finalWeakness: WeaknessEntry[] = weakness.length > 0 ? weakness : [
-    { topic: 'History', avg_score: 45, level: 'moderate', sessions: 5 },
-    { topic: 'Polity', avg_score: 72, level: 'strong', sessions: 12 },
-    { topic: 'Geography', avg_score: 35, level: 'weak', sessions: 8 },
-    { topic: 'Economy', avg_score: 58, level: 'moderate', sessions: 7 },
-    { topic: 'Science & Tech', avg_score: 81, level: 'strong', sessions: 15 },
-  ];
+  // Real data only — no more fake mockup fallback.
+  const finalWeakness: WeaknessEntry[] = weakness;
+  const hasData = finalWeakness.length > 0;
 
-  const overallAccuracy = summary?.mcq?.avg_score ?? 54;
+  const overallAccuracy = summary?.mcq?.avg_score ?? 0;
 
-  // Find the weakest topic to display in highlight card
+  // Weakest topic (only meaningful when we have data)
   const sortedWeakness = [...finalWeakness].sort((a, b) => a.avg_score - b.avg_score);
-  const criticalTopic = sortedWeakness.length > 0 ? sortedWeakness[0].topic : 'Art & Culture';
-  const criticalScore = sortedWeakness.length > 0 ? sortedWeakness[0].avg_score : 28;
+  const criticalTopic = hasData ? sortedWeakness[0].topic : '—';
+  const criticalScore = hasData ? sortedWeakness[0].avg_score : 0;
 
   if (loading) {
     return (
@@ -164,15 +159,21 @@ export default function WeaknessScreen() {
           <View style={styles.criticalCard}>
             <View style={styles.criticalHeader}>
               <View style={styles.warningIconContainer}>
-                <Text style={styles.warningIcon}>⚠️</Text>
+                <Text style={styles.warningIcon}>{hasData ? '⚠️' : '🎯'}</Text>
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={styles.criticalLabel}>CRITICAL FOCUS AREA</Text>
-                <Text style={styles.criticalTopic}>{criticalTopic}</Text>
+                <Text style={styles.criticalLabel}>
+                  {hasData ? 'CRITICAL FOCUS AREA' : 'GET STARTED'}
+                </Text>
+                <Text style={styles.criticalTopic}>
+                  {hasData ? criticalTopic : 'No MCQs yet'}
+                </Text>
               </View>
             </View>
             <Text style={styles.criticalDesc}>
-              Accuracy is critically low at {criticalScore}%. Review fundamental concepts and recent PYQs.
+              {hasData
+                ? `Accuracy is critically low at ${criticalScore}%. Review fundamental concepts and recent PYQs.`
+                : 'Take a few MCQ quizzes to build your personal weakness map.'}
             </Text>
             <TouchableOpacity
               style={styles.revisionBtn}
@@ -180,7 +181,9 @@ export default function WeaknessScreen() {
               onPress={() => router.push('/(tabs)/mcq' as any)}
             >
               <Text style={styles.revisionBtnIcon}>▶️</Text>
-              <Text style={styles.revisionBtnText}>Start Revision</Text>
+              <Text style={styles.revisionBtnText}>
+                {hasData ? 'Start Revision' : 'Take a Quiz'}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -206,6 +209,17 @@ export default function WeaknessScreen() {
           </View>
 
           <View style={styles.breakdownList}>
+            {!hasData && (
+              <Text style={{
+                fontFamily: 'Inter_400Regular',
+                fontSize: 13,
+                color: Colors.onSurfaceMuted,
+                textAlign: 'center',
+                paddingVertical: Spacing.md,
+              }}>
+                Your subject-wise accuracy will appear here after your first quiz.
+              </Text>
+            )}
             {finalWeakness.map((item, idx) => {
               // Dynamically resolve status color based on score thresholds
               const score = item.avg_score;

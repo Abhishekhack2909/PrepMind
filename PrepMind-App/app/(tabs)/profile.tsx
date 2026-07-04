@@ -1,11 +1,16 @@
 import { useEffect, useState } from 'react';
 import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, Alert, Image,
+  Modal, TextInput, Switch, Share, Linking, Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import * as ImagePicker from 'expo-image-picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { supabase } from '@/lib/supabase';
 import { Colors, Spacing, Radius, Shadows, Typography } from '@/constants/theme';
 import { useAuth } from '@/hooks/useAuth';
+import { useAppTheme } from '../_layout';
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
@@ -15,11 +20,18 @@ export default function ProfileScreen() {
   const userId = session?.user?.id;
   const email = session?.user?.email;
   const isAnon = !email || session?.user?.is_anonymous;
-  const displayName = email ? email.split('@')[0] : 'Abhishek Tripathi';
+  const displayName = email ? email.split('@')[0].replace(/[._-]+/g, ' ') : 'Aspirant';
   const initial = displayName[0].toUpperCase();
 
   const [summary, setSummary] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [name, setName] = useState<string>('');
+  const [avatarUri, setAvatarUri] = useState<string | null>(null);
+  const [editVisible, setEditVisible] = useState(false);
+  const [nameDraft, setNameDraft] = useState('');
+  const [notifOn, setNotifOn] = useState(true);
+  const [appearanceVisible, setAppearanceVisible] = useState(false);
+  const { pref: appearance, setPref: setAppearancePref } = useAppTheme();
 
   useEffect(() => {
     if (!userId) { setLoading(false); return; }
@@ -30,7 +42,78 @@ export default function ProfileScreen() {
       })
       .catch(() => null)
       .finally(() => setLoading(false));
+
+    // Load persisted profile bits (name from Supabase, avatar + prefs from local storage)
+    (async () => {
+      try {
+        const { data } = await supabase.from('users').select('name').eq('id', userId).maybeSingle();
+        if (data?.name) setName(data.name);
+      } catch {}
+      const [av, notif] = await Promise.all([
+        AsyncStorage.getItem(`prepmind:avatar:${userId}`),
+        AsyncStorage.getItem('prepmind:notifOn'),
+      ]);
+      if (av) setAvatarUri(av);
+      if (notif === '0') setNotifOn(false);
+    })();
   }, [userId]);
+
+  async function pickAvatar() {
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!perm.granted) {
+      Alert.alert('Permission needed', 'Please allow photo library access to change your avatar.');
+      return;
+    }
+    const res = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.6,
+    });
+    if (!res.canceled && res.assets[0]?.uri && userId) {
+      setAvatarUri(res.assets[0].uri);
+      await AsyncStorage.setItem(`prepmind:avatar:${userId}`, res.assets[0].uri);
+    }
+  }
+
+  async function saveName() {
+    const trimmed = nameDraft.trim();
+    if (!trimmed) { Alert.alert('Name required'); return; }
+    setName(trimmed);
+    setEditVisible(false);
+    if (userId) {
+      try {
+        await supabase.from('users').upsert({ id: userId, email, name: trimmed });
+      } catch (e: any) {
+        Alert.alert('Could not save', e.message ?? 'Try again later.');
+      }
+    }
+  }
+
+  async function toggleNotif(v: boolean) {
+    setNotifOn(v);
+    await AsyncStorage.setItem('prepmind:notifOn', v ? '1' : '0');
+  }
+
+  async function chooseAppearance(v: 'system' | 'light' | 'dark') {
+    setAppearanceVisible(false);
+    // Triggers a root remount so every StyleSheet re-evaluates with new colors.
+    await setAppearancePref(v);
+  }
+
+  async function shareProfile() {
+    const finalName = name || displayName;
+    await Share.share({
+      message: `I'm preparing for UPSC on PrepMind — an AI study companion. Join me! 🎯\n\n— ${finalName}`,
+    });
+  }
+
+  function openHelp() {
+    const url = 'mailto:support@prepmind.app?subject=Help%20Request';
+    Linking.openURL(url).catch(() =>
+      Alert.alert('Contact us', 'Email support@prepmind.app for help.'),
+    );
+  }
 
   function handleSignOut() {
     Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
@@ -39,15 +122,13 @@ export default function ProfileScreen() {
     ]);
   }
 
-  // Derive dynamic or fallback values to match design perfectly
-  const streakCount = summary?.streak ?? 12;
-  const mcqCount = summary?.mcq?.total_sessions
-    ? summary.mcq.total_sessions.toString()
-    : '1,450';
-  const evaluatedCount = summary?.evaluations?.total_submitted
-    ? summary.evaluations.total_submitted.toString()
-    : '84';
-  const globalRank = summary?.global_rank ?? 'Top 5%';
+  // Real values only — show 0 / — when nothing exists yet.
+  const streakCount: number = summary?.streak ?? 0;
+  const mcqCount = (summary?.mcq?.total_sessions ?? 0).toString();
+  const evaluatedCount = (summary?.evaluations?.total_submitted ?? 0).toString();
+  const globalRank = summary?.mcq?.avg_score
+    ? `${summary.mcq.avg_score}% avg`
+    : '—';
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -73,18 +154,23 @@ export default function ProfileScreen() {
           <View style={styles.profileHeaderGlow} />
           
           <View style={styles.avatarWrapper}>
-            <View style={styles.avatarRing}>
-              <Image
-                source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAnCccAlETF_JKCrPdiwWuUVTWzjsJ3Ys1-Q18DzfNu8qUiRzLg1h_ps3bfdP8GGgafxYWPEJR3ndAKXaj0hYJIUYXbVhqPT33CaqEJH0Nd80RMaXwBhnSwBgkFVDcCLar4MctYVLX0fb_yjqVz9VvukI-Yus35RL7B8K2_AtEaL4Eq5SC0KeEkwyWHTwTZinxli9Kd7BsirmVK3wgM5isHr6LWZa7w4QmfqtJMe8EnwPc23IvyWQcq-OQE-66YeCAiTEo6KL7nrq7s' }}
-                style={styles.largeAvatar}
-              />
-            </View>
-            <TouchableOpacity style={styles.editBtn} activeOpacity={0.85}>
-              <Text style={styles.editIcon}>✏️</Text>
+            <TouchableOpacity style={styles.avatarRing} activeOpacity={0.85} onPress={pickAvatar}>
+              {avatarUri ? (
+                <Image source={{ uri: avatarUri }} style={styles.largeAvatar} />
+              ) : (
+                <View style={[styles.largeAvatar, { backgroundColor: Colors.primaryGhost, alignItems: 'center', justifyContent: 'center' }]}>
+                  <Text style={{ fontSize: 42, fontWeight: '700', color: Colors.primary }}>
+                    {(name || displayName)[0]?.toUpperCase() || '?'}
+                  </Text>
+                </View>
+              )}
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.editBtn} activeOpacity={0.85} onPress={pickAvatar}>
+              <Text style={styles.editIcon}>📷</Text>
             </TouchableOpacity>
           </View>
 
-          <Text style={styles.profileName}>{displayName === 'Anonymous Aspirant' ? 'Abhishek Tripathi' : displayName}</Text>
+          <Text style={styles.profileName}>{name || displayName}</Text>
           <View style={styles.targetRow}>
             <Text style={styles.targetIcon}>🎓</Text>
             <Text style={styles.targetText}>Target Year: UPSC 2029</Text>
@@ -97,10 +183,14 @@ export default function ProfileScreen() {
           )}
 
           <View style={styles.actionBtnRow}>
-            <TouchableOpacity style={styles.primaryActionBtn} activeOpacity={0.8}>
+            <TouchableOpacity
+              style={styles.primaryActionBtn}
+              activeOpacity={0.8}
+              onPress={() => { setNameDraft(name || displayName); setEditVisible(true); }}
+            >
               <Text style={styles.primaryActionText}>Edit Profile</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.secondaryActionBtn} activeOpacity={0.8}>
+            <TouchableOpacity style={styles.secondaryActionBtn} activeOpacity={0.8} onPress={shareProfile}>
               <Text style={styles.secondaryActionText}>Share Profile</Text>
             </TouchableOpacity>
           </View>
@@ -157,35 +247,42 @@ export default function ProfileScreen() {
 
           <View style={styles.settingsList}>
             {/* Notifications */}
-            <TouchableOpacity style={styles.settingsItem} activeOpacity={0.7}>
+            <View style={styles.settingsItem}>
               <View style={styles.settingsItemLeft}>
                 <View style={styles.settingsItemIconBg}>
                   <Text style={styles.settingsItemEmoji}>🔔</Text>
                 </View>
                 <View>
                   <Text style={styles.settingsItemText}>Notifications</Text>
-                  <Text style={styles.settingsItemSubtext}>Manage daily reminders and alerts</Text>
+                  <Text style={styles.settingsItemSubtext}>Daily reminders and alerts</Text>
                 </View>
               </View>
-              <Text style={styles.chevron}>→</Text>
-            </TouchableOpacity>
+              <Switch
+                value={notifOn}
+                onValueChange={toggleNotif}
+                trackColor={{ false: Colors.outlineVariant, true: Colors.primary }}
+                thumbColor={'#fff'}
+              />
+            </View>
 
             {/* Appearance */}
-            <TouchableOpacity style={styles.settingsItem} activeOpacity={0.7}>
+            <TouchableOpacity style={styles.settingsItem} activeOpacity={0.7} onPress={() => setAppearanceVisible(true)}>
               <View style={styles.settingsItemLeft}>
                 <View style={styles.settingsItemIconBg}>
                   <Text style={styles.settingsItemEmoji}>🎨</Text>
                 </View>
                 <View>
                   <Text style={styles.settingsItemText}>Appearance</Text>
-                  <Text style={styles.settingsItemSubtext}>Light, Dark, or System default</Text>
+                  <Text style={styles.settingsItemSubtext}>
+                    {appearance === 'system' ? 'System default' : appearance === 'light' ? 'Light' : 'Dark'}
+                  </Text>
                 </View>
               </View>
               <Text style={styles.chevron}>→</Text>
             </TouchableOpacity>
 
             {/* Help & Support */}
-            <TouchableOpacity style={styles.settingsItem} activeOpacity={0.7}>
+            <TouchableOpacity style={styles.settingsItem} activeOpacity={0.7} onPress={openHelp}>
               <View style={styles.settingsItemLeft}>
                 <View style={styles.settingsItemIconBg}>
                   <Text style={styles.settingsItemEmoji}>❓</Text>
@@ -216,9 +313,151 @@ export default function ProfileScreen() {
         {/* Space at the bottom for floating tab bar */}
         <View style={styles.bottomSpacer} />
       </ScrollView>
+
+      {/* Edit Profile modal */}
+      <Modal visible={editVisible} transparent animationType="fade" onRequestClose={() => setEditVisible(false)}>
+        <View style={modalStyles.overlay}>
+          <View style={modalStyles.card}>
+            <Text style={modalStyles.title}>Edit Profile</Text>
+            <Text style={modalStyles.label}>Display name</Text>
+            <TextInput
+              value={nameDraft}
+              onChangeText={setNameDraft}
+              placeholder="Your name"
+              placeholderTextColor={Colors.onSurfaceMuted}
+              style={modalStyles.input}
+              autoFocus
+              maxLength={40}
+            />
+            <View style={modalStyles.actions}>
+              <TouchableOpacity onPress={() => setEditVisible(false)} style={modalStyles.btnSecondary}>
+                <Text style={modalStyles.btnSecondaryText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={saveName} style={modalStyles.btnPrimary}>
+                <Text style={modalStyles.btnPrimaryText}>Save</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Appearance modal */}
+      <Modal visible={appearanceVisible} transparent animationType="fade" onRequestClose={() => setAppearanceVisible(false)}>
+        <View style={modalStyles.overlay}>
+          <View style={modalStyles.card}>
+            <Text style={modalStyles.title}>Appearance</Text>
+            {(['system', 'light', 'dark'] as const).map(opt => (
+              <TouchableOpacity
+                key={opt}
+                onPress={() => chooseAppearance(opt)}
+                style={modalStyles.optionRow}
+                activeOpacity={0.7}
+              >
+                <Text style={modalStyles.optionText}>
+                  {opt === 'system' ? 'System default' : opt === 'light' ? 'Light' : 'Dark'}
+                </Text>
+                {appearance === opt && <Text style={modalStyles.optionCheck}>✓</Text>}
+              </TouchableOpacity>
+            ))}
+            <TouchableOpacity onPress={() => setAppearanceVisible(false)} style={[modalStyles.btnSecondary, { marginTop: 12, alignSelf: 'stretch' }]}>
+              <Text style={modalStyles.btnSecondaryText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
+
+const modalStyles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  card: {
+    width: '100%',
+    maxWidth: 380,
+    backgroundColor: Colors.surfaceCard,
+    borderRadius: Radius.xl,
+    padding: Spacing.lg,
+  },
+  title: {
+    fontFamily: 'PlusJakartaSans_700Bold',
+    fontSize: 18,
+    color: Colors.onSurface,
+    fontWeight: '700',
+    marginBottom: Spacing.md,
+  },
+  label: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 11,
+    color: Colors.onSurfaceMuted,
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+    marginBottom: 6,
+  },
+  input: {
+    backgroundColor: Colors.surfaceContainer,
+    borderRadius: Radius.md,
+    paddingHorizontal: Spacing.md,
+    height: 46,
+    fontFamily: 'Inter_500Medium',
+    fontSize: 15,
+    color: Colors.onSurface,
+  },
+  actions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 10,
+    marginTop: Spacing.md,
+  },
+  btnSecondary: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: Radius.full,
+    backgroundColor: Colors.surfaceContainer,
+    alignItems: 'center',
+  },
+  btnSecondaryText: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 14,
+    color: Colors.onSurfaceVariant,
+    fontWeight: '600',
+  },
+  btnPrimary: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: Radius.full,
+    backgroundColor: Colors.primary,
+  },
+  btnPrimaryText: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 14,
+    color: '#fff',
+    fontWeight: '600',
+  },
+  optionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.outlineFaint,
+  },
+  optionText: {
+    fontFamily: 'Inter_500Medium',
+    fontSize: 15,
+    color: Colors.onSurface,
+  },
+  optionCheck: {
+    fontSize: 18,
+    color: Colors.primary,
+    fontWeight: '700',
+  },
+});
 
 const styles = StyleSheet.create({
   safe: {
