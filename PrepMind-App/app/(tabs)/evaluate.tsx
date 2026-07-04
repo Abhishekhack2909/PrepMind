@@ -5,7 +5,6 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
-import * as FileSystem from 'expo-file-system';
 import { evaluateAnswer, type EvaluationResult } from '@/services/api';
 import { useAuth } from '@/hooks/useAuth';
 import { Colors, Spacing, Radius, Shadows, Typography } from '@/constants/theme';
@@ -82,9 +81,27 @@ export default function EvaluateScreen() {
 
     try {
       setStatusMsg('Reading image...');
-      const base64 = await FileSystem.readAsStringAsync(imageUri, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
+      // Use image-picker's built-in base64 output on retry to avoid the
+      // expo-file-system SDK-56 scoping issues; also fall back to fetch+blob→base64.
+      let base64: string | undefined;
+
+      try {
+        const asset = await fetch(imageUri);
+        const blob = await asset.blob();
+        base64 = await new Promise<string>((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            const dataUrl = reader.result as string;
+            resolve(dataUrl.split(',')[1] || '');
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+      } catch (readErr: any) {
+        throw new Error(`Could not read image: ${readErr?.message || readErr}`);
+      }
+
+      if (!base64) throw new Error('Could not read image bytes.');
 
       setStatusMsg('AI is evaluating your answer... ✨');
       const evaluation = await evaluateAnswer({

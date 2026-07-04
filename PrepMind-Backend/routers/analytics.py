@@ -13,6 +13,7 @@ Endpoints:
 
 from fastapi import APIRouter, HTTPException, Query
 from typing import Optional
+from datetime import date, datetime, timedelta, timezone
 import os
 from supabase import create_client
 
@@ -115,8 +116,30 @@ async def get_summary(user_id: str = Query(...)):
             g = e.get("grade", "Unknown")
             grade_dist[g] = grade_dist.get(g, 0) + 1
 
+        # Streak: consecutive UTC days with any activity, ending today or yesterday
+        active_days: set = set()
+        for row in list(mcq_data) + list(eval_data):
+            ts = row.get("created_at")
+            if not ts:
+                continue
+            try:
+                dt = datetime.fromisoformat(str(ts).replace("Z", "+00:00"))
+                active_days.add(dt.astimezone(timezone.utc).date())
+            except Exception:
+                continue
+
+        streak = 0
+        if active_days:
+            today = datetime.now(timezone.utc).date()
+            cursor = today if today in active_days else today - timedelta(days=1)
+            while cursor in active_days:
+                streak += 1
+                cursor -= timedelta(days=1)
+
         return {
             "success": True,
+            "streak": streak,
+            "active_days": len(active_days),
             "mcq": {
                 "total_sessions": mcq_count,
                 "avg_score": mcq_avg,
