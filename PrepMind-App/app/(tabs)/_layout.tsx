@@ -33,23 +33,24 @@ export default function TabsLayout() {
         tabBarStyle: {
           backgroundColor: Colors.surfaceCard,
           borderTopWidth: 0,
-          marginHorizontal: 16,
-          marginBottom: Platform.OS === 'ios' ? 24 : 12,
+          marginHorizontal: 12,
+          marginBottom: Platform.OS === 'ios' ? 24 : 14,
           borderRadius: Radius.xxl,
-          height: 64,
+          height: 76,
           paddingBottom: 0,
           position: 'absolute',
           ...Shadows.elevated,
         },
         tabBarLabelStyle: {
           fontFamily: 'Inter_600SemiBold',
-          fontSize: 10,
-          marginTop: -2,
-          marginBottom: 8,
+          fontSize: 11,
+          marginTop: 2,
+          marginBottom: 10,
           fontWeight: '600',
+          letterSpacing: 0.2,
         },
         tabBarItemStyle: {
-          paddingTop: 8,
+          paddingTop: 10,
         },
       }}
     >
@@ -69,24 +70,23 @@ export default function TabsLayout() {
 
 const styles = StyleSheet.create({
   iconContainer: {
-    width: 36,
-    height: 28,
-    borderRadius: Radius.md,
+    minWidth: 48,
+    height: 34,
+    paddingHorizontal: 10,
+    borderRadius: Radius.full,
     alignItems: 'center',
     justifyContent: 'center',
   },
   iconContainerActive: {
     backgroundColor: Colors.primaryGhost,
-    borderRadius: Radius.full,
-    width: 44,
-    height: 28,
+    minWidth: 54,
   },
   iconText: {
-    fontSize: 18,
-    opacity: 0.6,
+    fontSize: 22,
+    opacity: 0.55,
   },
   iconTextActive: {
-    fontSize: 20,
+    fontSize: 24,
     opacity: 1,
   },
 });

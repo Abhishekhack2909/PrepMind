@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl, Image,
+  View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl, Image, Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -14,11 +14,12 @@ export default function HomeScreen() {
   const { session, user } = useAuth();
   const userId = session?.user?.id;
   
-  // Format username dynamically, fall back to "Abhishek Tripathi" (from design) if not set
-  const fullName = user?.name || 'Abhishek Tripathi';
-  const streakCount = 12; // Static or dynamic placeholder matching design profile stats
+  // Real user info — fall back to email prefix, then a friendly generic.
+  const emailPrefix = session?.user?.email?.split('@')[0] || '';
+  const fullName = user?.name || (emailPrefix ? emailPrefix.replace(/[._-]+/g, ' ') : 'Aspirant');
 
   const [summary, setSummary] = useState<any>(null);
+  const streakCount: number = summary?.streak ?? 0;
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -184,15 +185,6 @@ export default function HomeScreen() {
               </View>
             </View>
 
-            {/* Ask PrepMind Overlay FAB — gradient blue */}
-            <TouchableOpacity 
-              style={styles.askSuperBtn} 
-              activeOpacity={0.85}
-              onPress={() => router.push('/(tabs)/voice' as any)}
-            >
-              <Text style={styles.askSuperBtnIcon}>✨</Text>
-              <Text style={styles.askSuperBtnText}>Ask PrepMind</Text>
-            </TouchableOpacity>
           </View>
         </View>
 
@@ -200,6 +192,16 @@ export default function HomeScreen() {
         <View style={styles.bottomSpacer} />
 
       </ScrollView>
+
+      {/* Floating Ask PrepMind FAB — always visible without scrolling */}
+      <TouchableOpacity
+        style={styles.askFab}
+        activeOpacity={0.85}
+        onPress={() => router.push('/(tabs)/voice' as any)}
+      >
+        <Text style={styles.askFabIcon}>✨</Text>
+        <Text style={styles.askFabText}>Ask PrepMind</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 }
@@ -574,27 +576,31 @@ const styles = StyleSheet.create({
     ...Typography.caption,
     marginTop: Spacing.xs,
   },
-  askSuperBtn: {
+  askFab: {
     position: 'absolute',
-    bottom: -22,
+    left: '50%',
+    transform: [{ translateX: -85 }],
+    bottom: Platform.OS === 'ios' ? 108 : 100,
     backgroundColor: Colors.primary,
     borderRadius: Radius.full,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: 12,
+    paddingHorizontal: 22,
+    paddingVertical: 13,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
     ...Shadows.primaryGlow,
-    zIndex: 20,
+    zIndex: 30,
+    elevation: 12,
   },
-  askSuperBtnIcon: {
+  askFabIcon: {
     color: '#ffffff',
     fontSize: 16,
   },
-  askSuperBtnText: {
+  askFabText: {
     fontFamily: 'Inter_600SemiBold',
     fontSize: 14,
     color: '#ffffff',
     fontWeight: '600',
+    letterSpacing: 0.2,
   },
 });
