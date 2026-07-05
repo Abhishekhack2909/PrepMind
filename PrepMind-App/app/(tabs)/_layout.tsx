@@ -1,6 +1,6 @@
 import { Tabs } from 'expo-router';
 import { View, Text, StyleSheet, Platform } from 'react-native';
-import { Colors, Shadows, Radius, Spacing } from '@/constants/theme';
+import { Colors, Shadows, Radius, Spacing, themed } from '@/constants/theme';
 
 function TabIcon({ icon, color, focused }: { icon: string; color?: any; focused: boolean }) {
   return (
@@ -68,7 +68,7 @@ export default function TabsLayout() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed((Colors) => StyleSheet.create({
   iconContainer: {
     minWidth: 48,
     height: 34,
@@ -89,4 +89,4 @@ const styles = StyleSheet.create({
     fontSize: 24,
     opacity: 1,
   },
-});
+}));
