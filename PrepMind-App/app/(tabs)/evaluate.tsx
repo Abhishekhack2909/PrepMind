@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
 import { evaluateAnswer, type EvaluationResult } from '@/services/api';
 import { useAuth } from '@/hooks/useAuth';
-import { Colors, Spacing, Radius, Shadows, Typography } from '@/constants/theme';
+import { Colors, Spacing, Radius, Shadows, Typography, themed } from '@/constants/theme';
 
 type AppState = 'idle' | 'loading' | 'results' | 'error';
 
@@ -399,7 +399,7 @@ function ScoreRow({ label, score, max }: { label: string; score: number; max: nu
 
 // ── Styles ─────────────────────────────────────────────────────────────────────
 
-const styles = StyleSheet.create({
+const styles = themed((Colors) => StyleSheet.create({
   safe: {
     flex: 1,
     backgroundColor: Colors.background,
@@ -838,4 +838,4 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     fontStyle: 'italic',
   },
-});
+}));
