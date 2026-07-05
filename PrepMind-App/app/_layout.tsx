@@ -20,7 +20,7 @@ import {
   Inter_600SemiBold,
 } from '@expo-google-fonts/inter';
 import { useAuth } from '@/hooks/useAuth';
-import { Colors, setColorMode, type ColorMode } from '@/constants/theme';
+import { Colors, setColorMode, type ColorMode, themed } from '@/constants/theme';
 
 export type AppearancePref = 'system' | 'light' | 'dark';
 
@@ -101,9 +101,10 @@ export default function RootLayout() {
     (async () => {
       try {
         const stored = (await AsyncStorage.getItem('prepmind:appearance')) as AppearancePref | null;
-        const p: AppearancePref = stored === 'light' || stored === 'dark' || stored === 'system' ? stored : 'system';
+        // Default to LIGHT on first install (users opt into dark/system).
+        const p: AppearancePref = stored === 'light' || stored === 'dark' || stored === 'system' ? stored : 'light';
         const eff = resolveEffective(p);
-        setColorMode(eff);   // mutate BEFORE anything using Colors mounts
+        setColorMode(eff);      // mutate the Colors singleton + currentMode
         setPrefState(p);
         setEffective(eff);
       } finally {
@@ -129,7 +130,7 @@ export default function RootLayout() {
     setPref: async (next) => {
       await AsyncStorage.setItem('prepmind:appearance', next);
       const eff = resolveEffective(next);
-      setColorMode(eff);
+      setColorMode(eff);   // update singleton + currentMode; key remount re-renders
       setPrefState(next);
       setEffective(eff);
     },
@@ -147,7 +148,7 @@ export default function RootLayout() {
 
   return (
     <ThemeCtx.Provider value={themeValue}>
-      {/* key remounts the tree when theme flips, so StyleSheet.create() re-runs. */}
+      {/* key remounts the tree when theme flips, so themed((Colors) => StyleSheet.create()) re-runs. */}
       <AuthGuard key={effective}>
         <StatusBar style={effective === 'dark' ? 'light' : 'dark'} />
         <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: Colors.background } }}>

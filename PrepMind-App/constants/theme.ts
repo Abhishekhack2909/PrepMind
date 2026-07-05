@@ -147,22 +147,56 @@ const DarkPalette: typeof LightPalette = {
 };
 
 // Mutable Colors singleton. Screens keep `import { Colors } from '@/constants/theme'`.
-// We mutate this object in place so all references stay valid, and force a root
-// remount when the mode changes so StyleSheet.create() re-runs with new values.
-export const Colors: typeof LightPalette = { ...LightPalette };
+// We mutate this object in place so all references stay valid.
+//
+// Boot ordering matters: `StyleSheet.create()` in each screen captures Colors
+// values at MODULE LOAD time. So we resolve the initial mode SYNCHRONOUSLY here
+// — from React Native's `Appearance` API (which persists across a JS reload
+// on the native side, even without any async storage). The user's stored pref
+// is applied on top via `Appearance.setColorScheme()` before we reload.
 
 let currentMode: ColorMode = 'light';
+
+// Mutable singleton for inline `Colors.x` usages in JSX (re-read every render).
+export const Colors: typeof LightPalette = { ...LightPalette };
+
+function applyPalette(mode: ColorMode) {
+  currentMode = mode;
+  const src = mode === 'dark' ? DarkPalette : LightPalette;
+  for (const k of Object.keys(src) as Array<keyof typeof LightPalette>) {
+    (Colors as any)[k] = src[k];
+  }
+}
 
 export function getColorMode(): ColorMode {
   return currentMode;
 }
 
 export function setColorMode(mode: ColorMode) {
-  currentMode = mode;
-  const src = mode === 'dark' ? DarkPalette : LightPalette;
-  for (const k of Object.keys(src) as Array<keyof typeof LightPalette>) {
-    (Colors as any)[k] = src[k];
-  }
+  applyPalette(mode);
+}
+
+/**
+ * Wrap a StyleSheet factory so it rebuilds per color mode AT RENDER TIME.
+ *
+ * Usage (module level, unchanged sub-components):
+ *   const styles = themed((Colors) => StyleSheet.create({ ... Colors.x ... }));
+ *
+ * Returns a Proxy: every `styles.foo` access rebuilds/caches the sheet for the
+ * CURRENT mode. So when the root remounts on a theme switch, screens re-render,
+ * re-access `styles`, and get the right palette — no reload, no boot-timing race.
+ */
+export function themed<T extends object>(factory: (colors: typeof LightPalette) => T): T {
+  const cache: Partial<Record<ColorMode, T>> = {};
+  return new Proxy({} as T, {
+    get(_t, prop) {
+      const mode = currentMode;
+      if (!cache[mode]) {
+        cache[mode] = factory(mode === 'dark' ? DarkPalette : LightPalette);
+      }
+      return (cache[mode] as any)[prop];
+    },
+  });
 }
 
 export const Gradients = {
