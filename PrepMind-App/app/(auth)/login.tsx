@@ -5,7 +5,7 @@ import {
   ActivityIndicator, } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '@/lib/supabase';
-import { Colors, Spacing, Radius, Shadows, Typography } from '@/constants/theme';
+import { Colors, Spacing, Radius, Shadows, Typography, themed } from '@/constants/theme';
 
 type Mode = 'signin' | 'signup';
 
@@ -265,7 +265,7 @@ export default function LoginScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed((Colors) => StyleSheet.create({
   safe: {
     flex: 1,
     backgroundColor: Colors.background,
@@ -511,4 +511,4 @@ const styles = StyleSheet.create({
     color: Colors.primary,
     fontWeight: '600',
   },
-});
+}));

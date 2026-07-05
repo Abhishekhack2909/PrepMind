@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { Colors, Spacing, Radius, Shadows, Typography } from '@/constants/theme';
+import { Colors, Spacing, Radius, Shadows, Typography, themed } from '@/constants/theme';
 import { appStorage } from '../../lib/storage';
 
 
@@ -276,7 +276,7 @@ export default function OnboardingScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const styles = themed((Colors) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.background,
@@ -619,4 +619,4 @@ const styles = StyleSheet.create({
   actionButtonText: {
     ...Typography.button,
   },
-});
+}));
