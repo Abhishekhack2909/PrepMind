@@ -14,7 +14,7 @@ import {
   setAudioModeAsync,
   useAudioRecorder,
 } from 'expo-audio';
-import { Colors, Spacing, Radius, Shadows, Typography } from '@/constants/theme';
+import { Colors, Spacing, Radius, Shadows, Typography, themed } from '@/constants/theme';
 import { chatWithVoiceAgent, askByVoice, type ConversationTurn } from '@/services/api';
 import {
   DeepgramVoiceClient,
@@ -76,7 +76,7 @@ function OrbGlyph({ state }: { state: AgentState }) {
   );
 }
 
-const glyph = StyleSheet.create({
+const glyph = themed((Colors) => StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   dot: { width: 9, height: 9, borderRadius: 5, backgroundColor: '#fff' },
   bar: { width: 5, borderRadius: 3, backgroundColor: '#fff' },
@@ -86,7 +86,7 @@ const glyph = StyleSheet.create({
   micBody: { width: 18, height: 28, borderRadius: 9, backgroundColor: '#fff' },
   micStand: { width: 3, height: 8, backgroundColor: '#fff', marginTop: 2, borderRadius: 2 },
   micBase: { width: 16, height: 3, backgroundColor: '#fff', marginTop: 1, borderRadius: 2 },
-});
+}));
 
 let ExpoWebSpeechRecognitionCtor: any = null;
 try {
@@ -905,7 +905,7 @@ export default function VoiceAgentScreen() {
 
 const ORB_SIZE = 100;
 
-const styles = StyleSheet.create({
+const styles = themed((Colors) => StyleSheet.create({
   safe: {
     flex: 1,
     backgroundColor: Colors.background,
@@ -1272,4 +1272,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#fff',
   },
-});
+}));
