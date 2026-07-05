@@ -8,7 +8,7 @@ import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '@/lib/supabase';
-import { Colors, Spacing, Radius, Shadows, Typography } from '@/constants/theme';
+import { Colors, Spacing, Radius, Shadows, Typography, themed } from '@/constants/theme';
 import { useAuth } from '@/hooks/useAuth';
 import { useAppTheme } from '../_layout';
 
@@ -97,7 +97,8 @@ export default function ProfileScreen() {
 
   async function chooseAppearance(v: 'system' | 'light' | 'dark') {
     setAppearanceVisible(false);
-    // Triggers a root remount so every StyleSheet re-evaluates with new colors.
+    // themed() styles rebuild at render, and the root remounts on theme change,
+    // so this flips the whole app instantly — no reload needed.
     await setAppearancePref(v);
   }
 
@@ -369,7 +370,7 @@ export default function ProfileScreen() {
   );
 }
 
-const modalStyles = StyleSheet.create({
+const modalStyles = themed((Colors) => StyleSheet.create({
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.45)',
@@ -457,9 +458,9 @@ const modalStyles = StyleSheet.create({
     color: Colors.primary,
     fontWeight: '700',
   },
-});
+}));
 
-const styles = StyleSheet.create({
+const styles = themed((Colors) => StyleSheet.create({
   safe: {
     flex: 1,
     backgroundColor: Colors.background,
@@ -752,4 +753,4 @@ const styles = StyleSheet.create({
     color: Colors.onSurfaceMuted,
     fontWeight: 'bold',
   },
-});
+}));
