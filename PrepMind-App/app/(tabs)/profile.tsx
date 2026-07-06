@@ -29,6 +29,8 @@ export default function ProfileScreen() {
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
   const [editVisible, setEditVisible] = useState(false);
   const [nameDraft, setNameDraft] = useState('');
+  const [targetYear, setTargetYear] = useState('2027');
+  const [targetDraft, setTargetDraft] = useState('2027');
   const [notifOn, setNotifOn] = useState(true);
   const [appearanceVisible, setAppearanceVisible] = useState(false);
   const { pref: appearance, setPref: setAppearancePref } = useAppTheme();
@@ -49,12 +51,14 @@ export default function ProfileScreen() {
         const { data } = await supabase.from('users').select('name').eq('id', userId).maybeSingle();
         if (data?.name) setName(data.name);
       } catch {}
-      const [av, notif] = await Promise.all([
+      const [av, notif, ty] = await Promise.all([
         AsyncStorage.getItem(`prepmind:avatar:${userId}`),
         AsyncStorage.getItem('prepmind:notifOn'),
+        AsyncStorage.getItem('prepmind:targetYear'),
       ]);
       if (av) setAvatarUri(av);
       if (notif === '0') setNotifOn(false);
+      if (ty) setTargetYear(ty);
     })();
   }, [userId]);
 
@@ -80,7 +84,10 @@ export default function ProfileScreen() {
     const trimmed = nameDraft.trim();
     if (!trimmed) { Alert.alert('Name required'); return; }
     setName(trimmed);
+    const ty = (targetDraft.trim().match(/\d{4}/)?.[0]) || targetYear;
+    setTargetYear(ty);
     setEditVisible(false);
+    await AsyncStorage.setItem('prepmind:targetYear', ty);
     if (userId) {
       try {
         await supabase.from('users').upsert({ id: userId, email, name: trimmed });
@@ -127,8 +134,8 @@ export default function ProfileScreen() {
   const streakCount: number = summary?.streak ?? 0;
   const mcqCount = (summary?.mcq?.total_sessions ?? 0).toString();
   const evaluatedCount = (summary?.evaluations?.total_submitted ?? 0).toString();
-  const globalRank = summary?.mcq?.avg_score
-    ? `${summary.mcq.avg_score}% avg`
+  const avgAccuracy = summary?.mcq?.avg_score
+    ? `${summary.mcq.avg_score}%`
     : '—';
 
   return (
@@ -136,15 +143,11 @@ export default function ProfileScreen() {
       {/* ── Top App Bar ── */}
       <View style={styles.topAppBar}>
         <View style={styles.appBarLeft}>
-          <Image
-            source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuByxSf4OTUXolMlmCbJuTTcHqyrEEJ4Mm1X_0c178B9UivY8ImT9IaY6rkVqK4I6PhXY50IYQgdSO3ETrt0_qCno6ya5SwAetJg96f2T6KWwXRoAWdm6lW7Eu8e9H5YsscCd8pibb70l7fHEAZ1O-w8i1KfSsVOZUN4PmIjk_PBnyjD2CZ5Pa9nmH7nHSbVST3dR1YvGd-DvbU3Lb5Aceq5iDs_dWFKvmhYFTqyncWKFzsojDtmNEUSBCUeXlWkw_CNcjbfJxUgQEsu' }}
-            style={styles.headerAvatar}
-          />
           <Text style={styles.headerTitle}>PrepMind</Text>
         </View>
-        <TouchableOpacity style={styles.superBadge} activeOpacity={0.8}>
-          <Text style={styles.superBadgeIcon}>⚡</Text>
-          <Text style={styles.superBadgeText}>SUPER</Text>
+        <TouchableOpacity style={styles.superBadge} activeOpacity={0.8} onPress={shareProfile}>
+          <Text style={styles.superBadgeIcon}>↗</Text>
+          <Text style={styles.superBadgeText}>SHARE</Text>
         </TouchableOpacity>
       </View>
 
@@ -172,10 +175,14 @@ export default function ProfileScreen() {
           </View>
 
           <Text style={styles.profileName}>{name || displayName}</Text>
-          <View style={styles.targetRow}>
+          <TouchableOpacity
+            style={styles.targetRow}
+            activeOpacity={0.7}
+            onPress={() => { setNameDraft(name || displayName); setTargetDraft(targetYear); setEditVisible(true); }}
+          >
             <Text style={styles.targetIcon}>🎓</Text>
-            <Text style={styles.targetText}>Target Year: UPSC 2029</Text>
-          </View>
+            <Text style={styles.targetText}>Target: UPSC {targetYear}</Text>
+          </TouchableOpacity>
 
           {isAnon && (
             <View style={styles.anonAlert}>
@@ -187,7 +194,7 @@ export default function ProfileScreen() {
             <TouchableOpacity
               style={styles.primaryActionBtn}
               activeOpacity={0.8}
-              onPress={() => { setNameDraft(name || displayName); setEditVisible(true); }}
+              onPress={() => { setNameDraft(name || displayName); setTargetDraft(targetYear); setEditVisible(true); }}
             >
               <Text style={styles.primaryActionText}>Edit Profile</Text>
             </TouchableOpacity>
@@ -229,14 +236,14 @@ export default function ProfileScreen() {
             <Text style={styles.statLabel}>Answers Evaluated</Text>
           </View>
 
-          {/* Global Rank */}
+          {/* Avg Accuracy */}
           <View style={styles.statCard}>
             <View style={[styles.statAccentStrip, { backgroundColor: Colors.warning }]} />
             <View style={[styles.statIconContainer, { backgroundColor: Colors.warningContainer }]}>
               <Text style={styles.statIcon}>🏆</Text>
             </View>
-            <Text style={styles.statValue}>{globalRank}</Text>
-            <Text style={styles.statLabel}>Global Rank</Text>
+            <Text style={styles.statValue}>{avgAccuracy}</Text>
+            <Text style={styles.statLabel}>Avg Accuracy</Text>
           </View>
         </View>
 
@@ -329,6 +336,16 @@ export default function ProfileScreen() {
               style={modalStyles.input}
               autoFocus
               maxLength={40}
+            />
+            <Text style={[modalStyles.label, { marginTop: Spacing.md }]}>Target UPSC year</Text>
+            <TextInput
+              value={targetDraft}
+              onChangeText={setTargetDraft}
+              placeholder="2027"
+              placeholderTextColor={Colors.onSurfaceMuted}
+              style={modalStyles.input}
+              keyboardType="number-pad"
+              maxLength={4}
             />
             <View style={modalStyles.actions}>
               <TouchableOpacity onPress={() => setEditVisible(false)} style={modalStyles.btnSecondary}>

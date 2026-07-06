@@ -51,7 +51,26 @@ export async function evaluateAnswer(payload: EvaluatePayload): Promise<Evaluati
   return data.data as EvaluationResult;
 }
 
-// ── Phase 3: Knowledge Base Q&A ───────────────────────────────────────────────
+export type EvaluationHistoryItem = {
+  id: string;
+  question: string | null;
+  total_marks: number;
+  grade: string;
+  strong_points: string[];
+  improvement_areas: string[];
+  model_answer_hint: string | null;
+  created_at: string;
+};
+
+/** Fetch a user's past answer evaluations (most recent first). */
+export async function listEvaluations(userId: string): Promise<EvaluationHistoryItem[]> {
+  const res = await fetch(`${BASE_URL}/api/evaluations?user_id=${encodeURIComponent(userId)}`);
+  if (!res.ok) return [];
+  const data = await res.json().catch(() => ({ evaluations: [] }));
+  return (data.evaluations || []) as EvaluationHistoryItem[];
+}
+
+// ── Phase 3: Knowledge Base Q&A ─────────────────────────────────────────────────
 
 export type AskResult = {
   answer: string;

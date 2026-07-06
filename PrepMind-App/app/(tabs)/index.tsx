@@ -4,24 +4,39 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Colors, Spacing, Radius, Shadows, Typography, themed } from '@/constants/theme';
 import { useAuth } from '@/hooks/useAuth';
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
+// Curated motivational quotes (rotates daily) — real, attributable UPSC wisdom.
+const QUOTES = [
+  { text: 'Success is the sum of small efforts repeated day in and day out.', author: 'Robert Collier' },
+  { text: "Don't watch the clock; do what it does. Keep going.", author: 'Sam Levenson' },
+  { text: 'It always seems impossible until it is done.', author: 'Nelson Mandela' },
+  { text: 'The expert in anything was once a beginner.', author: 'Helen Hayes' },
+  { text: 'Discipline is the bridge between goals and accomplishment.', author: 'Jim Rohn' },
+];
+
 export default function HomeScreen() {
   const router = useRouter();
   const { session, user } = useAuth();
   const userId = session?.user?.id;
-  
+
   // Real user info — fall back to email prefix, then a friendly generic.
   const emailPrefix = session?.user?.email?.split('@')[0] || '';
   const fullName = user?.name || (emailPrefix ? emailPrefix.replace(/[._-]+/g, ' ') : 'Aspirant');
+  const initial = (fullName[0] || '?').toUpperCase();
 
   const [summary, setSummary] = useState<any>(null);
   const streakCount: number = summary?.streak ?? 0;
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [avatarUri, setAvatarUri] = useState<string | null>(null);
+
+  // Deterministic "quote of the day" (no Math.random — stable per day).
+  const quote = QUOTES[new Date().getDate() % QUOTES.length];
 
   const fetchData = useCallback(async () => {
     if (!userId) { setLoading(false); return; }
@@ -41,7 +56,10 @@ export default function HomeScreen() {
 
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+    if (userId) {
+      AsyncStorage.getItem(`prepmind:avatar:${userId}`).then(uri => uri && setAvatarUri(uri));
+    }
+  }, [fetchData, userId]);
 
   function onRefresh() {
     setRefreshing(true);
@@ -54,28 +72,27 @@ export default function HomeScreen() {
       <View style={styles.topAppBar}>
         <View style={styles.appBarLeft}>
           <TouchableOpacity activeOpacity={0.8} onPress={() => router.push('/(tabs)/profile' as any)}>
-            <Image
-              source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAG-6hrRt-wKLpxpe424UxZuFo1q4pOxaqkpxWrJzE400hmHYaadmdDp_dtusF5zfMMfkL7vjGxf7fgftwWT9mhz5BbD-jdwXcwGkoG2R5Thu8jLuVA-53ZCuQw_-g9OB-ryIigk1vrIDgY2Ze018DhkWrUWJBl5KF2o3YKQJe8DimAdjjWujepXe6AkbQ5wxvAF7qjWvqNktdQWxOMq-Vt26W3rXvQfI5czFOF4Bw2B94nsy5pD_pn6b3K1_aH-6xy8-C3pW2oAsOj' }}
-              style={styles.avatar}
-            />
+            {avatarUri ? (
+              <Image source={{ uri: avatarUri }} style={styles.avatar} />
+            ) : (
+              <View style={[styles.avatar, styles.avatarFallback]}>
+                <Text style={styles.avatarInitial}>{initial}</Text>
+              </View>
+            )}
           </TouchableOpacity>
-          <TouchableOpacity style={styles.superBadge} activeOpacity={0.8}>
-            <Text style={styles.superBadgeIcon}>⚡</Text>
-            <Text style={styles.superBadgeText}>SUPER</Text>
-          </TouchableOpacity>
+          <View style={styles.streakChip}>
+            <Text style={styles.streakIcon}>🔥</Text>
+            <Text style={styles.streakText}>{streakCount}</Text>
+          </View>
         </View>
 
         <View style={styles.appBarRight}>
           <TouchableOpacity style={styles.iconChip} activeOpacity={0.7} onPress={() => router.push('/(tabs)/weakness' as any)}>
             <Text style={styles.iconChipText}>📊</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.iconChip} activeOpacity={0.7}>
+          <TouchableOpacity style={styles.iconChip} activeOpacity={0.7} onPress={() => router.push('/(tabs)/profile' as any)}>
             <Text style={styles.iconChipText}>🏆</Text>
           </TouchableOpacity>
-          <View style={styles.streakChip}>
-            <Text style={styles.streakIcon}>🔥</Text>
-            <Text style={styles.streakText}>{streakCount}</Text>
-          </View>
         </View>
       </View>
 
@@ -84,39 +101,42 @@ export default function HomeScreen() {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={Colors.primary} />}
         showsVerticalScrollIndicator={false}
       >
-        
-        {/* ── Promotional Banners Section ── */}
+
+        {/* ── Quick Actions ── */}
         <View style={styles.promoSection}>
-          
-          {/* Super Promo Card — vibrant gradient-like purple */}
-          <TouchableOpacity style={styles.promoCardSuper} activeOpacity={0.9}>
+          <TouchableOpacity
+            style={styles.promoCardSuper}
+            activeOpacity={0.9}
+            onPress={() => router.push('/(tabs)/mcq' as any)}
+          >
             <View style={styles.promoSuperContent}>
-              <Text style={styles.promoSuperTitle}>Try SUPER at just ₹7</Text>
-              <Text style={styles.promoSuperSubtitle}>Guided journey to crack UPSC 2029!</Text>
-              <TouchableOpacity style={styles.promoSuperBtn} activeOpacity={0.8}>
-                <Text style={styles.promoSuperBtnText}>⚡ Get Now</Text>
-              </TouchableOpacity>
+              <Text style={styles.promoSuperTitle}>Practice MCQs</Text>
+              <Text style={styles.promoSuperSubtitle}>AI-generated UPSC questions on any topic</Text>
+              <View style={styles.promoSuperBtn}>
+                <Text style={styles.promoSuperBtnText}>Start Quiz →</Text>
+              </View>
             </View>
             <View style={styles.promoSuperBlob}>
-              <Text style={styles.promoSuperBlobIcon}>⚡</Text>
+              <Text style={styles.promoSuperBlobIcon}>🧠</Text>
             </View>
-            {/* Shimmer overlay simulation */}
             <View style={styles.shimmerOverlay} />
           </TouchableOpacity>
 
-          {/* Prelims Answer Key Card — deep blue */}
-          <TouchableOpacity style={styles.promoCardAnswerKey} activeOpacity={0.9}>
+          <TouchableOpacity
+            style={styles.promoCardAnswerKey}
+            activeOpacity={0.9}
+            onPress={() => router.push('/(tabs)/evaluate' as any)}
+          >
             <View style={styles.answerKeyContent}>
-              <Text style={styles.answerKeyTitle}>Prelims '26 Answer Key</Text>
+              <Text style={styles.answerKeyTitle}>Evaluate an Answer</Text>
               <View style={styles.answerKeyActionRow}>
-                <Text style={styles.answerKeyLinkText}>Check Now</Text>
+                <Text style={styles.answerKeyLinkText}>Upload Now</Text>
                 <Text style={styles.answerKeyChevron}>→</Text>
               </View>
             </View>
-            
-            {/* Glass-effect badge */}
+
             <View style={styles.simulatedBadge}>
-              <Text style={styles.simulatedBadgeTitle}>ANSWER{"\n"}KEY</Text>
+              <Text style={styles.simulatedBadgeTitle}>ANSWER{"\n"}CHECK</Text>
               <View style={styles.simulatedChart}>
                 <View style={[styles.simulatedBar, { height: '33%', backgroundColor: Colors.error }]} />
                 <View style={[styles.simulatedBar, { height: '66%', backgroundColor: Colors.warning }]} />
@@ -153,35 +173,12 @@ export default function HomeScreen() {
               <Text style={styles.addBtnText}>Add Targets</Text>
             </TouchableOpacity>
 
-            {/* Social Proof */}
-            <View style={styles.socialProofRow}>
-              <View style={styles.socialAvatars}>
-                <Image
-                  source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC-VWzr2i-cKLL4HWwIPw-lCXMqeQBrTs7ONoeeV68L4fLAPdIn1TN5x-7KgOCD-I4TzAvNrGMd1xrpJ_nKqYR6BfA4ICFo50gWsdvr4m9IUFYBnVciIWmAXqwyutbstxo1818Pzk7bmEa_V-evNv7rurEkfE5jX1CkTiQWoLa8fQJ-LvH0n3oOxIHZqm1ij4QQDmCEA0-QlzyunTMtpydRbrj1Pur4xwbIU22P3L2UXp83i5wdv0wUQpTJ8k7yTEMzJMZqMIfDloDr' }}
-                  style={styles.smallAvatar}
-                />
-                <Image
-                  source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDH5eVyBJfMK6UfNne26ozd1zbsoX9zz-tFG8GsI5LUHHzmltyJOz-Qev_RyhyuAGBe8ykIHkXgstcN9JVDyxAO3-RwmdYs8Fc5hz9U1sZ9gdfNRyfUbgMgekJsLGfUCJWEKKXsbtzZSgodn0xCQAlN_3cTejGqLq11Y9XwMXxCtEt_SToKTb5TExaB3j99kUtYRf0PYmyOznNZFRG96gX27F7XwEvXQL84wGZ4gskqrdQn9nOb_xKcS0w0jRcifjXV8QgNCa6ej9Kc' }}
-                  style={[styles.smallAvatar, { marginLeft: -8 }]}
-                />
-                <Image
-                  source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuClVzYBO1BTENVOGJwb514Y2OxkjUZIlQCBYleaVZ7CFwHtwJtie_fHe5CtXGi_idpipEHsaflrFcGi5GtdSUzcYSR-ePO-8qQDdJnBW9ysdjOMu1wIiX1SlVDFj96PHr-dj-fJbB9uSycKprfqxkNogL0rrYY9XNMdXjQeyY1XYLdfWl92C57mZsLwro4YTB3fVOmWKsWg_oM4QFKVKa843wIWOwbv4INoq0ODmBJsNsV01KHdUR25RoMQPNhNv8AVsSgjPAopVIZZ' }}
-                  style={[styles.smallAvatar, { marginLeft: -8 }]}
-                />
-              </View>
-              <Text style={styles.socialProofText}>2526 completed their targets last week</Text>
-            </View>
-
-            <View style={styles.cardSeparator} />
-
-            {/* Quote Block with gradient accent */}
+            {/* Motivational quote of the day */}
             <View style={styles.quoteBlock}>
               <View style={styles.quoteAccentBar} />
               <View style={styles.quoteTextContainer}>
-                <Text style={styles.quoteText}>
-                  You don't need to study 15 hours a day. You just need to hit the <Text style={styles.quoteTextHighlight}>right goals daily.</Text>
-                </Text>
-                <Text style={styles.quoteAuthor}>- IAS Shakti</Text>
+                <Text style={styles.quoteText}>{quote.text}</Text>
+                <Text style={styles.quoteAuthor}>— {quote.author}</Text>
               </View>
             </View>
 
@@ -240,6 +237,17 @@ const styles = themed((Colors) => StyleSheet.create({
     borderRadius: 20,
     borderWidth: 2,
     borderColor: Colors.primaryGhost,
+  },
+  avatarFallback: {
+    backgroundColor: Colors.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  avatarInitial: {
+    color: '#fff',
+    fontFamily: 'PlusJakartaSans_700Bold',
+    fontSize: 18,
+    fontWeight: '700',
   },
   superBadge: {
     flexDirection: 'row',

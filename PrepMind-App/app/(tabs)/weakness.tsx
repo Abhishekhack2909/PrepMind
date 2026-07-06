@@ -114,9 +114,9 @@ export default function WeaknessScreen() {
           <Text style={styles.headerAvatarEmoji}>👤</Text>
         </TouchableOpacity>
         <Text style={styles.headerTitle}>Weakness Map</Text>
-        <TouchableOpacity style={styles.superBadge} activeOpacity={0.8}>
-          <Text style={styles.superBadgeIcon}>👑</Text>
-          <Text style={styles.superBadgeText}>SUPER</Text>
+        <TouchableOpacity style={styles.superBadge} activeOpacity={0.8} onPress={() => router.push('/(tabs)/mcq' as any)}>
+          <Text style={styles.superBadgeIcon}>🧠</Text>
+          <Text style={styles.superBadgeText}>QUIZ</Text>
         </TouchableOpacity>
       </View>
 
@@ -150,8 +150,12 @@ export default function WeaknessScreen() {
               <Text style={styles.accuracyPercent}>%</Text>
             </View>
             <View style={styles.statusChip}>
-              <Text style={styles.statusChipArrow}>➔</Text>
-              <Text style={styles.statusChipText}>Steady</Text>
+              <Text style={styles.statusChipArrow}>
+                {overallAccuracy >= 75 ? '↗' : overallAccuracy >= 50 ? '➔' : '↘'}
+              </Text>
+              <Text style={styles.statusChipText}>
+                {overallAccuracy === 0 ? 'No data' : overallAccuracy >= 75 ? 'Strong' : overallAccuracy >= 50 ? 'Steady' : 'Needs work'}
+              </Text>
             </View>
           </View>
 
@@ -251,7 +255,11 @@ export default function WeaknessScreen() {
             </View>
             <View style={{ flex: 1 }}>
               <Text style={styles.recommendedTitle}>Generate Custom Test</Text>
-              <Text style={styles.recommendedDesc}>Focus on Art & Culture and Geography to improve score.</Text>
+              <Text style={styles.recommendedDesc}>
+                {hasData
+                  ? `Focus on ${sortedWeakness.slice(0, 2).map(w => w.topic).join(' and ')} to improve your score.`
+                  : 'Take a quiz to get personalized practice recommendations.'}
+              </Text>
             </View>
           </View>
           <TouchableOpacity

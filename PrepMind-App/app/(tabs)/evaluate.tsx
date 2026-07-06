@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, ScrollView,
-  TextInput, ActivityIndicator, Image, Alert, Platform,
+  TextInput, ActivityIndicator, Image, Alert, Platform, Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
-import { evaluateAnswer, type EvaluationResult } from '@/services/api';
+import { evaluateAnswer, listEvaluations, type EvaluationResult, type EvaluationHistoryItem } from '@/services/api';
 import { useAuth } from '@/hooks/useAuth';
 import { Colors, Spacing, Radius, Shadows, Typography, themed } from '@/constants/theme';
 
@@ -27,6 +27,20 @@ export default function EvaluateScreen() {
   const [result, setResult] = useState<EvaluationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [statusMsg, setStatusMsg] = useState('');
+  const [historyVisible, setHistoryVisible] = useState(false);
+  const [history, setHistory] = useState<EvaluationHistoryItem[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+
+  async function openHistory() {
+    setHistoryVisible(true);
+    setHistoryLoading(true);
+    try {
+      const items = session?.user?.id ? await listEvaluations(session.user.id) : [];
+      setHistory(items);
+    } finally {
+      setHistoryLoading(false);
+    }
+  }
 
   // Ask for camera/gallery
   async function handlePickImage() {
@@ -218,21 +232,6 @@ export default function EvaluateScreen() {
             <Text style={styles.evaluateBtnText}>✨  {imageUri ? 'Evaluate Now' : 'Select Answer Image'}</Text>
           </TouchableOpacity>
 
-          {/* Social Proof */}
-          <View style={styles.socialProofRow}>
-            <View style={styles.socialAvatars}>
-              <Image
-                source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBGsfAYz5_HF1caYJsObODfhr0lXTHvySjW6OWA_9pu-UVW0KwdXQqXCBgQ8ULJ1EM38KTQnnuNtiCtmnHbETxJGH-46PLbqLZOzef6fh8qH7_V4_uf21v9CehMTHoWNh7jh2rMA3Seq8TvBQFTLgIwl1CAa-0f_zb8JknITVyz8Qub89h2VE3UXWS95Lbzvx_bi47WlDAPgoGb9g2rSBDm0esDvVDb__O_JTNCpVBBC8UY2s2CPm35x45RoYJTwXEzpkZODjJnQn1p' }}
-                style={styles.socialAvatar}
-              />
-              <Image
-                source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuC8dWz6fhP6xFn7x8t0vQtVnrShMy-LRKoyKgCFN_KugsgdN5GtTDM1bVDwLyQBaw88sNgy7S273wUmaHRnXUoKUB6JJg0S3DMdBze5_v4p6ehywnY7-ZlM8CM7JMIp0GTW2Xc60_-oxLF8Ymmf4BsZoZEOuUL22frJWLDEQWaOBnCUJl12O-PYju7F2EYfwkNPjXbDNHGC8T_Y4q11xn793hsKYtEGgNWXqKPbWZ2AdyBnH8sbj_8rNcogKTptjwguCf4y6L-P-dve' }}
-                style={[styles.socialAvatar, { marginLeft: -6 }]}
-              />
-            </View>
-            <Text style={styles.socialProofText}>3932+ evaluations in last 7 days</Text>
-          </View>
-
           <View style={styles.separator} />
 
           {/* Try Sample Answer */}
@@ -251,7 +250,7 @@ export default function EvaluateScreen() {
 
         {/* Secondary Actions list */}
         <View style={styles.listSection}>
-          <TouchableOpacity style={styles.listItem} activeOpacity={0.7}>
+          <TouchableOpacity style={styles.listItem} activeOpacity={0.7} onPress={openHistory}>
             <View style={styles.listIconWrapper}>
               <Text style={styles.listIcon}>⏳</Text>
             </View>
@@ -261,21 +260,46 @@ export default function EvaluateScreen() {
             </View>
             <Text style={styles.listChevron}>→</Text>
           </TouchableOpacity>
-
-          <TouchableOpacity style={styles.listItem} activeOpacity={0.7}>
-            <View style={styles.listIconWrapper}>
-              <Text style={styles.listIcon}>📅</Text>
-            </View>
-            <View style={styles.listInfo}>
-              <Text style={styles.listTitle}>Mains PYQs</Text>
-              <Text style={styles.listSubtitle}>Practice previous year questions</Text>
-            </View>
-            <Text style={styles.listChevron}>→</Text>
-          </TouchableOpacity>
         </View>
 
         <View style={{ height: 80 }} />
       </ScrollView>
+
+      {/* Evaluations history modal */}
+      <Modal visible={historyVisible} animationType="slide" onRequestClose={() => setHistoryVisible(false)}>
+        <SafeAreaView style={styles.safe}>
+          <View style={styles.histHeader}>
+            <Text style={styles.histTitle}>My Evaluations</Text>
+            <TouchableOpacity onPress={() => setHistoryVisible(false)} style={styles.histClose}>
+              <Text style={styles.histCloseText}>✕</Text>
+            </TouchableOpacity>
+          </View>
+          {historyLoading ? (
+            <View style={styles.centerView}><ActivityIndicator size="large" color={Colors.primary} /></View>
+          ) : history.length === 0 ? (
+            <View style={styles.centerView}>
+              <Text style={{ fontSize: 40 }}>📭</Text>
+              <Text style={styles.loadingText}>No evaluations yet</Text>
+              <Text style={styles.loadingSubtext}>Evaluate an answer to see it here.</Text>
+            </View>
+          ) : (
+            <ScrollView contentContainerStyle={{ padding: Spacing.md, gap: 12 }}>
+              {history.map(h => (
+                <View key={h.id} style={styles.histCard}>
+                  <View style={styles.histCardTop}>
+                    <Text style={styles.histGrade}>{h.grade}</Text>
+                    <Text style={styles.histMarks}>{h.total_marks}/15</Text>
+                  </View>
+                  {!!h.question && <Text style={styles.histQ} numberOfLines={2}>{h.question}</Text>}
+                  <Text style={styles.histDate}>
+                    {new Date(h.created_at).toLocaleDateString()} · {new Date(h.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                  </Text>
+                </View>
+              ))}
+            </ScrollView>
+          )}
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -415,6 +439,44 @@ const styles = themed((Colors) => StyleSheet.create({
     padding: Spacing.lg,
     backgroundColor: Colors.background,
   },
+  histHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: Colors.outlineFaint,
+  },
+  histTitle: {
+    fontFamily: 'PlusJakartaSans_700Bold',
+    fontSize: 18,
+    color: Colors.onSurface,
+    fontWeight: '700',
+  },
+  histClose: {
+    width: 34, height: 34, borderRadius: 17,
+    backgroundColor: Colors.surfaceContainer,
+    alignItems: 'center', justifyContent: 'center',
+  },
+  histCloseText: { fontSize: 14, color: Colors.onSurfaceVariant },
+  histCard: {
+    backgroundColor: Colors.surfaceCard,
+    borderRadius: Radius.lg,
+    padding: Spacing.md,
+    borderWidth: 1,
+    borderColor: Colors.outlineFaint,
+    gap: 6,
+  },
+  histCardTop: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  histGrade: {
+    fontFamily: 'Inter_600SemiBold', fontSize: 14, color: Colors.primary, fontWeight: '600',
+  },
+  histMarks: {
+    fontFamily: 'PlusJakartaSans_700Bold', fontSize: 15, color: Colors.onSurface, fontWeight: '700',
+  },
+  histQ: { fontFamily: 'Inter_400Regular', fontSize: 13, color: Colors.onSurfaceVariant, lineHeight: 19 },
+  histDate: { fontFamily: 'Inter_400Regular', fontSize: 11, color: Colors.onSurfaceMuted },
 
   // Limits Bar — purple tint
   limitsBar: {

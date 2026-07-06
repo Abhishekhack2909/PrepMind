@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 from typing import Optional
 import os
@@ -49,3 +49,19 @@ async def evaluate_endpoint(req: EvaluateRequest):
         except Exception as e:
             print(f"[WARN] Failed to store evaluation: {e}")
     return EvaluateResponse(success=True, data=eval_data)
+
+
+@router.get("/evaluations")
+async def list_evaluations(user_id: str = Query(...)):
+    """Return a user's past evaluations (most recent first)."""
+    try:
+        res = supabase_client.table("evaluations") \
+            .select("id, question, total_marks, grade, strong_points, improvement_areas, model_answer_hint, created_at") \
+            .eq("user_id", user_id) \
+            .order("created_at", desc=True) \
+            .limit(50) \
+            .execute()
+        return {"success": True, "evaluations": res.data or []}
+    except Exception as e:
+        print(f"[WARN] list_evaluations failed: {e}")
+        return {"success": True, "evaluations": []}
