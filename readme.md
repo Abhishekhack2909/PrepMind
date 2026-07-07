@@ -26,7 +26,7 @@
 - **Expo** (React Native) with Expo Router file-based navigation
 - **TypeScript** throughout
 - **Supabase** JS client for auth + data
-- Anonymous auth by default (no login required)
+- Anonymous auth by default
 
 ### Backend (PrepMind-Backend)
 
