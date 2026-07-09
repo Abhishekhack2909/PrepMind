@@ -169,6 +169,6 @@ PrepMind/
 │   ├── chroma_db/             # Vector store (auto-created)
 │   └── seed_knowledge.py      # One-time KB seeder
 │
-└── LEARNING.md            # Full learning notes (all phases)
+
 ```
 
