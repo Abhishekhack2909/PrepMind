@@ -34,7 +34,7 @@ DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sun
 
 class PlannerRequest(BaseModel):
     user_id: str
-    hours_per_day: int = 4        # Study hours available per day
+    hours_per_day: int = 4        # Study hours available per day(customizable by user)
     weak_topics: Optional[List[str]] = None   # Override from frontend if needed
     exam_date: Optional[str] = None           # e.g., "2025-06-15"
     focus_subjects: Optional[List[str]] = None  # e.g., ["Polity", "History"]
