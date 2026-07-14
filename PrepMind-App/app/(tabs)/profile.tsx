@@ -50,7 +50,7 @@ export default function ProfileScreen() {
       try {
         const { data } = await supabase.from('users').select('name').eq('id', userId).maybeSingle();
         if (data?.name) setName(data.name);
-      } catch {}
+      } catch { }
       const [av, notif, ty] = await Promise.all([
         AsyncStorage.getItem(`prepmind:avatar:${userId}`),
         AsyncStorage.getItem('prepmind:notifOn'),
@@ -105,7 +105,7 @@ export default function ProfileScreen() {
   async function chooseAppearance(v: 'system' | 'light' | 'dark') {
     setAppearanceVisible(false);
     // themed() styles rebuild at render, and the root remounts on theme change,
-    // so this flips the whole app instantly — no reload needed.
+    // so this flips the whole app instantly — no reload needed(for mobile mainly).
     await setAppearancePref(v);
   }
 
@@ -156,7 +156,7 @@ export default function ProfileScreen() {
         <View style={styles.profileHeaderCard}>
           {/* Decorative gradient overlay */}
           <View style={styles.profileHeaderGlow} />
-          
+
           <View style={styles.avatarWrapper}>
             <TouchableOpacity style={styles.avatarRing} activeOpacity={0.85} onPress={pickAvatar}>
               {avatarUri ? (
