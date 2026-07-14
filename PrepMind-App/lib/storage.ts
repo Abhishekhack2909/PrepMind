@@ -3,8 +3,8 @@ import * as SecureStore from 'expo-secure-store';
 
 /**
  * Unified storage engine for PrepMind.
- * - Mobile: Uses expo-secure-store (native, encrypted, stable in Expo Go)
- * - Web: Uses window.localStorage (standard browser storage)
+ * Mobile: Uses expo-secure-store (native, encrypted, stable in Expo Go)
+ * Web: Uses window.localStorage (standard browser storage)
  *
  * Prevents the "AsyncStorage native module is null" crash on both Web and Mobile devices.
  */
