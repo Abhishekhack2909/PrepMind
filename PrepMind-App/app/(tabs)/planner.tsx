@@ -69,7 +69,7 @@ export default function PlannerScreen() {
         setState('plan');
       }
     } catch {
-      // Show setup by default
+      // Show setup by default(in case of error)
     }
   }
 
@@ -130,7 +130,7 @@ export default function PlannerScreen() {
 
   if (state === 'plan' && plan) {
     const currentDay = plan.days?.[selectedDay];
-    
+
     // Group tasks under categories for Daily Plan view
     const readTasks = currentDay?.tasks?.filter(t => t.type === 'study') || [];
     const practiceTasks = currentDay?.tasks?.filter(t => t.type === 'practice' || t.type === 'mock_test') || [];
@@ -151,7 +151,7 @@ export default function PlannerScreen() {
         </View>
 
         <ScrollView style={styles.taskScroll} showsVerticalScrollIndicator={false}>
-          
+
           {/* Day selection tabs */}
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.dayTabs} contentContainerStyle={{ paddingHorizontal: Spacing.md, gap: 8 }}>
             {plan.days?.map((day, i) => (
@@ -192,7 +192,7 @@ export default function PlannerScreen() {
           {/* Task List Timeline Section */}
           {currentDay ? (
             <View style={styles.taskListBento}>
-              
+
               {/* Category: Read */}
               {readTasks.length > 0 && (
                 <View style={styles.taskCategory}>
@@ -311,7 +311,7 @@ export default function PlannerScreen() {
   return (
     <SafeAreaView style={styles.safe}>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-        
+
         <View style={styles.header}>
           <Text style={styles.title}>Study Planner</Text>
           <Text style={styles.subtitle}>AI creates a personalized 7-day schedule based on your weak areas</Text>
@@ -325,7 +325,7 @@ export default function PlannerScreen() {
 
         {/* Bento Grid Parameter Cards */}
         <View style={styles.setupGrid}>
-          
+
           {/* Exam Date Card */}
           <View style={styles.setupCard}>
             <View style={styles.setupCardHeader}>
