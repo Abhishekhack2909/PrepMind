@@ -78,7 +78,7 @@ export default function WeaknessScreen() {
     fetchData();
   }
 
-  // Real data only — no more fake mockup fallback.
+  // Real data only — no more fake mockup fallback(for now).
   const finalWeakness: WeaknessEntry[] = weakness;
   const hasData = finalWeakness.length > 0;
 
@@ -225,7 +225,7 @@ export default function WeaknessScreen() {
               </Text>
             )}
             {finalWeakness.map((item, idx) => {
-              // Dynamically resolve status color based on score thresholds
+              // Dynamically resolve status color based on score thresholds(for now)
               const score = item.avg_score;
               const color = score < 40 ? STATUS_COLORS.weak : score <= 70 ? STATUS_COLORS.moderate : STATUS_COLORS.strong;
 
