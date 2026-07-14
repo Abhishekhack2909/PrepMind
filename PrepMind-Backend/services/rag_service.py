@@ -42,7 +42,7 @@ DB_PATH = os.path.join(os.path.dirname(__file__), "..", "chroma_db")
 client = chromadb.PersistentClient(path=DB_PATH)
 
 # Use SentenceTransformer for embeddings — all-MiniLM-L6-v2 is fast and good
-# It converts text → 384-dimensional vector
+# It converts text → 384-dimensional vector or we can use other
 embedding_fn = embedding_functions.SentenceTransformerEmbeddingFunction(
     model_name="all-MiniLM-L6-v2"
 )
