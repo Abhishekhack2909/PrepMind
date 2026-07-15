@@ -104,8 +104,8 @@ export default function ProfileScreen() {
 
   async function chooseAppearance(v: 'system' | 'light' | 'dark') {
     setAppearanceVisible(false);
-    // themed() styles rebuild at render, and the root remounts on theme change,
-    // so this flips the whole app instantly — no reload needed(for mobile mainly).
+    // themed() styles rebuild at render, and the root remounts on theme change(as per the app.tsx file),
+    // so this flips the whole app instantly — no reload needed(for mobile mainly). just checking it.
     await setAppearancePref(v);
   }
 
