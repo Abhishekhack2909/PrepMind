@@ -603,7 +603,7 @@ const styles = themed((Colors) => StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.primaryGlow,
   },
-  recommendedHeader: {
+  recommendedHeader: {// types/types.ts
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.md,
