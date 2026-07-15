@@ -275,7 +275,8 @@ export default function WeaknessScreen() {
       </ScrollView>
     </SafeAreaView>
   );
-}
+} // export default function WeaknessScreen() {
+
 
 const styles = themed((Colors) => StyleSheet.create({
   safe: {
