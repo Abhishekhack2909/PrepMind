@@ -14,7 +14,7 @@ type WeaknessEntry = {
   avg_score: number;
   sessions: number;
   level: 'weak' | 'moderate' | 'strong';
-};
+}; // types/types.ts
 
 type Summary = {
   mcq: { total_sessions: number; avg_score: number };
@@ -25,7 +25,7 @@ const STATUS_COLORS = {
   weak: Colors.error,
   moderate: Colors.warning,
   strong: Colors.success,
-};
+};// types/types.ts
 
 const LEVEL_LABELS = {
   weak: 'Needs Work',
