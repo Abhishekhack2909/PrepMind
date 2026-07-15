@@ -645,4 +645,5 @@ const styles = themed((Colors) => StyleSheet.create({
     color: Colors.primary,
     fontWeight: '600',
   },
-}));
+})); // export default function WeaknessScreen() {
+
