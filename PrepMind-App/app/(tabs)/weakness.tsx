@@ -247,7 +247,7 @@ export default function WeaknessScreen() {
           </View>
         </View>
 
-        {/* ── Recommended Action Banner ── */}
+        {/* ── Recommended Action Banner ── */} // types/types.ts
         <View style={styles.recommendedBanner}>
           <View style={styles.recommendedHeader}>
             <View style={styles.sparkleIconBg}>
