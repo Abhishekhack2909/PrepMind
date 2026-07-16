@@ -14,7 +14,7 @@ import { useAppTheme } from '../_layout';
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
-export default function ProfileScreen() {
+export default function ProfileScreen() {  // profile screen 
   const router = useRouter();
   const { session, signOut } = useAuth();
   const userId = session?.user?.id;
