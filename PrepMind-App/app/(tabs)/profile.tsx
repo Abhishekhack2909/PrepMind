@@ -97,7 +97,7 @@ export default function ProfileScreen() {  // profile screen
     }
   }
 
-  async function toggleNotif(v: boolean) {
+  async function toggleNotif(v: boolean) {//function to toggle the notification
     setNotifOn(v);
     await AsyncStorage.setItem('prepmind:notifOn', v ? '1' : '0');
   }
