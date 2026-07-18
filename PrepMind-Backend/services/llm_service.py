@@ -179,7 +179,7 @@ async def generate_conversational_answer(
     messages.append({"role": "user", "content": user_content})
 
     try:
-        client = _get_groq_client()
+        client = _get_groq_client() # groq client
         response = await client.chat.completions.create(
             model="llama-3.1-8b-instant",
             messages=messages,
