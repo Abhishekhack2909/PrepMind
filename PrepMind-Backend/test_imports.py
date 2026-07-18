@@ -2,7 +2,7 @@ import os
 import sys
 import traceback
 
-try:
+try: #try to 
     print("Importing rag_service inside try...")
     from services.rag_service import ingest_document, get_stats
     print("Import successful!")
