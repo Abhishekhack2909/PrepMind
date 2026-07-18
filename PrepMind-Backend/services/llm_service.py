@@ -194,5 +194,5 @@ async def generate_conversational_answer(
             "model": "llama-3.1-8b-instant",
             "tokens_used": response.usage.total_tokens,
         }
-    except Exception as e:
+    except Exception as e: # groq client 
         return {"success": False, "error": str(e)}
