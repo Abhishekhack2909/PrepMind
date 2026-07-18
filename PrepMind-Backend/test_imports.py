@@ -18,4 +18,4 @@ try: #try to
 except Exception as e:
     print(f"CRASHED: {e}")
     traceback.print_exc()
-    sys.exit(1)
+    sys.exit(1)  #exit with the code 1
