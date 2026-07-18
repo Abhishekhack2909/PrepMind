@@ -80,7 +80,7 @@ export default function ProfileScreen() {  // profile screen
     }
   }
 
-  async function saveName() {
+  async function saveName() { //function to save the name of the user
     const trimmed = nameDraft.trim();
     if (!trimmed) { Alert.alert('Name required'); return; }
     setName(trimmed);
