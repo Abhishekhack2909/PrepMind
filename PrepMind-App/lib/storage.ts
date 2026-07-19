@@ -38,7 +38,7 @@ export const appStorage = { // for testing only
     }
   },
 
-  removeItem: async (key: string): Promise<void> => {
+  removeItem: async (key: string): Promise<void> => { // for testing only
     if (Platform.OS === 'web') {
       if (typeof window !== 'undefined') {
         window.localStorage.removeItem(key);
