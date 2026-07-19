@@ -33,7 +33,7 @@ const LEVEL_LABELS = {
   strong: 'Strong',
 };
 
-export default function WeaknessScreen() {
+export default function WeaknessScreen() { // for testing only
   const router = useRouter();
   const { session } = useAuth();
   const userId = session?.user?.id;
