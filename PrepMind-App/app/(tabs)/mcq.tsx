@@ -11,7 +11,7 @@ const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:8000'
 
 type QuizState = 'topic_select' | 'loading' | 'quiz' | 'results';
 
-type MCQQuestion = {
+type MCQQuestion = { //  for mcq screen
   question: string;
   options: Record<string, string>;
   correct: string;
@@ -20,7 +20,7 @@ type MCQQuestion = {
   topic: string;
 };
 
-type QuizResult = {
+type QuizResult = { //for quiz result
   question: string;
   user_answer: string;
   correct_answer: string;
@@ -29,7 +29,7 @@ type QuizResult = {
   difficulty: string;
 };
 
-const PRESET_TOPICS = [
+const PRESET_TOPICS = [ // hardcoded topics for quiz - can be changed later
   'Indian Polity & Constitution',
   'Modern Indian History',
   'Physical Geography of India',
@@ -40,7 +40,7 @@ const PRESET_TOPICS = [
   'Current Affairs',
 ];
 
-const TOPIC_ICONS: Record<string, string> = {
+const TOPIC_ICONS: Record<string, string> = { //hardcoded icons for topics, can be changed later
   'Indian Polity & Constitution': '⚖️',
   'Modern Indian History': '🏛️',
   'Physical Geography of India': '🌍',
@@ -59,11 +59,11 @@ export default function MCQScreen() {
   const [questions, setQuestions] = useState<MCQQuestion[]>([]);
   const [currentIdx, setCurrentIdx] = useState(0);
   const [userAnswers, setUserAnswers] = useState<string[]>([]);
-  
+
   // Interactive options states
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  
+
   const [results, setResults] = useState<any>(null);
   const [error, setError] = useState('');
 
@@ -88,7 +88,7 @@ export default function MCQScreen() {
   };
 
   // ── Generate questions ────────────────────────────────────────────────────
-  async function startQuiz(topic: string) {
+  async function startQuiz(topic: string) { // for mcq generation
     setSelectedTopic(topic);
     setQuizState('loading');
     setError('');
@@ -130,7 +130,7 @@ export default function MCQScreen() {
     if (!selectedOption) return;
     const newAnswers = [...userAnswers, selectedOption];
     setUserAnswers(newAnswers);
-    
+
     // Clear interactive flags for next question
     setSelectedOption(null);
     setIsSubmitted(false);
@@ -179,7 +179,7 @@ export default function MCQScreen() {
   }
 
   if (quizState === 'loading') return <LoadingView />;
-  
+
   if (quizState === 'quiz') {
     const question = questions[currentIdx];
     const correct = question.correct;
@@ -190,7 +190,7 @@ export default function MCQScreen() {
         {/* Top Header */}
         <View style={styles.quizHeader}>
           <View style={styles.quizHeaderLeft}>
-            <TouchableOpacity 
+            <TouchableOpacity
               style={styles.backBtn}
               onPress={() => Alert.alert('Quit Quiz', 'Are you sure you want to exit the quiz?', [
                 { text: 'Cancel', style: 'cancel' },
@@ -204,7 +204,7 @@ export default function MCQScreen() {
               <Text style={styles.quizHeaderSubtitle} numberOfLines={1}>{selectedTopic}</Text>
             </View>
           </View>
-          
+
           {/* Timer Component */}
           <View style={[styles.timerChip, timeLeft < 60 && styles.timerChipUrgent]}>
             <Text style={styles.timerIcon}>⏱️</Text>
@@ -220,7 +220,7 @@ export default function MCQScreen() {
         </View>
 
         <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
-          
+
           <View style={styles.questionHeader}>
             <View style={styles.questionCounterBadge}>
               <Text style={styles.questionCounter}>Question {currentIdx + 1} of {questions.length}</Text>
@@ -245,12 +245,12 @@ export default function MCQScreen() {
             {Object.entries(question.options).map(([key, value]) => {
               const isSelected = selectedOption === key;
               const isCorrectOpt = key === correct;
-              
+
               // Color styles
               let btnStyle: any = styles.optionBtn;
               let bubbleStyle: any = styles.optionBubble;
               let bubbleText = key;
-              
+
               if (isSubmitted) {
                 if (isCorrectOpt) {
                   btnStyle = [styles.optionBtn, styles.optionBtnCorrect];
@@ -299,7 +299,7 @@ export default function MCQScreen() {
             </View>
           ) : (
             <View style={styles.feedbackArea}>
-              
+
               {/* Feedback banner */}
               <View style={[
                 styles.feedbackBanner,
