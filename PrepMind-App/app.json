@@ -41,7 +41,9 @@
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "metro",
-      "output": "single"
+      "output": "single",
+      "name": "PrepMind — AI UPSC Prep",
+      "description": "AI-powered UPSC preparation: evaluate answers, MCQ engine, voice AI tutor & study planner."
     },
     "plugins": [
       "expo-router",

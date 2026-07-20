@@ -1,0 +1,25 @@
+{
+  "name": "PrepMind — AI UPSC Prep",
+  "short_name": "PrepMind",
+  "description": "AI-powered UPSC preparation: answer evaluation, voice tutor, MCQ engine, study planner.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#006399",
+  "theme_color": "#006399",
+  "lang": "en",
+  "icons": [
+    {
+      "src": "/assets/icon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/icon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

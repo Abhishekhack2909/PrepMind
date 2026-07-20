@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta httpEquiv="X-UA-Compatible" content="IE=edge" />
+
+    <!-- Viewport — critical for mobile web feel -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#006399" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="PrepMind" />
+
+    <!-- SEO -->
+    <meta name="description" content="PrepMind — AI-powered UPSC preparation app. Evaluate answers, practice MCQs, get a voice AI tutor, and build your personalized study plan." />
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/manifest.json" />
+
+    <!-- Apple Touch Icon (iOS home screen icon) -->
+    <link rel="apple-touch-icon" href="/assets/icon.png" />
+
+    <!-- Favicon -->
+    <link rel="shortcut icon" href="/assets/favicon.png" />
+
+    <title>PrepMind — AI UPSC Prep</title>
+
+    <style>
+      /* Prevent flash of white before React loads */
+      html, body {
+        margin: 0;
+        padding: 0;
+        background-color: #006399;
+        height: 100%;
+      }
+      #root {
+        height: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run PrepMind.</noscript>
+    <div id="root"></div>
+
+    <!-- Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', function () {
+          navigator.serviceWorker
+            .register('/service-worker.js')
+            .then(function (reg) {
+              console.log('[PrepMind SW] Registered:', reg.scope);
+            })
+            .catch(function (err) {
+              console.warn('[PrepMind SW] Registration failed:', err);
+            });
+        });
+      }
+    </script>
+  </body>
+</html>

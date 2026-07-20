@@ -36,5 +36,9 @@ Thumbs.db
 .vscode/settings.json
 *.tsbuildinfo
 
+# ── Backend logs & temp error files ───────────────
+PrepMind-Backend/*.log
+PrepMind-Backend/*_error.txt
+
 # ── Personal learning notes (ignored) ──
 LEARNING.md
