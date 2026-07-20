@@ -97,7 +97,7 @@ export default function LoginScreen() {
     setName('');
   }
 
-  return (
+  return ( // return statement for login screen
     <SafeAreaView style={styles.safe}>
       <KeyboardAvoidingView
         style={styles.flex}
