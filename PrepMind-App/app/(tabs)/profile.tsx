@@ -138,7 +138,7 @@ export default function ProfileScreen() {  // profile screen
     ? `${summary.mcq.avg_score}%`
     : '—';
 
-  return (
+  return ( //  for profile page
     <SafeAreaView style={styles.safe}>
       {/* ── Top App Bar ── */}
       <View style={styles.topAppBar}>
@@ -477,7 +477,7 @@ const modalStyles = themed((Colors) => StyleSheet.create({
   },
 }));
 
-const styles = themed((Colors) => StyleSheet.create({
+const styles = themed((Colors) => StyleSheet.create({ // for profile styles
   safe: {
     flex: 1,
     backgroundColor: Colors.background,
