@@ -2,7 +2,8 @@ import { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet,
   KeyboardAvoidingView, Platform, ScrollView,
-  ActivityIndicator, } from 'react-native';
+  ActivityIndicator,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '@/lib/supabase';
 import { Colors, Spacing, Radius, Shadows, Typography, themed } from '@/constants/theme';
@@ -19,7 +20,7 @@ export default function LoginScreen() {
   const [guestLoading, setGuestLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleGuest() {
+  async function handleGuest() { // for guest sign in
     setGuestLoading(true);
     setError(null);
     try {
@@ -34,7 +35,7 @@ export default function LoginScreen() {
     }
   }
 
-  async function handleSubmit() {
+  async function handleSubmit() { // for sign in and sign up
     setError(null);
 
     if (!email || !password) {
@@ -62,7 +63,7 @@ export default function LoginScreen() {
     }
   }
 
-  async function signIn() {
+  async function signIn() { // for email and password sign in
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) {
       setError(error.message === 'Invalid login credentials'
@@ -71,7 +72,7 @@ export default function LoginScreen() {
     }
   }
 
-  async function signUp() {
+  async function signUp() { // for email and password sign up
     const { data, error } = await supabase.auth.signUp({ email, password });
     if (error) { setError(error.message); return; }
     if (!data.user) { setError('Sign up failed. Please try again.'); return; }
@@ -88,7 +89,7 @@ export default function LoginScreen() {
     }
   }
 
-  function toggleMode() {
+  function toggleMode() { // for toggle between sign in and sign up
     setMode(m => m === 'signin' ? 'signup' : 'signin');
     setError(null);
     setEmail('');
@@ -138,7 +139,7 @@ export default function LoginScreen() {
 
             {/* Form */}
             <View style={styles.form}>
-              
+
               {/* Name Field (Sign Up Only) */}
               {mode === 'signup' && (
                 <View style={styles.fieldGroup}>
@@ -301,7 +302,7 @@ const styles = themed((Colors) => StyleSheet.create({
     bottom: '5%',
     left: -80,
   },
-  
+
   // Card
   card: {
     backgroundColor: Colors.surfaceCard,
