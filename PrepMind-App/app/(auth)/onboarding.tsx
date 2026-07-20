@@ -15,7 +15,7 @@ export default function OnboardingScreen() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const splashOpacity = useRef(new Animated.Value(1)).current;
   const slideAnim = useRef(new Animated.Value(0)).current;
-  
+
   // Custom pulse animation for splash & mic button
   const pulseAnim = useRef(new Animated.Value(0.95)).current;
   const floatAnim = useRef(new Animated.Value(0)).current;
@@ -23,7 +23,7 @@ export default function OnboardingScreen() {
   // On web, skip splash immediately to save time, or show it
   const [splashDone, setSplashDone] = useState(Platform.OS === 'web');
 
-  useEffect(() => {
+  useEffect(() => { // for onboarding animations
     // Pulse animation loop
     Animated.loop(
       Animated.sequence([
@@ -57,7 +57,7 @@ export default function OnboardingScreen() {
     ).start();
 
     if (Platform.OS === 'web') return;
-    
+
     // Fade out splash after 2.5s
     setTimeout(() => {
       Animated.timing(splashOpacity, {
@@ -108,7 +108,7 @@ export default function OnboardingScreen() {
           <View style={styles.splashGradientOverlay} />
           <View style={styles.splashContent}>
             <Animated.View style={[
-              styles.splashIconWrapper, 
+              styles.splashIconWrapper,
               { transform: [{ scale: pulseAnim }] }
             ]}>
               <Text style={styles.splashIcon}>🧠</Text>
@@ -137,18 +137,18 @@ export default function OnboardingScreen() {
               styles.slidesRow,
               { transform: [{ translateX: slideAnim }] }
             ]}>
-              
+
               {/* Slide 1: AI Answer Evaluation */}
               <View style={styles.slide}>
                 <View style={styles.graphicsWrapper}>
                   {/* Gradient-tinted decorative backgrounds */}
                   <View style={[styles.slideBgOuter, { backgroundColor: Colors.primaryGhost }]} />
                   <View style={[styles.slideBgInner, { backgroundColor: Colors.surfaceContainerHigh }]} />
-                  
+
                   {/* Floating decorative dots */}
                   <Animated.View style={[styles.floatingDot, styles.floatingDot1, { transform: [{ translateY: floatY }] }]} />
                   <Animated.View style={[styles.floatingDot, styles.floatingDot2, { transform: [{ translateY: floatAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 10] }) }] }]} />
-                  
+
                   {/* Main Icon Card */}
                   <View style={styles.mainIconCard}>
                     <Text style={styles.mainIconText}>📄</Text>
@@ -159,7 +159,7 @@ export default function OnboardingScreen() {
                     </View>
                   </View>
                 </View>
-                
+
                 <View style={styles.textContainer}>
                   <Text style={styles.slideTitle}>AI Answer Evaluation</Text>
                   <Text style={styles.slideDescription}>
@@ -174,24 +174,24 @@ export default function OnboardingScreen() {
                   {/* Decorative background shapes */}
                   <View style={[styles.slideBgOuter, { backgroundColor: Colors.accentGhost, borderRadius: Radius.xxl }]} />
                   <View style={[styles.slideBgInner, { backgroundColor: Colors.accentGhost, borderRadius: Radius.xl }]} />
-                  
+
                   <Animated.View style={[styles.floatingDot, styles.floatingDot1, { backgroundColor: Colors.accentLight, transform: [{ translateY: floatY }] }]} />
                   <Animated.View style={[styles.floatingDot, styles.floatingDot2, { backgroundColor: Colors.accentLight, transform: [{ translateY: floatAnim.interpolate({ inputRange: [0, 1], outputRange: [0, 10] }) }] }]} />
-                  
+
                   {/* Main Mic Card */}
                   <Animated.View style={[
                     styles.mainMicCard,
                     { transform: [{ scale: pulseAnim }] }
                   ]}>
                     <Text style={styles.mainIconText}>🎙️</Text>
-                    
+
                     {/* Sound waves left */}
                     <View style={styles.soundWavesLeft}>
                       <View style={[styles.soundBar, { height: 12 }]} />
                       <View style={[styles.soundBar, { height: 24 }]} />
                       <View style={[styles.soundBar, { height: 16 }]} />
                     </View>
-                    
+
                     {/* Sound waves right */}
                     <View style={styles.soundWavesRight}>
                       <View style={[styles.soundBar, { height: 16 }]} />
@@ -200,7 +200,7 @@ export default function OnboardingScreen() {
                     </View>
                   </Animated.View>
                 </View>
-                
+
                 <View style={styles.textContainer}>
                   <Text style={styles.slideTitle}>Voice Doubt Solver</Text>
                   <Text style={styles.slideDescription}>
@@ -219,7 +219,7 @@ export default function OnboardingScreen() {
                     <View style={[styles.bentoItem, { backgroundColor: Colors.onSurfaceMuted, opacity: 0.3 }]} />
                     <View style={[styles.bentoItem, { backgroundColor: Colors.primary, opacity: 0.7 }]} />
                   </View>
-                  
+
                   {/* Main Planning Box */}
                   <View style={styles.mainPlanningCard}>
                     <Text style={styles.planningRobotIcon}>🤖</Text>
@@ -229,7 +229,7 @@ export default function OnboardingScreen() {
                     <Text style={styles.planningCalendarIcon}>📅</Text>
                   </View>
                 </View>
-                
+
                 <View style={styles.textContainer}>
                   <Text style={styles.slideTitle}>Adaptive Study Planning</Text>
                   <Text style={styles.slideDescription}>
@@ -242,6 +242,7 @@ export default function OnboardingScreen() {
           </View>
 
           {/* Bottom Navigation & Controls */}
+          //for dots animation
           <View style={styles.controlsContainer}>
             {/* Pagination Dots */}
             <View style={styles.paginationRow}>
@@ -284,9 +285,9 @@ const styles = themed((Colors) => StyleSheet.create({
   flex: {
     flex: 1,
   },
-  
+
   // Splash Overlay — gradient simulation
-  splash: {
+  splash: { // for splash screen animation
     ...StyleSheet.absoluteFill,
     backgroundColor: Colors.primary,
     alignItems: 'center',
