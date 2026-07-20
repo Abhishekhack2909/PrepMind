@@ -266,7 +266,7 @@ export default function LoginScreen() {
   );
 }
 
-const styles = themed((Colors) => StyleSheet.create({
+const styles = themed((Colors) => StyleSheet.create({ // for styling the login screen
   safe: {
     flex: 1,
     backgroundColor: Colors.background,
