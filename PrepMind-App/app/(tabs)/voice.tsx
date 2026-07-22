@@ -24,7 +24,7 @@ import {
 
 type AgentState = 'idle' | 'listening' | 'thinking' | 'speaking' | 'error';
 
-type Message = {
+type Message = { // for message assistent switching
   id: string;
   role: 'user' | 'assistant';
   content: string;
@@ -91,7 +91,7 @@ const glyph = themed((Colors) => StyleSheet.create({
 let ExpoWebSpeechRecognitionCtor: any = null;
 try {
   ExpoWebSpeechRecognitionCtor = require('expo-speech-recognition').ExpoWebSpeechRecognition;
-} catch {}
+} catch { }
 
 function isWebSpeechSupported(): boolean {
   if (Platform.OS === 'web' && typeof window !== 'undefined') {
@@ -151,7 +151,7 @@ export default function VoiceAgentScreen() {
   historyRef.current = history;
   autoResumeRef.current = autoResume;
 
-  const orbScale  = useRef(new Animated.Value(1)).current;
+  const orbScale = useRef(new Animated.Value(1)).current;
   const orbOpacity = useRef(new Animated.Value(0.85)).current;
   const ring1Scale = useRef(new Animated.Value(1)).current;
   const ring2Scale = useRef(new Animated.Value(1)).current;
@@ -238,31 +238,31 @@ export default function VoiceAgentScreen() {
 
   useEffect(() => {
     switch (agentState) {
-      case 'idle':      startIdleAnimation(); break;
+      case 'idle': startIdleAnimation(); break;
       case 'listening': startListeningAnimation(); break;
-      case 'thinking':  startThinkingAnimation(); break;
-      case 'speaking':  startSpeakingAnimation(); break;
-      case 'error':     stopAllAnimations(); break;
+      case 'thinking': startThinkingAnimation(); break;
+      case 'speaking': startSpeakingAnimation(); break;
+      case 'error': stopAllAnimations(); break;
     }
   }, [agentState]);
 
   const getOrbGradient = (): [string, string] => {
     switch (agentState) {
-      case 'idle':      return [Colors.primaryLight, Colors.accent];
+      case 'idle': return [Colors.primaryLight, Colors.accent];
       case 'listening': return ['#F87171', '#DC2626'];
-      case 'thinking':  return ['#FBBF24', '#F59E0B'];
-      case 'speaking':  return [Colors.accentLight, Colors.accentDark];
-      case 'error':     return ['#F87171', '#B91C1C'];
+      case 'thinking': return ['#FBBF24', '#F59E0B'];
+      case 'speaking': return [Colors.accentLight, Colors.accentDark];
+      case 'error': return ['#F87171', '#B91C1C'];
     }
   };
 
   const getOrbGlow = () => {
     switch (agentState) {
-      case 'idle':      return 'rgba(0,102,255,0.35)';
+      case 'idle': return 'rgba(0,102,255,0.35)';
       case 'listening': return 'rgba(239,68,68,0.35)';
-      case 'thinking':  return 'rgba(245,158,11,0.35)';
-      case 'speaking':  return 'rgba(124,58,237,0.40)';
-      case 'error':     return 'rgba(239,68,68,0.25)';
+      case 'thinking': return 'rgba(245,158,11,0.35)';
+      case 'speaking': return 'rgba(124,58,237,0.40)';
+      case 'error': return 'rgba(239,68,68,0.25)';
     }
   };
 
@@ -274,9 +274,9 @@ export default function VoiceAgentScreen() {
       case 'listening':
         if (IS_NATIVE) return 'Recording... tap to send';
         return 'Listening... tap to stop';
-      case 'thinking':  return 'Thinking...';
-      case 'speaking':  return 'Speaking... tap to interrupt';
-      case 'error':     return errorMsg;
+      case 'thinking': return 'Thinking...';
+      case 'speaking': return 'Speaking... tap to interrupt';
+      case 'error': return errorMsg;
     }
   };
 
@@ -327,8 +327,8 @@ export default function VoiceAgentScreen() {
       utterance.lang = 'en-IN';
       const voices = window.speechSynthesis.getVoices();
       const preferred = voices.find(v => v.lang === 'en-IN') ||
-                        voices.find(v => v.lang.startsWith('en')) ||
-                        voices[0];
+        voices.find(v => v.lang.startsWith('en')) ||
+        voices[0];
       if (preferred) utterance.voice = preferred;
       utterance.onend = () => {
         setAgentState('idle');
@@ -401,7 +401,7 @@ export default function VoiceAgentScreen() {
 
   const stopListening = useCallback(() => {
     if (recognitionRef.current) {
-      try { recognitionRef.current.abort(); } catch {}
+      try { recognitionRef.current.abort(); } catch { }
       recognitionRef.current = null;
     }
     setAgentState('idle');
@@ -420,7 +420,7 @@ export default function VoiceAgentScreen() {
     try {
       recognitionRef.current?.abort?.();
       recognitionRef.current = null;
-    } catch {}
+    } catch { }
     if (Platform.OS === 'web' && typeof window !== 'undefined' && window.speechSynthesis) {
       window.speechSynthesis.cancel();
     } else {
@@ -527,7 +527,7 @@ export default function VoiceAgentScreen() {
         allowsRecording: false,
         playsInSilentMode: true,
       });
-    } catch {}
+    } catch { }
 
     if (!uri) {
       setErrorMsg('Recording produced no audio.');
@@ -581,7 +581,7 @@ export default function VoiceAgentScreen() {
     return () => {
       if (isRecordingRef.current) {
         isRecordingRef.current = false;
-        audioRecorder?.stop?.().catch?.(() => {});
+        audioRecorder?.stop?.().catch?.(() => { });
       }
     };
   }, [audioRecorder]);

@@ -23,7 +23,7 @@ function TabIcon({ icon, color, focused }: { icon: string; color?: any; focused:
  * Voice & Weakness are accessible from Home and Profile
  * (too many tabs crowds the mobile nav bar)
  */
-export default function TabsLayout() {
+export default function TabsLayout() { //
   return (
     <Tabs
       screenOptions={{
@@ -68,7 +68,7 @@ export default function TabsLayout() {
   );
 }
 
-const styles = themed((Colors) => StyleSheet.create({
+const styles = themed((Colors) => StyleSheet.create({ 
   iconContainer: {
     minWidth: 48,
     height: 34,
