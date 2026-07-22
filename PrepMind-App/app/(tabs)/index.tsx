@@ -203,7 +203,7 @@ export default function HomeScreen() {  // for testing only
   );
 }
 
-const styles = themed((Colors) => StyleSheet.create({ // for styling only
+const styles = themed((Colors) => StyleSheet.create({ // for  theme styling only
   safe: {
     flex: 1,
     backgroundColor: Colors.background,
@@ -450,7 +450,7 @@ const styles = themed((Colors) => StyleSheet.create({ // for styling only
     borderRadius: 3,
   },
 
-  // Targets Section
+  // Targets Section 
   targetsSection: {
     gap: Spacing.md,
   },
