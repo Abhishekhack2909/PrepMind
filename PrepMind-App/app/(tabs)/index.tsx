@@ -61,7 +61,7 @@ export default function HomeScreen() {  // for testing only
     }
   }, [fetchData, userId]);
 
-  function onRefresh() {
+  function onRefresh() { // for refreshing the page
     setRefreshing(true);
     fetchData();
   }
