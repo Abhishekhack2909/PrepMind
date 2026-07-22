@@ -19,7 +19,7 @@ const QUOTES = [
   { text: 'Discipline is the bridge between goals and accomplishment.', author: 'Jim Rohn' },
 ];
 
-export default function HomeScreen() {
+export default function HomeScreen() {  // for testing only
   const router = useRouter();
   const { session, user } = useAuth();
   const userId = session?.user?.id;
@@ -149,7 +149,7 @@ export default function HomeScreen() {
         {/* ── Targets Section ── */}
         <View style={styles.targetsSection}>
           <Text style={styles.sectionTitle}>My Targets</Text>
-          
+
           {/* Greeting Card — warm amber */}
           <View style={styles.greetingCard}>
             <Text style={styles.greetingSun}>☀️</Text>
@@ -162,10 +162,10 @@ export default function HomeScreen() {
           {/* Add Targets Container */}
           <View style={styles.addTargetsCard}>
             <Text style={styles.addTargetsHeader}>ADD TARGETS</Text>
-            
+
             {/* Dashed Add Button */}
-            <TouchableOpacity 
-              style={styles.dashedAddBtn} 
+            <TouchableOpacity
+              style={styles.dashedAddBtn}
               activeOpacity={0.8}
               onPress={() => router.push('/(tabs)/planner' as any)}
             >
