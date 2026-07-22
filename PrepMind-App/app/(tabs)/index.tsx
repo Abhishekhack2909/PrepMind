@@ -203,7 +203,7 @@ export default function HomeScreen() {  // for testing only
   );
 }
 
-const styles = themed((Colors) => StyleSheet.create({
+const styles = themed((Colors) => StyleSheet.create({ // for styling only
   safe: {
     flex: 1,
     backgroundColor: Colors.background,
