@@ -303,7 +303,7 @@ const styles = themed((Colors) => StyleSheet.create({ // for styling the login s
     left: -80,
   },
 
-  // Card
+  // card colour 
   card: {
     backgroundColor: Colors.surfaceCard,
     borderRadius: Radius.xxl,
