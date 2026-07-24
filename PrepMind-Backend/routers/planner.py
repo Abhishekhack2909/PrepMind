@@ -40,16 +40,25 @@ class PlannerRequest(BaseModel):
     focus_subjects: Optional[List[str]] = None  # e.g., ["Polity", "History"]
 
 
-def build_planner_prompt(weak_topics: list, hours: int, exam_date: Optional[str]) -> str:
+def build_planner_prompt(
+    weak_topics: list,
+    hours: int,
+    exam_date: Optional[str],
+    focus_subjects: Optional[list] = None,
+) -> str:
     exam_context = f"Exam date: {exam_date}." if exam_date else "No specific exam date."
     weak_str = ", ".join(weak_topics) if weak_topics else "General UPSC preparation"
+    focus_str = ", ".join(focus_subjects) if focus_subjects else "None specified"
 
     return f"""You are an expert UPSC coaching institute director creating a personalized 7-day study plan.
 
 Student Profile:
-- Weak areas: {weak_str}
+- Weak areas (from quiz history): {weak_str}
+- Priority focus areas (chosen by the student): {focus_str}
 - Available study time: {hours} hours per day
 - {exam_context}
+
+Give extra weightage to the student's chosen priority focus areas across the week.
 
 Create a REALISTIC, PRACTICAL 7-day weekly study plan. 
 - Prioritize weak areas but also include revision of strong topics
@@ -109,7 +118,14 @@ async def generate_plan(req: PlannerRequest):
         except Exception:
             pass
 
-    prompt = build_planner_prompt(weak_topics, req.hours_per_day, req.exam_date)
+    # Merge student-chosen focus areas into the weak-topic set so the plan
+    # always reflects what they explicitly asked to prioritize.
+    focus_subjects = req.focus_subjects or []
+    combined_weak = list(dict.fromkeys([*focus_subjects, *weak_topics]))
+
+    prompt = build_planner_prompt(
+        combined_weak, req.hours_per_day, req.exam_date, focus_subjects
+    )
 
     try:
         response = groq_client.chat.completions.create(
@@ -131,13 +147,13 @@ async def generate_plan(req: PlannerRequest):
             supabase.table("study_plans").upsert({
                 "user_id": req.user_id,
                 "plan": plan,
-                "weak_topics": weak_topics,
+                "weak_topics": combined_weak,
                 "hours_per_day": req.hours_per_day,
             }, on_conflict="user_id").execute()
         except Exception as e:
             print(f"[WARN] Could not save plan: {e}")
 
-        return {"success": True, "plan": plan, "weak_topics_used": weak_topics}
+        return {"success": True, "plan": plan, "weak_topics_used": combined_weak}
 
     except (json.JSONDecodeError, ValueError) as e:
         raise HTTPException(status_code=500, detail=f"Failed to parse plan: {str(e)}")

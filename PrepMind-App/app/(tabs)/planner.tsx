@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, ScrollView,
-  ActivityIndicator, TextInput, Platform,
+  ActivityIndicator, TextInput, Platform, Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Colors, Spacing, Radius, Shadows, Typography, themed } from '@/constants/theme';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -41,9 +43,14 @@ const CATEGORY_ACCENTS: Record<string, string> = {
   current_affairs: Colors.warning,
 };
 
+// Stable identifier for a task so completion survives day switches / reloads.
+const taskKey = (dayName: string, t: Task) => `${dayName}::${t.time}::${t.subject}`;
+
 export default function PlannerScreen() {
+  const router = useRouter();
   const { session } = useAuth();
   const userId = session?.user?.id || 'anonymous';
+  const progressStorageKey = `prepmind:planprogress:${userId}`;
 
   const [state, setState] = useState<PlannerState>('setup');
   const [hoursPerDay, setHoursPerDay] = useState(6);
@@ -52,13 +59,32 @@ export default function PlannerScreen() {
   const [selectedDay, setSelectedDay] = useState(0);
   const [error, setError] = useState('');
 
-  // Local state for focus topics (simulated bento focus tags matching design)
+  // Focus topics chosen by the student — sent to the backend on generate.
   const [focusTopics, setFocusTopics] = useState<string[]>(['Ancient History', 'Polity']);
 
-  // Load existing plan on mount
+  // Add-topic modal
+  const [addTopicVisible, setAddTopicVisible] = useState(false);
+  const [topicDraft, setTopicDraft] = useState('');
+
+  // Completed task keys (persisted per user in AsyncStorage).
+  const [completed, setCompleted] = useState<Record<string, boolean>>({});
+
+  // Load existing plan + saved progress on mount
   useEffect(() => {
     loadExistingPlan();
-  }, []);
+    AsyncStorage.getItem(progressStorageKey)
+      .then((raw) => { if (raw) setCompleted(JSON.parse(raw)); })
+      .catch(() => {});
+  }, [progressStorageKey]);
+
+  const toggleTask = useCallback((key: string) => {
+    setCompleted((prev) => {
+      const next = { ...prev, [key]: !prev[key] };
+      if (!next[key]) delete next[key];
+      AsyncStorage.setItem(progressStorageKey, JSON.stringify(next)).catch(() => {});
+      return next;
+    });
+  }, [progressStorageKey]);
 
   async function loadExistingPlan() {
     try {
@@ -84,12 +110,16 @@ export default function PlannerScreen() {
           user_id: userId,
           hours_per_day: hoursPerDay,
           exam_date: examDate || null,
+          focus_subjects: focusTopics,
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.detail || 'Failed to generate plan');
       setPlan(data.plan);
       setSelectedDay(0);
+      // Fresh plan → clear old completion marks.
+      setCompleted({});
+      AsyncStorage.removeItem(progressStorageKey).catch(() => {});
       setState('plan');
     } catch (e: any) {
       setError(e.message);
@@ -97,23 +127,26 @@ export default function PlannerScreen() {
     }
   }
 
-  function addTopicPrompt() {
-    Alert.alert('Add Focus Area', 'Enter a topic to focus on:', [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Add',
-        onPress: (text?: string) => {
-          if (text && text.trim()) {
-            setFocusTopics([...focusTopics, text.trim()]);
-          }
-        }
-      }
-    ], 'plain-text');
+  function confirmAddTopic() {
+    const t = topicDraft.trim();
+    if (t && !focusTopics.includes(t)) {
+      setFocusTopics([...focusTopics, t]);
+    }
+    setTopicDraft('');
+    setAddTopicVisible(false);
   }
-
 
   function removeTopic(index: number) {
     setFocusTopics(focusTopics.filter((_, i) => i !== index));
+  }
+
+  // Route the "Start" action to the most relevant tool for the task type.
+  function startTask(task: Task) {
+    if (task.type === 'practice' || task.type === 'mock_test') {
+      router.push('/(tabs)/mcq' as any);
+    } else {
+      router.push('/(tabs)/voice' as any);
+    }
   }
 
   if (state === 'loading') {
@@ -130,12 +163,19 @@ export default function PlannerScreen() {
 
   if (state === 'plan' && plan) {
     const currentDay = plan.days?.[selectedDay];
+    const dayName = currentDay?.day || DAY_ABBR[selectedDay] || '';
 
     // Group tasks under categories for Daily Plan view
     const readTasks = currentDay?.tasks?.filter(t => t.type === 'study') || [];
     const practiceTasks = currentDay?.tasks?.filter(t => t.type === 'practice' || t.type === 'mock_test') || [];
     const reviseTasks = currentDay?.tasks?.filter(t => t.type === 'revision' || t.type === 'current_affairs') || [];
     const otherTasks = currentDay?.tasks?.filter(t => t.type !== 'study' && t.type !== 'practice' && t.type !== 'mock_test' && t.type !== 'revision' && t.type !== 'current_affairs') || [];
+
+    // Real completion stats for the selected day.
+    const dayTasks = currentDay?.tasks || [];
+    const totalTasks = dayTasks.length;
+    const doneTasks = dayTasks.filter(t => completed[taskKey(dayName, t)]).length;
+    const donePercent = totalTasks > 0 ? Math.round((doneTasks / totalTasks) * 100) : 0;
 
     return (
       <SafeAreaView style={styles.safe}>
@@ -170,21 +210,31 @@ export default function PlannerScreen() {
             ))}
           </ScrollView>
 
-          {/* Progress Overview Section */}
+          {/* Progress Overview Section — reflects real task completion */}
           <View style={styles.progressCard}>
             <View style={styles.circleProgressWrapper}>
-              <View style={styles.circleProgressPlaceholder} />
+              {donePercent > 0 && <View style={styles.circleProgressPlaceholder} />}
               <View style={styles.circleTextContainer}>
-                <Text style={styles.circlePercentage}>65%</Text>
+                <Text style={styles.circlePercentage}>{donePercent}%</Text>
                 <Text style={styles.circleLabel}>DONE</Text>
               </View>
             </View>
             <View style={styles.progressTextContainer}>
-              <Text style={styles.progressTitle}>Great pace today!</Text>
-              <Text style={styles.progressSubtitle}>You are on track to finish your daily targets. Keep pushing forward.</Text>
+              <Text style={styles.progressTitle}>
+                {donePercent === 100 && totalTasks > 0
+                  ? 'Day complete! 🎉'
+                  : donePercent >= 50
+                    ? 'Great pace today!'
+                    : "Let's get started"}
+              </Text>
+              <Text style={styles.progressSubtitle}>
+                {donePercent === 100 && totalTasks > 0
+                  ? 'You finished every task for today. Fantastic work.'
+                  : 'Tick off tasks as you finish them to track your day.'}
+              </Text>
               <View style={styles.progressBadge}>
                 <View style={styles.badgeDot} />
-                <Text style={styles.progressBadgeText}>4/6 Tasks done</Text>
+                <Text style={styles.progressBadgeText}>{doneTasks}/{totalTasks} Tasks done</Text>
               </View>
             </View>
           </View>
@@ -197,21 +247,29 @@ export default function PlannerScreen() {
               {readTasks.length > 0 && (
                 <View style={styles.taskCategory}>
                   <Text style={styles.categoryTitle}>📖  READ</Text>
-                  {readTasks.map((task, i) => (
-                    <View key={i} style={styles.taskRow}>
-                      <View style={[styles.taskAccentBar, { backgroundColor: Colors.primary }]} />
-                      <TouchableOpacity style={[styles.checkBtn, styles.checkBtnChecked]} activeOpacity={0.7}>
-                        <Text style={styles.checkIcon}>✓</Text>
-                      </TouchableOpacity>
-                      <View style={styles.taskRowInfo}>
-                        <Text style={[styles.taskRowSubject, styles.textLineThrough]}>{task.subject}</Text>
-                        <Text style={styles.taskRowDesc}>{task.task}</Text>
+                  {readTasks.map((task, i) => {
+                    const key = taskKey(dayName, task);
+                    const done = !!completed[key];
+                    return (
+                      <View key={i} style={styles.taskRow}>
+                        <View style={[styles.taskAccentBar, { backgroundColor: Colors.primary }]} />
+                        <TouchableOpacity
+                          style={[styles.checkBtn, done && styles.checkBtnChecked]}
+                          activeOpacity={0.7}
+                          onPress={() => toggleTask(key)}
+                        >
+                          {done && <Text style={styles.checkIcon}>✓</Text>}
+                        </TouchableOpacity>
+                        <View style={styles.taskRowInfo}>
+                          <Text style={[styles.taskRowSubject, done && styles.textLineThrough]}>{task.subject}</Text>
+                          <Text style={styles.taskRowDesc}>{task.task}</Text>
+                        </View>
+                        <View style={styles.durationBadge}>
+                          <Text style={styles.taskRowTime}>{task.duration_mins}m</Text>
+                        </View>
                       </View>
-                      <View style={styles.durationBadge}>
-                        <Text style={styles.taskRowTime}>{task.duration_mins}m</Text>
-                      </View>
-                    </View>
-                  ))}
+                    );
+                  })}
                 </View>
               )}
 
@@ -219,26 +277,36 @@ export default function PlannerScreen() {
               {practiceTasks.length > 0 && (
                 <View style={styles.taskCategory}>
                   <Text style={styles.categoryTitle}>🎯  PRACTICE</Text>
-                  {practiceTasks.map((task, i) => (
-                    <View key={i} style={styles.taskRowActive}>
-                      <View style={[styles.taskAccentBarActive, { backgroundColor: Colors.accent }]} />
-                      <View style={styles.activeInnerRow}>
-                        <TouchableOpacity style={styles.checkBtn} activeOpacity={0.7} />
-                        <View style={styles.taskRowInfo}>
-                          <Text style={styles.taskRowSubject}>{task.subject}</Text>
-                          <Text style={styles.taskRowDesc}>{task.task}</Text>
-                        </View>
-                        <View style={styles.activeAction}>
-                          <View style={styles.durationBadge}>
-                            <Text style={styles.taskRowTime}>{task.duration_mins}m</Text>
-                          </View>
-                          <TouchableOpacity style={styles.startBtnSmall} activeOpacity={0.8}>
-                            <Text style={styles.startBtnSmallText}>Start</Text>
+                  {practiceTasks.map((task, i) => {
+                    const key = taskKey(dayName, task);
+                    const done = !!completed[key];
+                    return (
+                      <View key={i} style={styles.taskRowActive}>
+                        <View style={[styles.taskAccentBarActive, { backgroundColor: Colors.accent }]} />
+                        <View style={styles.activeInnerRow}>
+                          <TouchableOpacity
+                            style={[styles.checkBtn, done && styles.checkBtnChecked]}
+                            activeOpacity={0.7}
+                            onPress={() => toggleTask(key)}
+                          >
+                            {done && <Text style={styles.checkIcon}>✓</Text>}
                           </TouchableOpacity>
+                          <View style={styles.taskRowInfo}>
+                            <Text style={[styles.taskRowSubject, done && styles.textLineThrough]}>{task.subject}</Text>
+                            <Text style={styles.taskRowDesc}>{task.task}</Text>
+                          </View>
+                          <View style={styles.activeAction}>
+                            <View style={styles.durationBadge}>
+                              <Text style={styles.taskRowTime}>{task.duration_mins}m</Text>
+                            </View>
+                            <TouchableOpacity style={styles.startBtnSmall} activeOpacity={0.8} onPress={() => startTask(task)}>
+                              <Text style={styles.startBtnSmallText}>Start</Text>
+                            </TouchableOpacity>
+                          </View>
                         </View>
                       </View>
-                    </View>
-                  ))}
+                    );
+                  })}
                 </View>
               )}
 
@@ -246,19 +314,29 @@ export default function PlannerScreen() {
               {reviseTasks.length > 0 && (
                 <View style={styles.taskCategory}>
                   <Text style={styles.categoryTitle}>📝  REVISE</Text>
-                  {reviseTasks.map((task, i) => (
-                    <View key={i} style={styles.taskRow}>
-                      <View style={[styles.taskAccentBar, { backgroundColor: Colors.warning }]} />
-                      <TouchableOpacity style={styles.checkBtn} activeOpacity={0.7} />
-                      <View style={styles.taskRowInfo}>
-                        <Text style={styles.taskRowSubject}>{task.subject}</Text>
-                        <Text style={styles.taskRowDesc}>{task.task}</Text>
+                  {reviseTasks.map((task, i) => {
+                    const key = taskKey(dayName, task);
+                    const done = !!completed[key];
+                    return (
+                      <View key={i} style={styles.taskRow}>
+                        <View style={[styles.taskAccentBar, { backgroundColor: Colors.warning }]} />
+                        <TouchableOpacity
+                          style={[styles.checkBtn, done && styles.checkBtnChecked]}
+                          activeOpacity={0.7}
+                          onPress={() => toggleTask(key)}
+                        >
+                          {done && <Text style={styles.checkIcon}>✓</Text>}
+                        </TouchableOpacity>
+                        <View style={styles.taskRowInfo}>
+                          <Text style={[styles.taskRowSubject, done && styles.textLineThrough]}>{task.subject}</Text>
+                          <Text style={styles.taskRowDesc}>{task.task}</Text>
+                        </View>
+                        <View style={styles.durationBadge}>
+                          <Text style={styles.taskRowTime}>{task.duration_mins}m</Text>
+                        </View>
                       </View>
-                      <View style={styles.durationBadge}>
-                        <Text style={styles.taskRowTime}>{task.duration_mins}m</Text>
-                      </View>
-                    </View>
-                  ))}
+                    );
+                  })}
                 </View>
               )}
 
@@ -266,19 +344,29 @@ export default function PlannerScreen() {
               {otherTasks.length > 0 && (
                 <View style={styles.taskCategory}>
                   <Text style={styles.categoryTitle}>⏰  OTHERS</Text>
-                  {otherTasks.map((task, i) => (
-                    <View key={i} style={styles.taskRow}>
-                      <View style={[styles.taskAccentBar, { backgroundColor: Colors.onSurfaceMuted }]} />
-                      <TouchableOpacity style={styles.checkBtn} activeOpacity={0.7} />
-                      <View style={styles.taskRowInfo}>
-                        <Text style={styles.taskRowSubject}>{task.subject}</Text>
-                        <Text style={styles.taskRowDesc}>{task.task}</Text>
+                  {otherTasks.map((task, i) => {
+                    const key = taskKey(dayName, task);
+                    const done = !!completed[key];
+                    return (
+                      <View key={i} style={styles.taskRow}>
+                        <View style={[styles.taskAccentBar, { backgroundColor: Colors.onSurfaceMuted }]} />
+                        <TouchableOpacity
+                          style={[styles.checkBtn, done && styles.checkBtnChecked]}
+                          activeOpacity={0.7}
+                          onPress={() => toggleTask(key)}
+                        >
+                          {done && <Text style={styles.checkIcon}>✓</Text>}
+                        </TouchableOpacity>
+                        <View style={styles.taskRowInfo}>
+                          <Text style={[styles.taskRowSubject, done && styles.textLineThrough]}>{task.subject}</Text>
+                          <Text style={styles.taskRowDesc}>{task.task}</Text>
+                        </View>
+                        <View style={styles.durationBadge}>
+                          <Text style={styles.taskRowTime}>{task.duration_mins}m</Text>
+                        </View>
                       </View>
-                      <View style={styles.durationBadge}>
-                        <Text style={styles.taskRowTime}>{task.duration_mins}m</Text>
-                      </View>
-                    </View>
-                  ))}
+                    );
+                  })}
                 </View>
               )}
 
@@ -365,7 +453,7 @@ export default function PlannerScreen() {
                   <Text style={styles.tagClose}>✕</Text>
                 </TouchableOpacity>
               ))}
-              <TouchableOpacity style={styles.addTagBtn} onPress={addTopicPrompt} activeOpacity={0.7}>
+              <TouchableOpacity style={styles.addTagBtn} onPress={() => setAddTopicVisible(true)} activeOpacity={0.7}>
                 <Text style={styles.addTagText}>+ Add Topic</Text>
               </TouchableOpacity>
             </View>
@@ -403,25 +491,37 @@ export default function PlannerScreen() {
 
         <View style={{ height: 80 }} />
       </ScrollView>
+
+      {/* Add Focus Topic modal */}
+      <Modal visible={addTopicVisible} transparent animationType="fade" onRequestClose={() => setAddTopicVisible(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Add Focus Area</Text>
+            <Text style={styles.modalLabel}>Topic</Text>
+            <TextInput
+              style={styles.dateInput}
+              value={topicDraft}
+              onChangeText={setTopicDraft}
+              placeholder="e.g. Modern History, Environment"
+              placeholderTextColor={Colors.onSurfaceMuted}
+              autoFocus
+              onSubmitEditing={confirmAddTopic}
+              returnKeyType="done"
+            />
+            <View style={styles.modalActions}>
+              <TouchableOpacity onPress={() => { setTopicDraft(''); setAddTopicVisible(false); }} style={styles.modalBtnSecondary}>
+                <Text style={styles.modalBtnSecondaryText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={confirmAddTopic} style={styles.modalBtnPrimary}>
+                <Text style={styles.modalBtnPrimaryText}>Add</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
-
-// Helper mock for Alerts text prompts on web/native
-const Alert = {
-  alert: (title: string, msg: string, buttons: any[], type?: string) => {
-    if (Platform.OS === 'web') {
-      const txt = prompt(msg);
-      if (txt && buttons[1]?.onPress) {
-        buttons[1].onPress(txt);
-      }
-    } else {
-      // Standard native dialog prompt is simulated here, or fall back
-      const txt = 'Modern History';
-      if (buttons[1]?.onPress) buttons[1].onPress(txt);
-    }
-  }
-};
 
 // ── Styles ─────────────────────────────────────────────────────────────────────
 const styles = themed((Colors) => StyleSheet.create({
@@ -952,5 +1052,67 @@ const styles = themed((Colors) => StyleSheet.create({
     fontFamily: 'Inter_400Regular',
     fontSize: 13,
     color: Colors.error,
+  },
+
+  // Add-topic modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  modalCard: {
+    width: '100%',
+    maxWidth: 380,
+    backgroundColor: Colors.surfaceCard,
+    borderRadius: Radius.xl,
+    padding: Spacing.lg,
+  },
+  modalTitle: {
+    fontFamily: 'PlusJakartaSans_700Bold',
+    fontSize: 18,
+    color: Colors.onSurface,
+    fontWeight: '700',
+    marginBottom: Spacing.md,
+  },
+  modalLabel: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 11,
+    color: Colors.onSurfaceMuted,
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+    marginBottom: 6,
+  },
+  modalActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 10,
+    marginTop: Spacing.md,
+  },
+  modalBtnSecondary: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: Radius.full,
+    backgroundColor: Colors.surfaceContainer,
+    alignItems: 'center',
+  },
+  modalBtnSecondaryText: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 14,
+    color: Colors.onSurfaceVariant,
+    fontWeight: '600',
+  },
+  modalBtnPrimary: {
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: Radius.full,
+    backgroundColor: Colors.primary,
+  },
+  modalBtnPrimaryText: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 14,
+    color: '#fff',
+    fontWeight: '600',
   },
 }));
