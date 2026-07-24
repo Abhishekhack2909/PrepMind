@@ -7,7 +7,7 @@ from services.gemini_service import evaluate_answer
 
 router = APIRouter(prefix="/api", tags=["Evaluate"])
 
-supabase_client = create_client(
+supabase_client = create_client( 
     os.getenv("SUPABASE_URL", ""),
     os.getenv("SUPABASE_SERVICE_KEY", "")
 )
@@ -42,6 +42,10 @@ async def evaluate_endpoint(req: EvaluateRequest):
                 "grade": eval_data.get("grade"),
                 "content_score": eval_data.get("content_score"),
                 "structure_score": eval_data.get("structure_score"),
+                "examples_score": eval_data.get("examples_score"),
+                "impression_score": eval_data.get("impression_score"),
+                "presentation_score": eval_data.get("presentation_score"),
+                "transcribed_text": eval_data.get("transcribed_text"),
                 "strong_points": eval_data.get("strong_points", []),
                 "improvement_areas": eval_data.get("improvement_areas", []),
                 "model_answer_hint": eval_data.get("model_answer_hint"),
