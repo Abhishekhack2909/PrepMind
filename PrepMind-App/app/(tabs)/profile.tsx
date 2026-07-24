@@ -6,6 +6,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
+import * as Notifications from 'expo-notifications';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '@/lib/supabase';
 import { Colors, Spacing, Radius, Shadows, Typography, themed } from '@/constants/theme';
@@ -13,6 +14,19 @@ import { useAuth } from '@/hooks/useAuth';
 import { useAppTheme } from '../_layout';
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+
+// Achievement badges — earned status is computed from the user's real stats.
+type Badge = { id: string; icon: string; title: string; earned: (s: Stats) => boolean };
+type Stats = { streak: number; mcq: number; evals: number; accuracy: number };
+
+const BADGES: Badge[] = [
+  { id: 'first_mcq', icon: '🎯', title: 'First Quiz', earned: (s) => s.mcq >= 1 },
+  { id: 'first_eval', icon: '✍️', title: 'First Eval', earned: (s) => s.evals >= 1 },
+  { id: 'streak_3', icon: '🔥', title: '3-Day Streak', earned: (s) => s.streak >= 3 },
+  { id: 'streak_7', icon: '⚡', title: 'Week Warrior', earned: (s) => s.streak >= 7 },
+  { id: 'mcq_10', icon: '🧠', title: '10 Quizzes', earned: (s) => s.mcq >= 10 },
+  { id: 'sharp', icon: '🏆', title: 'Sharp Shooter', earned: (s) => s.accuracy >= 75 },
+];
 
 export default function ProfileScreen() {  // profile screen 
   const router = useRouter();
@@ -100,6 +114,35 @@ export default function ProfileScreen() {  // profile screen
   async function toggleNotif(v: boolean) {//function to toggle the notification
     setNotifOn(v);
     await AsyncStorage.setItem('prepmind:notifOn', v ? '1' : '0');
+
+    // Web has no local scheduled notifications — persist the pref only.
+    if (Platform.OS === 'web') return;
+
+    try {
+      if (v) {
+        const { status } = await Notifications.requestPermissionsAsync();
+        if (status !== 'granted') {
+          setNotifOn(false);
+          await AsyncStorage.setItem('prepmind:notifOn', '0');
+          Alert.alert('Permission needed', 'Enable notifications in your device settings to get daily study reminders.');
+          return;
+        }
+        // Replace any existing schedule with a single daily 9:00 AM reminder.
+        await Notifications.cancelAllScheduledNotificationsAsync();
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: '📚 Time to study, ' + (name || displayName) + '!',
+            body: 'Your UPSC prep is waiting. Do today\'s plan, an MCQ quiz, or evaluate an answer.',
+          },
+          trigger: { hour: 9, minute: 0, repeats: true } as any,
+        });
+      } else {
+        await Notifications.cancelAllScheduledNotificationsAsync();
+      }
+    } catch (e: any) {
+      // Non-fatal — the pref is still saved.
+      console.warn('Notification scheduling failed:', e?.message || e);
+    }
   }
 
   async function chooseAppearance(v: 'system' | 'light' | 'dark') {
@@ -137,6 +180,14 @@ export default function ProfileScreen() {  // profile screen
   const avgAccuracy = summary?.mcq?.avg_score
     ? `${summary.mcq.avg_score}%`
     : '—';
+
+  // Earned achievement badges, computed from real stats.
+  const badgeStats: Stats = {
+    streak: streakCount,
+    mcq: summary?.mcq?.total_sessions ?? 0,
+    evals: summary?.evaluations?.total_submitted ?? 0,
+    accuracy: summary?.mcq?.avg_score ?? 0,
+  };
 
   return ( //  for profile page
     <SafeAreaView style={styles.safe}>
@@ -244,6 +295,22 @@ export default function ProfileScreen() {  // profile screen
             </View>
             <Text style={styles.statValue}>{avgAccuracy}</Text>
             <Text style={styles.statLabel}>Avg Accuracy</Text>
+          </View>
+        </View>
+
+        {/* ── Achievements ── */}
+        <View style={styles.badgesCard}>
+          <Text style={styles.badgesTitle}>🏅 Achievements</Text>
+          <View style={styles.badgesGrid}>
+            {BADGES.map((b) => {
+              const earned = b.earned(badgeStats);
+              return (
+                <View key={b.id} style={[styles.badgeItem, !earned && styles.badgeItemLocked]}>
+                  <Text style={[styles.badgeIcon, !earned && styles.badgeIconLocked]}>{b.icon}</Text>
+                  <Text style={[styles.badgeLabel, !earned && styles.badgeLabelLocked]}>{b.title}</Text>
+                </View>
+              );
+            })}
           </View>
         </View>
 
@@ -711,6 +778,51 @@ const styles = themed((Colors) => StyleSheet.create({ // for profile styles
   statLabel: {
     ...Typography.caption,
     marginTop: 2,
+  },
+
+  // Achievements
+  badgesCard: {
+    backgroundColor: Colors.surfaceCard,
+    borderRadius: Radius.xxl,
+    padding: Spacing.lg,
+    ...Shadows.card,
+  },
+  badgesTitle: {
+    ...Typography.subtitle,
+    marginBottom: Spacing.md,
+  },
+  badgesGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.sm,
+  },
+  badgeItem: {
+    width: '30%',
+    alignItems: 'center',
+    backgroundColor: Colors.primaryGhost,
+    borderRadius: Radius.lg,
+    paddingVertical: Spacing.md,
+    gap: 6,
+  },
+  badgeItemLocked: {
+    backgroundColor: Colors.surfaceContainer,
+    opacity: 0.6,
+  },
+  badgeIcon: {
+    fontSize: 26,
+  },
+  badgeIconLocked: {
+    opacity: 0.4,
+  },
+  badgeLabel: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 11,
+    color: Colors.primary,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  badgeLabelLocked: {
+    color: Colors.onSurfaceMuted,
   },
 
   // Settings Card

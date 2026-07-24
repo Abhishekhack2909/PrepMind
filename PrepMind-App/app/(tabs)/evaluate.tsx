@@ -1,15 +1,35 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   View, Text, StyleSheet, TouchableOpacity, ScrollView,
   TextInput, ActivityIndicator, Image, Alert, Platform, Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import { evaluateAnswer, listEvaluations, type EvaluationResult, type EvaluationHistoryItem } from '@/services/api';
 import { useAuth } from '@/hooks/useAuth';
 import { Colors, Spacing, Radius, Shadows, Typography, themed } from '@/constants/theme';
 
 type AppState = 'idle' | 'loading' | 'results' | 'error';
+
+// Free-tier monthly evaluation quota (tracked locally per device/user).
+const FREE_MONTHLY_LIMIT = 3;
+
+// Curated daily Mains question — rotates deterministically by day of month.
+const DAILY_QUESTIONS = [
+  'Discuss the constitutional significance of the Preamble as the key to the minds of the makers of the Constitution.',
+  'Examine the role of the Directive Principles of State Policy in achieving a welfare state.',
+  'Critically analyse the impact of the 1991 economic reforms on the Indian economy.',
+  'Discuss the causes and consequences of the Revolt of 1857.',
+  'Evaluate the effectiveness of India\'s federal structure in managing centre-state relations.',
+  'Explain the significance of monsoons in shaping the agricultural economy of India.',
+  'Assess the role of civil services in the governance and development of independent India.',
+];
+
+function currentMonthKey() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
 
 const GRADE_COLORS: Record<string, string> = {
   Excellent: '#10B981',
@@ -30,6 +50,24 @@ export default function EvaluateScreen() {
   const [historyVisible, setHistoryVisible] = useState(false);
   const [history, setHistory] = useState<EvaluationHistoryItem[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
+  const [usedThisMonth, setUsedThisMonth] = useState(0);
+
+  const quotaKey = `prepmind:evalquota:${session?.user?.id || 'anon'}:${currentMonthKey()}`;
+  const remaining = Math.max(0, FREE_MONTHLY_LIMIT - usedThisMonth);
+  const dailyQuestion = DAILY_QUESTIONS[new Date().getDate() % DAILY_QUESTIONS.length];
+
+  // Load this month's evaluation usage.
+  useEffect(() => {
+    AsyncStorage.getItem(quotaKey)
+      .then((raw) => setUsedThisMonth(raw ? parseInt(raw, 10) || 0 : 0))
+      .catch(() => {});
+  }, [quotaKey]);
+
+  async function bumpQuota() {
+    const next = usedThisMonth + 1;
+    setUsedThisMonth(next);
+    await AsyncStorage.setItem(quotaKey, String(next)).catch(() => {});
+  }
 
   async function openHistory() {
     setHistoryVisible(true);
@@ -90,6 +128,15 @@ export default function EvaluateScreen() {
       return;
     }
 
+    if (remaining <= 0) {
+      Alert.alert(
+        'Monthly limit reached',
+        `You've used all ${FREE_MONTHLY_LIMIT} free evaluations this month. Upgrade to Pro for unlimited evaluations.`,
+        [{ text: 'OK' }]
+      );
+      return;
+    }
+
     setState('loading');
     setError(null);
 
@@ -127,6 +174,7 @@ export default function EvaluateScreen() {
 
       setResult(evaluation);
       setState('results');
+      await bumpQuota();
 
     } catch (err: any) {
       setError(err.message || 'Evaluation failed. Is the backend running?');
@@ -151,9 +199,14 @@ export default function EvaluateScreen() {
       {/* Limits Bar — gradient purple tint */}
       <View style={styles.limitsBar}>
         <Text style={styles.limitsText}>
-          <Text style={{ fontWeight: 'bold', color: Colors.accent }}>3/3 FREE</Text> Evaluations left this month
+          <Text style={{ fontWeight: 'bold', color: remaining > 0 ? Colors.accent : Colors.error }}>
+            {remaining}/{FREE_MONTHLY_LIMIT} FREE
+          </Text> Evaluations left this month
         </Text>
-        <TouchableOpacity activeOpacity={0.7}>
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() => Alert.alert('PrepMind Pro', 'Unlimited evaluations, priority AI, and detailed model answers are coming soon!')}
+        >
           <Text style={styles.upgradeText}>Upgrade →</Text>
         </TouchableOpacity>
       </View>
@@ -179,7 +232,7 @@ export default function EvaluateScreen() {
               <Text style={styles.attemptedText}>271 attempted</Text>
             </View>
           </View>
-          <TouchableOpacity style={styles.attemptBtn} activeOpacity={0.7} onPress={() => setQuestion('Discuss the constitutional significance of the Preamble as the key to the minds of the makers of the Constitution.')}>
+          <TouchableOpacity style={styles.attemptBtn} activeOpacity={0.7} onPress={() => setQuestion(dailyQuestion)}>
             <Text style={styles.attemptBtnText}>Attempt</Text>
           </TouchableOpacity>
         </View>
