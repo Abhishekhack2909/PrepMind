@@ -5,6 +5,7 @@ Run locally: uvicorn main:app --reload --port 8000
 Docs at:     http://localhost:8000/docs
 """
 
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
@@ -17,10 +18,17 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# Allow Expo app (any origin during dev) to call the backend
+# CORS: set ALLOWED_ORIGINS in .env as a comma-separated list for production
+# (e.g. "https://prepmind.app,https://www.prepmind.app"). Defaults to "*" for
+# local dev so the Expo app on any device/port can reach the backend.
+_origins_env = os.getenv("ALLOWED_ORIGINS", "*").strip()
+allowed_origins = ["*"] if _origins_env == "*" else [
+    o.strip() for o in _origins_env.split(",") if o.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Restrict to app domain in production
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
