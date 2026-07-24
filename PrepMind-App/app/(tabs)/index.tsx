@@ -30,6 +30,7 @@ export default function HomeScreen() {  // for testing only
   const initial = (fullName[0] || '?').toUpperCase();
 
   const [summary, setSummary] = useState<any>(null);
+  const [todayTasks, setTodayTasks] = useState<any[]>([]);
   const streakCount: number = summary?.streak ?? 0;
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -41,10 +42,25 @@ export default function HomeScreen() {  // for testing only
   const fetchData = useCallback(async () => {
     if (!userId) { setLoading(false); return; }
     try {
-      const sumRes = await fetch(`${BASE_URL}/api/analytics/summary?user_id=${userId}`).catch(() => null);
+      const [sumRes, planRes] = await Promise.all([
+        fetch(`${BASE_URL}/api/analytics/summary?user_id=${userId}`).catch(() => null),
+        fetch(`${BASE_URL}/api/planner/latest?user_id=${userId}`).catch(() => null),
+      ]);
       if (sumRes?.ok) {
         const d = await sumRes.json();
         if (d.success) setSummary(d);
+      }
+      if (planRes?.ok) {
+        const p = await planRes.json();
+        const days = p?.plan?.days;
+        if (Array.isArray(days) && days.length > 0) {
+          // Match today's weekday name to a day in the plan.
+          const todayName = new Date().toLocaleDateString('en-US', { weekday: 'long' });
+          const match = days.find((d: any) => d.day === todayName) || days[0];
+          setTodayTasks(Array.isArray(match?.tasks) ? match.tasks.slice(0, 4) : []);
+        } else {
+          setTodayTasks([]);
+        }
       }
     } catch {
       // Ignore
@@ -159,9 +175,31 @@ export default function HomeScreen() {  // for testing only
             </View>
           </View>
 
+          {/* Today's Plan — shown when a study plan exists */}
+          {todayTasks.length > 0 && (
+            <View style={styles.todayCard}>
+              <View style={styles.todayHeader}>
+                <Text style={styles.todayTitle}>📅 Today's Plan</Text>
+                <TouchableOpacity onPress={() => router.push('/(tabs)/planner' as any)} activeOpacity={0.7}>
+                  <Text style={styles.todayViewAll}>View all →</Text>
+                </TouchableOpacity>
+              </View>
+              {todayTasks.map((t, i) => (
+                <View key={i} style={styles.todayTaskRow}>
+                  <View style={styles.todayTaskDot} />
+                  <View style={styles.todayTaskInfo}>
+                    <Text style={styles.todayTaskSubject} numberOfLines={1}>{t.subject}</Text>
+                    <Text style={styles.todayTaskDesc} numberOfLines={1}>{t.task}</Text>
+                  </View>
+                  <Text style={styles.todayTaskTime}>{t.duration_mins}m</Text>
+                </View>
+              ))}
+            </View>
+          )}
+
           {/* Add Targets Container */}
           <View style={styles.addTargetsCard}>
-            <Text style={styles.addTargetsHeader}>ADD TARGETS</Text>
+            <Text style={styles.addTargetsHeader}>{todayTasks.length > 0 ? 'ADJUST PLAN' : 'ADD TARGETS'}</Text>
 
             {/* Dashed Add Button */}
             <TouchableOpacity
@@ -170,7 +208,7 @@ export default function HomeScreen() {  // for testing only
               onPress={() => router.push('/(tabs)/planner' as any)}
             >
               <Text style={styles.addBtnPlus}>+</Text>
-              <Text style={styles.addBtnText}>Add Targets</Text>
+              <Text style={styles.addBtnText}>{todayTasks.length > 0 ? 'Manage Plan' : 'Add Targets'}</Text>
             </TouchableOpacity>
 
             {/* Motivational quote of the day */}
@@ -481,6 +519,59 @@ const styles = themed((Colors) => StyleSheet.create({ // for  theme styling only
   greetingMainText: {
     ...Typography.subtitle,
     marginTop: 2,
+  },
+  todayCard: {
+    backgroundColor: Colors.surfaceCard,
+    borderRadius: Radius.xxl,
+    padding: Spacing.lg,
+    ...Shadows.card,
+    gap: Spacing.sm,
+  },
+  todayHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: Spacing.xs,
+  },
+  todayTitle: {
+    ...Typography.subtitle,
+  },
+  todayViewAll: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 13,
+    color: Colors.primary,
+    fontWeight: '600',
+  },
+  todayTaskRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    paddingVertical: 6,
+  },
+  todayTaskDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: Colors.primary,
+  },
+  todayTaskInfo: {
+    flex: 1,
+  },
+  todayTaskSubject: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 14,
+    color: Colors.onSurface,
+    fontWeight: '600',
+  },
+  todayTaskDesc: {
+    fontFamily: 'Inter_400Regular',
+    fontSize: 12,
+    color: Colors.onSurfaceVariant,
+  },
+  todayTaskTime: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 12,
+    color: Colors.onSurfaceMuted,
   },
   addTargetsCard: {
     backgroundColor: Colors.surfaceCard,

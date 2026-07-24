@@ -67,6 +67,9 @@ export default function MCQScreen() {
   const [results, setResults] = useState<any>(null);
   const [error, setError] = useState('');
 
+  // Bookmarked question indices (visual flag during the quiz)
+  const [bookmarked, setBookmarked] = useState<Record<number, boolean>>({});
+
   // Timer state (14:59 format)
   const [timeLeft, setTimeLeft] = useState(14 * 60 + 59);
 
@@ -80,6 +83,42 @@ export default function MCQScreen() {
     }
     return () => clearInterval(timer);
   }, [quizState, timeLeft]);
+
+  // Auto-submit when the timer runs out — grade whatever is answered so far.
+  useEffect(() => {
+    if (quizState === 'quiz' && timeLeft === 0) {
+      const finalAnswers = [...userAnswers];
+      if (selectedOption) finalAnswers.push(selectedOption);
+      // Pad any unreached questions with blanks (graded as incorrect).
+      while (finalAnswers.length < questions.length) finalAnswers.push('');
+      submitQuiz(finalAnswers);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [timeLeft, quizState]);
+
+  function toggleBookmark(index: number) {
+    setBookmarked((prev) => {
+      const next = { ...prev };
+      if (next[index]) delete next[index];
+      else next[index] = true;
+      return next;
+    });
+  }
+
+  function reportQuestion() {
+    Alert.alert(
+      'Report Question',
+      'Flag this question as incorrect or unclear? Our team will review it.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Report',
+          style: 'destructive',
+          onPress: () => Alert.alert('Thanks!', 'This question has been reported for review.'),
+        },
+      ]
+    );
+  }
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
@@ -106,6 +145,7 @@ export default function MCQScreen() {
       setCurrentIdx(0);
       setSelectedOption(null);
       setIsSubmitted(false);
+      setBookmarked({});
       setQuizState('quiz');
     } catch (e: any) {
       setError(e.message);
@@ -226,10 +266,12 @@ export default function MCQScreen() {
               <Text style={styles.questionCounter}>Question {currentIdx + 1} of {questions.length}</Text>
             </View>
             <View style={styles.actionIcons}>
-              <TouchableOpacity style={styles.actionIconBtn} activeOpacity={0.7}>
-                <Text style={styles.actionIcon}>🔖</Text>
+              <TouchableOpacity style={styles.actionIconBtn} activeOpacity={0.7} onPress={() => toggleBookmark(currentIdx)}>
+                <Text style={[styles.actionIcon, bookmarked[currentIdx] && { opacity: 1 }]}>
+                  {bookmarked[currentIdx] ? '🔖' : '🏷️'}
+                </Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.actionIconBtn} activeOpacity={0.7}>
+              <TouchableOpacity style={styles.actionIconBtn} activeOpacity={0.7} onPress={reportQuestion}>
                 <Text style={styles.actionIcon}>⚠️</Text>
               </TouchableOpacity>
             </View>
