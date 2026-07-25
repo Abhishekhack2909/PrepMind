@@ -82,68 +82,77 @@ const LightPalette = {
   superPurpleGlow: 'rgba(124, 58, 237, 0.25)',
 };
 
+// iOS-grade dark palette — neutral near-black surfaces layered with the Apple
+// system gray scale (systemGray6 #1C1C1E → gray5 #2C2C2E → gray4 #3A3A3C → gray3
+// #48484A), true system-color accents, and hairline separators. No blue tint on
+// surfaces — that's what made it read "generic". Depth comes from layering, not
+// heavy glows.
 const DarkPalette: typeof LightPalette = {
-  // Primary stays vibrant so brand pops on dark
-  primary: '#3D8BFF',
-  primaryDark: '#0066FF',
-  primaryLight: '#60A5FA',
-  primaryGhost: 'rgba(61, 139, 255, 0.14)',
-  primaryGlow: 'rgba(61, 139, 255, 0.35)',
+  // Primary — iOS systemBlue (dark)
+  primary: '#0A84FF',
+  primaryDark: '#0060DF',
+  primaryLight: '#409CFF',
+  primaryGhost: 'rgba(10, 132, 255, 0.16)',
+  primaryGlow: 'rgba(10, 132, 255, 0.28)',
 
-  accent: '#A78BFA',
-  accentDark: '#7C3AED',
-  accentLight: '#C4B5FD',
-  accentGhost: 'rgba(167, 139, 250, 0.14)',
-  accentGlow: 'rgba(167, 139, 250, 0.30)',
+  // Accent — iOS systemPurple (dark)
+  accent: '#BF5AF2',
+  accentDark: '#9A3FD0',
+  accentLight: '#DA9CFF',
+  accentGhost: 'rgba(191, 90, 242, 0.16)',
+  accentGlow: 'rgba(191, 90, 242, 0.26)',
 
-  gradientStart: '#3D8BFF',
-  gradientEnd: '#A78BFA',
+  gradientStart: '#0A84FF',
+  gradientEnd: '#BF5AF2',
 
-  // Surfaces — deep neutrals with a hint of blue
-  surface: '#0B0F1A',
-  surfaceCard: '#141A2A',
-  surfaceElevated: '#1B2236',
-  surfaceContainer: '#182036',
-  surfaceContainerLow: '#141A2A',
-  surfaceContainerHigh: '#212B45',
-  surfaceContainerHighest: '#2A3552',
-  surfaceContainerLowest: '#0B0F1A',
-  surfaceBright: '#1B2236',
-  surfaceDim: '#0B0F1A',
-  surfaceVariant: '#212B45',
+  // Surfaces — pure neutral, Apple system gray scale
+  surface: '#000000',
+  surfaceCard: '#1C1C1E',           // systemGray6
+  surfaceElevated: '#2C2C2E',       // systemGray5
+  surfaceContainer: '#2C2C2E',      // systemGray5 — fills/chips on cards
+  surfaceContainerLow: '#1C1C1E',
+  surfaceContainerHigh: '#3A3A3C',  // systemGray4
+  surfaceContainerHighest: '#48484A', // systemGray3
+  surfaceContainerLowest: '#000000',
+  surfaceBright: '#2C2C2E',
+  surfaceDim: '#000000',
+  surfaceVariant: '#2C2C2E',
 
-  onSurface: '#F8FAFC',
-  onSurfaceVariant: '#CBD5E1',
-  onSurfaceMuted: '#94A3B8',
+  // Labels — iOS label opacities on white
+  onSurface: '#FFFFFF',
+  onSurfaceVariant: '#AEAEB2',      // ~secondary label
+  onSurfaceMuted: '#8E8E93',        // systemGray / tertiary label
 
-  outline: '#334155',
-  outlineVariant: '#293145',
-  outlineFaint: 'rgba(148, 163, 184, 0.15)',
+  // Separators — iOS hairline
+  outline: '#48484A',               // systemGray3
+  outlineVariant: '#2C2C2E',        // systemGray5
+  outlineFaint: 'rgba(84, 84, 88, 0.45)', // separator
 
-  onPrimary: '#0B0F1A',
-  primaryContainer: '#1E3A8A',
+  onPrimary: '#FFFFFF',
+  primaryContainer: '#0A84FF',
   onPrimaryContainer: '#DBEAFE',
-  secondaryContainer: '#4C1D95',
-  onSecondaryContainer: '#EDE9FE',
-  inverseSurface: '#F1F5F9',
-  inversePrimary: '#0066FF',
+  secondaryContainer: '#BF5AF2',
+  onSecondaryContainer: '#F3E8FF',
+  inverseSurface: '#2C2C2E',        // elevated dark card (quote card keeps white text)
+  inversePrimary: '#0A84FF',
 
-  error: '#F87171',
-  errorContainer: 'rgba(239, 68, 68, 0.18)',
-  success: '#34D399',
-  successContainer: 'rgba(16, 185, 129, 0.18)',
-  warning: '#FBBF24',
-  warningContainer: 'rgba(245, 158, 11, 0.18)',
-  info: '#60A5FA',
-  infoContainer: 'rgba(59, 130, 246, 0.18)',
+  // Feedback — iOS system colors (dark)
+  error: '#FF453A',
+  errorContainer: 'rgba(255, 69, 58, 0.18)',
+  success: '#30D158',
+  successContainer: 'rgba(48, 209, 88, 0.18)',
+  warning: '#FF9F0A',
+  warningContainer: 'rgba(255, 159, 10, 0.18)',
+  info: '#64D2FF',
+  infoContainer: 'rgba(100, 210, 255, 0.18)',
 
-  background: '#0B0F1A',
-  onBackground: '#F8FAFC',
+  background: '#000000',
+  onBackground: '#FFFFFF',
 
-  streakAmber: '#FBBF24',
-  streakAmberGlow: 'rgba(251, 191, 36, 0.24)',
-  superPurple: '#A78BFA',
-  superPurpleGlow: 'rgba(167, 139, 250, 0.28)',
+  streakAmber: '#FF9F0A',
+  streakAmberGlow: 'rgba(255, 159, 10, 0.22)',
+  superPurple: '#BF5AF2',
+  superPurpleGlow: 'rgba(191, 90, 242, 0.26)',
 };
 
 // Mutable Colors singleton. Screens keep `import { Colors } from '@/constants/theme'`.
