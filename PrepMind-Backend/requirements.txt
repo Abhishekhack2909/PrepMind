@@ -11,13 +11,17 @@ websockets==13.1             # WebSocket client for Deepgram Voice Agent proxy
 google-genai==2.7.0          # Phase 2: Gemini Vision (answer evaluation)
 groq==1.4.0                  # Phase 3-7: Groq llama3 + Whisper (fast inference)
 
-# ── Vector DB & RAG ───────────────────────────────────────────────────────────
-chromadb==1.5.9              # Phase 3: Vector database for knowledge base
-sentence-transformers==5.5.1 # Phase 3: Embeddings (all-MiniLM-L6-v2)
-
 # ── Database ──────────────────────────────────────────────────────────────────
 supabase==2.30.1             # All phases: PostgreSQL + Auth + RLS
 
 # ── Config ────────────────────────────────────────────────────────────────────
 python-dotenv==1.1.1         # Load .env files
-pydantic>=2.11.7            # Request/response validation
+pydantic>=2.11.7             # Request/response validation
+
+# ── Vector DB & RAG (OPTIONAL — only needed when RAG_ENABLED=true) ──────────────
+# These are HEAVY (torch ~200MB + a model download) and will OOM Render's free
+# 512MB plan. RAG is disabled by default (RAG_ENABLED=false) and rag_service
+# lazy-imports them, so they are NOT required to run the deployed backend.
+# Uncomment ONLY if you deploy on a larger instance AND set RAG_ENABLED=true:
+# chromadb==1.5.9
+# sentence-transformers==5.5.1

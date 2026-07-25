@@ -19,5 +19,11 @@ services:
         sync: false
       - key: SUPABASE_SERVICE_KEY
         sync: false
+      - key: DEEPGRAM_API_KEY
+        sync: false          # optional — for the live voice agent
+      - key: RAG_ENABLED
+        value: "false"       # keep off unless you install chromadb + use a bigger plan
+      - key: ALLOWED_ORIGINS
+        sync: false          # set to your Vercel URL, e.g. https://prepmind.vercel.app
       - key: PYTHON_VERSION
         value: "3.11.0"
