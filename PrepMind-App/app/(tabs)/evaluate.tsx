@@ -6,6 +6,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
+import { File, Paths } from 'expo-file-system';
 import { evaluateAnswer, listEvaluations, type EvaluationResult, type EvaluationHistoryItem } from '@/services/api';
 import { useAuth } from '@/hooks/useAuth';
 import { Colors, Spacing, Radius, Shadows, Typography, themed } from '@/constants/theme';
@@ -31,6 +32,35 @@ function currentMonthKey() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
 }
 
+/**
+ * Read an image as base64 across platforms WITHOUT using Blob (React Native
+ * can't build Blobs from ArrayBuffers, which breaks fetch().blob() on device).
+ *  - data: URL  → strip the prefix
+ *  - web        → fetch + FileReader (Blobs work in the browser)
+ *  - native http→ download to cache via expo-file-system, then base64()
+ *  - native file→ File(uri).base64()
+ */
+async function readImageBase64(uri: string): Promise<string> {
+  if (uri.startsWith('data:')) return uri.split(',')[1] || '';
+
+  if (Platform.OS === 'web') {
+    const res = await fetch(uri);
+    const blob = await res.blob();
+    return await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve((reader.result as string).split(',')[1] || '');
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  if (uri.startsWith('http')) {
+    const downloaded = await File.downloadFileAsync(uri, Paths.cache);
+    return await downloaded.base64();
+  }
+  return await new File(uri).base64();
+}
+
 const GRADE_COLORS: Record<string, string> = {
   Excellent: '#10B981',
   Good: '#3B82F6',
@@ -43,6 +73,7 @@ export default function EvaluateScreen() {
   const { session } = useAuth();
   const [state, setState] = useState<AppState>('idle');
   const [imageUri, setImageUri] = useState<string | null>(null);
+  const [imageBase64, setImageBase64] = useState<string | null>(null);
   const [question, setQuestion] = useState('');
   const [result, setResult] = useState<EvaluationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -102,10 +133,14 @@ export default function EvaluateScreen() {
 
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 0.85,
+      quality: 0.7,
       allowsEditing: true,
+      base64: true,   // read bytes here — file:// can't be fetched on native (expo/fetch)
     });
-    if (!result.canceled) setImageUri(result.assets[0].uri);
+    if (!result.canceled) {
+      setImageUri(result.assets[0].uri);
+      setImageBase64(result.assets[0].base64 ?? null);
+    }
   }
 
   async function pickFromCamera() {
@@ -116,10 +151,14 @@ export default function EvaluateScreen() {
     }
 
     const result = await ImagePicker.launchCameraAsync({
-      quality: 0.85,
+      quality: 0.7,
       allowsEditing: true,
+      base64: true,
     });
-    if (!result.canceled) setImageUri(result.assets[0].uri);
+    if (!result.canceled) {
+      setImageUri(result.assets[0].uri);
+      setImageBase64(result.assets[0].base64 ?? null);
+    }
   }
 
   async function handleEvaluate() {
@@ -142,27 +181,18 @@ export default function EvaluateScreen() {
 
     try {
       setStatusMsg('Reading image...');
-      // Use image-picker's built-in base64 output on retry to avoid the
-      // expo-file-system SDK-56 scoping issues; also fall back to fetch+blob→base64.
-      let base64: string | undefined;
-
-      try {
-        const asset = await fetch(imageUri);
-        const blob = await asset.blob();
-        base64 = await new Promise<string>((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            const dataUrl = reader.result as string;
-            resolve(dataUrl.split(',')[1] || '');
-          };
-          reader.onerror = reject;
-          reader.readAsDataURL(blob);
-        });
-      } catch (readErr: any) {
-        throw new Error(`Could not read image: ${readErr?.message || readErr}`);
+      // Prefer the base64 ImagePicker already gave us; otherwise read it with
+      // expo-file-system (never Blob-based — that fails on device).
+      let base64: string | undefined = imageBase64 || undefined;
+      if (!base64) {
+        try {
+          base64 = await readImageBase64(imageUri);
+        } catch (readErr: any) {
+          throw new Error(`Could not read image: ${readErr?.message || readErr}`);
+        }
       }
 
-      if (!base64) throw new Error('Could not read image bytes.');
+      if (!base64) throw new Error('Could not read image bytes. Please pick the image again.');
 
       setStatusMsg('AI is evaluating your answer... ✨');
       const evaluation = await evaluateAnswer({
@@ -185,6 +215,7 @@ export default function EvaluateScreen() {
   function reset() {
     setState('idle');
     setImageUri(null);
+    setImageBase64(null);
     setQuestion('');
     setResult(null);
     setError(null);
@@ -256,7 +287,7 @@ export default function EvaluateScreen() {
           {imageUri && (
             <View style={styles.previewContainer}>
               <Image source={{ uri: imageUri }} style={styles.previewImage} />
-              <TouchableOpacity onPress={() => setImageUri(null)} style={styles.removePreviewBtn}>
+              <TouchableOpacity onPress={() => { setImageUri(null); setImageBase64(null); }} style={styles.removePreviewBtn}>
                 <Text style={styles.removePreviewText}>✕ Remove</Text>
               </TouchableOpacity>
             </View>
@@ -293,6 +324,7 @@ export default function EvaluateScreen() {
             activeOpacity={0.7}
             onPress={() => {
               setImageUri('https://lh3.googleusercontent.com/aida-public/AB6AXuAG-6hrRt-wKLpxpe424UxZuFo1q4pOxaqkpxWrJzE400hmHYaadmdDp_dtusF5zfMMfkL7vjGxf7fgftwWT9mhz5BbD-jdwXcwGkoG2R5Thu8jLuVA-53ZCuQw_-g9OB-ryIigk1vrIDgY2Ze018DhkWrUWJBl5KF2o3YKQJe8DimAdjjWujepXe6AkbQ5wxvAF7qjWvqNktdQWxOMq-Vt26W3rXvQfI5czFOF4Bw2B94nsy5pD_pn6b3K1_aH-6xy8-C3pW2oAsOj');
+              setImageBase64(null);
               setQuestion('Explain the features of federalism in India.');
             }}
           >

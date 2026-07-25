@@ -6,9 +6,14 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import * as ImagePicker from 'expo-image-picker';
-import * as Notifications from 'expo-notifications';
+import Constants, { ExecutionEnvironment } from 'expo-constants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '@/lib/supabase';
+
+// Expo Go (SDK 53+) removed notification scheduling — only a real dev/standalone
+// build supports it. Importing expo-notifications at module top-level actually
+// throws in Expo Go, so we detect the environment and lazy-require it instead.
+const IS_EXPO_GO = Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
 import { Colors, Spacing, Radius, Shadows, Typography, themed } from '@/constants/theme';
 import { useAuth } from '@/hooks/useAuth';
 import { useAppTheme } from '../_layout';
@@ -118,7 +123,20 @@ export default function ProfileScreen() {  // profile screen
     // Web has no local scheduled notifications — persist the pref only.
     if (Platform.OS === 'web') return;
 
+    // Expo Go can't schedule notifications; keep the pref but tell the user.
+    if (IS_EXPO_GO) {
+      if (v) {
+        Alert.alert(
+          'Reminders need a dev build',
+          'Daily study reminders work in a development or production build, but not in Expo Go. Your preference has been saved.'
+        );
+      }
+      return;
+    }
+
     try {
+      // Lazy-require so the module never loads in unsupported environments.
+      const Notifications = require('expo-notifications');
       if (v) {
         const { status } = await Notifications.requestPermissionsAsync();
         if (status !== 'granted') {
