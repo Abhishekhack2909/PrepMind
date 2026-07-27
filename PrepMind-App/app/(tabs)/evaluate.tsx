@@ -170,7 +170,7 @@ export default function EvaluateScreen() {
     if (remaining <= 0) {
       Alert.alert(
         'Monthly limit reached',
-        `You've used all ${FREE_MONTHLY_LIMIT} free evaluations this month. Upgrade to Pro for unlimited evaluations.`,
+        `You've used all ${FREE_MONTHLY_LIMIT} evaluations for this month. Your quota resets at the start of next month.`,
         [{ text: 'OK' }]
       );
       return;
@@ -231,14 +231,11 @@ export default function EvaluateScreen() {
       <View style={styles.limitsBar}>
         <Text style={styles.limitsText}>
           <Text style={{ fontWeight: 'bold', color: remaining > 0 ? Colors.accent : Colors.error }}>
-            {remaining}/{FREE_MONTHLY_LIMIT} FREE
-          </Text> Evaluations left this month
+            {remaining}/{FREE_MONTHLY_LIMIT}
+          </Text> evaluations left this month
         </Text>
-        <TouchableOpacity
-          activeOpacity={0.7}
-          onPress={() => Alert.alert('PrepMind Pro', 'Unlimited evaluations, priority AI, and detailed model answers are coming soon!')}
-        >
-          <Text style={styles.upgradeText}>Upgrade →</Text>
+        <TouchableOpacity activeOpacity={0.7} onPress={openHistory}>
+          <Text style={styles.upgradeText}>History →</Text>
         </TouchableOpacity>
       </View>
 
@@ -249,19 +246,7 @@ export default function EvaluateScreen() {
           <View style={styles.dailyAccentBar} />
           <View style={styles.dailyLeft}>
             <Text style={styles.dailyTitle}>Daily Mains Question</Text>
-            <View style={styles.attemptedRow}>
-              <View style={styles.avatarsStack}>
-                <Image
-                  source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBAqZL9oxIVE6lYGDhXMMIMZQx0L4Lvf0EYMvM8kn6B-zNmE5l6p50cEEluSXJRxZzKhFppayonUFYZMy_5Co4fCkosve51T_4bpfsAeLAoy2y2eIvYhAB41B-c24__XDGRcYpWo-5Z5SKDSqhHvC77XdReKkV1g-GeSOQld7pWcBMeUaPEUHqPatpUsgRz3zkeXy_y5rku_nPTY_Tjge6OYP2VUe3EtQsBA4K9M74sn5kTE43E3eBAYUuvtQ4xT7NPflFjRfzqX6_U' }}
-                  style={styles.microAvatar}
-                />
-                <Image
-                  source={{ uri: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCpw_pbZx5rz9UVWUz3YWul-7WGMkDbQ7QL7NOcIO2Yoe1uLTviNOyc0x5z4w9r3S6_4DCpHKOm1Wt9QBtfbfYPxyGwrYOsEUxsLSROGbjfIxfv8UQ4pG882O5ZIabFb9-_rKZkR5OLotQ225eByj3_yyq-WTQib8Kdjd2x0ao6NxHBthfcYYqiMAL1ASE6ock1GkRRL7lkvonh4r9lWiG_lpL_N_FjwAC-uJ1iJlWkhpCOwniL2rpGb8C3XmnDeQVEQTzBt548jHLJ' }}
-                  style={[styles.microAvatar, { marginLeft: -6 }]}
-                />
-              </View>
-              <Text style={styles.attemptedText}>271 attempted</Text>
-            </View>
+            <Text style={styles.attemptedText} numberOfLines={2}>{dailyQuestion}</Text>
           </View>
           <TouchableOpacity style={styles.attemptBtn} activeOpacity={0.7} onPress={() => setQuestion(dailyQuestion)}>
             <Text style={styles.attemptBtnText}>Attempt</Text>
@@ -618,22 +603,6 @@ const styles = themed((Colors) => StyleSheet.create({
     ...Typography.subtitle,
     color: Colors.primary,
     fontSize: 16,
-  },
-  attemptedRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  avatarsStack: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  microAvatar: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 1.5,
-    borderColor: '#ffffff',
   },
   attemptedText: {
     ...Typography.caption,
