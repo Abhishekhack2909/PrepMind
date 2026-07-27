@@ -66,9 +66,11 @@ export default function ProfileScreen() {  // profile screen
 
     // Load persisted profile bits (name from Supabase, avatar + prefs from local storage)
     (async () => {
+      let serverYear: string | null = null;
       try {
-        const { data } = await supabase.from('users').select('name').eq('id', userId).maybeSingle();
+        const { data } = await supabase.from('users').select('name, exam_date').eq('id', userId).maybeSingle();
         if (data?.name) setName(data.name);
+        if (data?.exam_date) serverYear = String(data.exam_date).slice(0, 4);
       } catch { }
       const [av, notif, ty] = await Promise.all([
         AsyncStorage.getItem(`prepmind:avatar:${userId}`),
@@ -77,7 +79,12 @@ export default function ProfileScreen() {  // profile screen
       ]);
       if (av) setAvatarUri(av);
       if (notif === '0') setNotifOn(false);
-      if (ty) setTargetYear(ty);
+      // Server value wins — it survives reinstalls and syncs across devices.
+      const resolvedYear = serverYear || ty;
+      if (resolvedYear) {
+        setTargetYear(resolvedYear);
+        setTargetDraft(resolvedYear);
+      }
     })();
   }, [userId]);
 
@@ -109,7 +116,14 @@ export default function ProfileScreen() {  // profile screen
     await AsyncStorage.setItem('prepmind:targetYear', ty);
     if (userId) {
       try {
-        await supabase.from('users').upsert({ id: userId, email, name: trimmed });
+        // Persist exam_date too (UPSC Prelims is typically late May/June), so the
+        // AI planner can anchor the schedule to a real date instead of a default.
+        await supabase.from('users').upsert({
+          id: userId,
+          email,
+          name: trimmed,
+          exam_date: `${ty}-06-15`,
+        });
       } catch (e: any) {
         Alert.alert('Could not save', e.message ?? 'Try again later.');
       }

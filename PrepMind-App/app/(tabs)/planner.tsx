@@ -6,6 +6,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { supabase } from '@/lib/supabase';
 import { Colors, Spacing, Radius, Shadows, Typography, themed } from '@/constants/theme';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -57,13 +58,16 @@ export default function PlannerScreen() {
 
   const [state, setState] = useState<PlannerState>('setup');
   const [hoursPerDay, setHoursPerDay] = useState(6);
-  const [examDate, setExamDate] = useState('2026-06-15');
+  // Default to next year's UPSC Prelims window; overwritten below by the
+  // exam_date saved on the user's profile, if they've set one.
+  const [examDate, setExamDate] = useState(`${new Date().getFullYear() + 1}-06-15`);
   const [plan, setPlan] = useState<StudyPlan | null>(null);
   const [selectedDay, setSelectedDay] = useState(0);
   const [error, setError] = useState('');
 
-  // Focus topics chosen by the student — sent to the backend on generate.
-  const [focusTopics, setFocusTopics] = useState<string[]>(['Ancient History', 'Polity']);
+  // Focus topics — seeded from the user's REAL weakest topics (so the
+  // "AI Suggested" label is accurate), editable, then sent to the backend.
+  const [focusTopics, setFocusTopics] = useState<string[]>([]);
 
   // Add-topic modal
   const [addTopicVisible, setAddTopicVisible] = useState(false);
@@ -80,6 +84,26 @@ export default function PlannerScreen() {
       .catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [progressStorageKey, userId]);
+
+  // Pull the user's saved exam date + real weak topics to prefill the setup form.
+  useEffect(() => {
+    if (!userId) return;
+    (async () => {
+      try {
+        const { data } = await supabase.from('users').select('exam_date').eq('id', userId).maybeSingle();
+        if (data?.exam_date) setExamDate(String(data.exam_date).slice(0, 10));
+      } catch { }
+      try {
+        const res = await fetch(`${BASE_URL}/api/analytics/weakness?user_id=${encodeURIComponent(userId)}`);
+        const d = await res.json();
+        const weak = (d?.weakness_map || [])
+          .filter((w: any) => w.level !== 'strong')
+          .slice(0, 3)
+          .map((w: any) => w.topic);
+        if (weak.length > 0) setFocusTopics(weak);
+      } catch { }
+    })();
+  }, [userId]);
 
   const toggleTask = useCallback((key: string) => {
     setCompleted((prev) => {
@@ -449,12 +473,18 @@ export default function PlannerScreen() {
               </View>
               <View style={styles.flexRowJustified}>
                 <Text style={styles.setupCardTitle}>Focus Areas</Text>
-                <View style={styles.aiBadge}>
-                  <Text style={styles.aiBadgeText}>✨ AI Suggested</Text>
-                </View>
+                {focusTopics.length > 0 && (
+                  <View style={styles.aiBadge}>
+                    <Text style={styles.aiBadgeText}>✨ From your quizzes</Text>
+                  </View>
+                )}
               </View>
             </View>
-            <Text style={styles.setupCardDesc}>Select topics requiring extra attention.</Text>
+            <Text style={styles.setupCardDesc}>
+              {focusTopics.length > 0
+                ? 'Suggested from your weakest quiz topics. Tap to remove, or add your own.'
+                : 'Add topics you want to prioritise (or take a quiz to get suggestions).'}
+            </Text>
             <View style={styles.tagContainer}>
               {focusTopics.map((topic, i) => (
                 <TouchableOpacity key={i} style={styles.tagBtn} onPress={() => removeTopic(i)} activeOpacity={0.7}>
