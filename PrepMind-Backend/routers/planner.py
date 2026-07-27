@@ -163,7 +163,12 @@ async def generate_plan(req: PlannerRequest):
 
 @router.get("/latest")
 async def get_latest_plan(user_id: str):
-    """Get the user's most recently generated study plan."""
+    """Get the user's most recently generated study plan.
+
+    Degrades to `plan: None` instead of 500-ing: a malformed user_id (e.g. not a
+    UUID) makes Postgres reject the filter, but "no plan yet" is the sensible
+    answer for the client rather than an error.
+    """
     try:
         res = supabase.table("study_plans") \
             .select("plan, weak_topics, hours_per_day, created_at") \
@@ -178,4 +183,5 @@ async def get_latest_plan(user_id: str):
         return {"success": True, **res.data[0]}
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"[WARN] get_latest_plan failed for user_id={user_id!r}: {e}")
+        return {"success": True, "plan": None}

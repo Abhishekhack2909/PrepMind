@@ -75,7 +75,9 @@ class MCQQuestion(BaseModel):
     topic: str
 
 class SubmitRequest(BaseModel):
-    user_id: str
+    # Optional: a real auth.users UUID. When absent (no session yet) we still
+    # grade the quiz and return results, we just don't persist the session.
+    user_id: Optional[str] = None
     topic: str
     questions: List[dict]   # Original questions
     answers: List[str]      # User's answers: ["A", "C", "B", ...]
@@ -164,19 +166,22 @@ async def submit_mcq(req: SubmitRequest):
     total = len(req.questions)
     percentage = round((score / total) * 100) if total > 0 else 0
 
-    # Store in Supabase for Weakness Map (Phase 6)
-    try:
-        supabase.table("mcq_sessions").insert({
-            "user_id": req.user_id,
-            "topic": req.topic,
-            "total_questions": total,
-            "correct_answers": score,
-            "percentage": percentage,
-            "wrong_topics": list(set(wrong_topics)),
-            "results": results,
-        }).execute()
-    except Exception as e:
-        print(f"[WARN] Failed to store MCQ session: {e}")
+    # Store in Supabase for Weakness Map (Phase 6). Skipped without a valid
+    # user_id — mcq_sessions.user_id is a FK to auth.users(id), so a placeholder
+    # like "anonymous" would just raise and lose the row anyway.
+    if req.user_id:
+        try:
+            supabase.table("mcq_sessions").insert({
+                "user_id": req.user_id,
+                "topic": req.topic,
+                "total_questions": total,
+                "correct_answers": score,
+                "percentage": percentage,
+                "wrong_topics": list(set(wrong_topics)),
+                "results": results,
+            }).execute()
+        except Exception as e:
+            print(f"[WARN] Failed to store MCQ session: {e}")
 
     return {
         "success": True,
