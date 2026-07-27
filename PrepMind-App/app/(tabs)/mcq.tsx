@@ -190,7 +190,9 @@ export default function MCQScreen() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          user_id: session?.user?.id || 'anonymous',
+          // Omit when there's no session — the backend then grades without
+          // persisting, instead of failing on an invalid user UUID.
+          user_id: session?.user?.id ?? null,
           topic: selectedTopic,
           questions,
           answers,

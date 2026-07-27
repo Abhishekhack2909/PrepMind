@@ -49,8 +49,11 @@ const taskKey = (dayName: string, t: Task) => `${dayName}::${t.time}::${t.subjec
 export default function PlannerScreen() {
   const router = useRouter();
   const { session } = useAuth();
-  const userId = session?.user?.id || 'anonymous';
-  const progressStorageKey = `prepmind:planprogress:${userId}`;
+  // Only a real Supabase UUID is valid — the backend stores plans against
+  // auth.users(id), so sending a literal "anonymous" makes the query fail (500)
+  // and the plan is silently never saved.
+  const userId = session?.user?.id ?? null;
+  const progressStorageKey = `prepmind:planprogress:${userId ?? 'guest'}`;
 
   const [state, setState] = useState<PlannerState>('setup');
   const [hoursPerDay, setHoursPerDay] = useState(6);
@@ -69,13 +72,14 @@ export default function PlannerScreen() {
   // Completed task keys (persisted per user in AsyncStorage).
   const [completed, setCompleted] = useState<Record<string, boolean>>({});
 
-  // Load existing plan + saved progress on mount
+  // Load existing plan + saved progress once the session (userId) is available.
   useEffect(() => {
     loadExistingPlan();
     AsyncStorage.getItem(progressStorageKey)
       .then((raw) => { if (raw) setCompleted(JSON.parse(raw)); })
       .catch(() => {});
-  }, [progressStorageKey]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [progressStorageKey, userId]);
 
   const toggleTask = useCallback((key: string) => {
     setCompleted((prev) => {
@@ -87,8 +91,9 @@ export default function PlannerScreen() {
   }, [progressStorageKey]);
 
   async function loadExistingPlan() {
+    if (!userId) return;   // no session yet — show setup
     try {
-      const res = await fetch(`${BASE_URL}/api/planner/latest?user_id=${userId}`);
+      const res = await fetch(`${BASE_URL}/api/planner/latest?user_id=${encodeURIComponent(userId)}`);
       const data = await res.json();
       if (data.success && data.plan) {
         setPlan(data.plan);
@@ -100,6 +105,10 @@ export default function PlannerScreen() {
   }
 
   async function generatePlan() {
+    if (!userId) {
+      setError('Still signing you in — please try again in a moment.');
+      return;
+    }
     setState('loading');
     setError('');
     try {
