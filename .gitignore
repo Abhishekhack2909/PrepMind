@@ -19,6 +19,7 @@ venv/
 PrepMind-Backend/venv/
 
 # ── ChromaDB data (large, generated at runtime) ───
+chroma_db/
 PrepMind-Backend/chroma_db/
 PrepMind-Backend/*.sqlite3
 
