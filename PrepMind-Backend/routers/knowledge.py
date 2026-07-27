@@ -16,7 +16,7 @@ from services.llm_service import generate_rag_answer, generate_simple_answer
 router = APIRouter(prefix="/api", tags=["Knowledge"])
 
 
-# ── Request Models ─────────────────────────────────────────────────────────────
+# ── Request Models for RAG pipeline─────────────────────────────────────────────────────────────
 
 class AskRequest(BaseModel):
     question: str                          # Student's question
