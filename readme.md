@@ -11,7 +11,7 @@
 | **Answer Evaluator**          | Upload handwritten answers → AI grades them (marks, feedback, model answer) | Gemini Vision         |
 | **Voice Doubt Solver**        | Speak a question → AI answers from your knowledge base                      | Groq Whisper + llama3 |
 | **Knowledge Base**            | RAG system — upload NCERT/PYQ content, get grounded answers                 | ChromaDB + Groq       |
-| **MCQ Engine**                | AI generates UPSC-style questions on any topic with explanations            | Groq llama3           |
+| **MCQ Engine**                | AI generates UPSC-style based questions on any topic with explanations            | Groq llama3           |
 | **Weakness Map**              | Visual analytics of your weak topics based on MCQ history                   | Supabase Analytics    |
 | **Study Planner**             | AI creates personalized 7-day study schedule from your weak areas           | Groq llama3           |
 | **Home Dashboard**            | Stats overview, today's schedule, quick actions                             | —                     |
