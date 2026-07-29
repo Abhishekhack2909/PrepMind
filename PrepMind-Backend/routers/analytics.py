@@ -20,7 +20,7 @@ from supabase import create_client
 router = APIRouter(prefix="/api/analytics", tags=["Analytics"])
 supabase = create_client(os.getenv("SUPABASE_URL", ""), os.getenv("SUPABASE_SERVICE_KEY", ""))
 
-
+#table 
 def _safe_rows(table: str, select: str, user_id: str, **kwargs) -> list:
     """
     Query a table but degrade to [] if the table doesn't exist yet
