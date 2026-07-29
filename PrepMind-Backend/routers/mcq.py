@@ -26,7 +26,7 @@ router = APIRouter(prefix="/api/mcq", tags=["MCQ"])
 groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 supabase = create_client(os.getenv("SUPABASE_URL", ""), os.getenv("SUPABASE_SERVICE_KEY", ""))
 
-# ── Prompt ─────────────────────────────────────────────────────────────────────
+# ── PROMPT ─────────────────────────────────────────────────────────────────────
 
 def build_mcq_prompt(topic: str, count: int, context: str) -> str:
     return f"""You are a UPSC exam expert. Generate exactly {count} high-quality MCQ questions on: "{topic}"
