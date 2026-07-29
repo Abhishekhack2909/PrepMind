@@ -12,7 +12,7 @@ Why a proxy (and not client → Deepgram direct)?
      grounded in the UPSC knowledge base.
   3. Central place to inject the Settings config every session gets.
 
-Message flow:
+Message flow: # fully flow
     client → proxy → Deepgram      binary PCM16 @ 48 kHz  (mic frames)
     Deepgram → proxy → client      binary PCM16 @ 24 kHz  (agent voice)
     Deepgram → proxy → client      JSON events            (transcripts, states)
