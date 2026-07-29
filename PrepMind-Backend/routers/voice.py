@@ -11,7 +11,7 @@ Phase 10 — Conversational Agent flow:
   The backend only needs to do: question + history → RAG + LLM → spoken answer.
   This keeps the round-trip fast and avoids audio upload overhead on web.
 
-  Flow:
+  Flow:   #fully flow
     1. User speaks → browser transcribes to text
     2. Frontend POSTs { question, history } to /api/voice/chat
     3. Backend: RAG retrieval + Groq LLM with conversation history
