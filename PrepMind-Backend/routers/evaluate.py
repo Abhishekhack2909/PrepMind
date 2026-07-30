@@ -11,7 +11,7 @@ supabase_client = create_client(
     os.getenv("SUPABASE_URL", ""),
     os.getenv("SUPABASE_SERVICE_KEY", "")
 )
-
+#helllre
 class EvaluateRequest(BaseModel):
     image_base64: str
     question: Optional[str] = None
