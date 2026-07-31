@@ -18,12 +18,13 @@ HOW IT WORKS:
   5. Frontend renders day-by-day schedule
 """
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from typing import Optional, List
 import os, json, re
 from groq import Groq
 from supabase import create_client
+from services.auth import resolve_user_id
 
 router = APIRouter(prefix="/api/planner", tags=["Planner"])
 groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
@@ -162,13 +163,15 @@ async def generate_plan(req: PlannerRequest):
 
 
 @router.get("/latest")
-async def get_latest_plan(user_id: str):
+async def get_latest_plan(user_id: Optional[str] = Depends(resolve_user_id)):
     """Get the user's most recently generated study plan.
 
     Degrades to `plan: None` instead of 500-ing: a malformed user_id (e.g. not a
     UUID) makes Postgres reject the filter, but "no plan yet" is the sensible
     answer for the client rather than an error.
     """
+    if not user_id:
+        return {"success": True, "plan": None}
     try:
         res = supabase.table("study_plans") \
             .select("plan, weak_topics, hours_per_day, created_at") \

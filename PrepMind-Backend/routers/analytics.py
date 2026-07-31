@@ -11,11 +11,12 @@ Endpoints:
   GET /api/analytics/summary?user_id=...    — Full performance summary
 """
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from typing import Optional
 from datetime import date, datetime, timedelta, timezone
 import os
 from supabase import create_client
+from services.auth import resolve_user_id
 
 router = APIRouter(prefix="/api/analytics", tags=["Analytics"])
 supabase = create_client(os.getenv("SUPABASE_URL", ""), os.getenv("SUPABASE_SERVICE_KEY", ""))
@@ -40,12 +41,17 @@ def _safe_rows(table: str, select: str, user_id: str, **kwargs) -> list:
 
 
 @router.get("/weakness")
-async def get_weakness_map(user_id: str = Query(...)):
+async def get_weakness_map(user_id: Optional[str] = Depends(resolve_user_id)):
     """
     Aggregate MCQ sessions to find weak topics.
     A topic is 'weak' if average score < 60%.
     Returns topics sorted by weakness (lowest score first).
+
+    user_id comes from the verified access token when one is sent, so a caller
+    can't request another user's data.
     """
+    if not user_id:
+        return {"success": True, "weakness_map": [], "total_sessions": 0}
     try:
         sessions = _safe_rows(
             "mcq_sessions",
@@ -91,10 +97,20 @@ async def get_weakness_map(user_id: str = Query(...)):
 
 
 @router.get("/summary")
-async def get_summary(user_id: str = Query(...)):
+async def get_summary(user_id: Optional[str] = Depends(resolve_user_id)):
     """
     Full performance summary combining MCQ + evaluations.
+
+    user_id is derived from the verified token when present.
     """
+    if not user_id:
+        return {
+            "success": True,
+            "streak": 0,
+            "active_days": 0,
+            "mcq": {"total_sessions": 0, "avg_score": 0},
+            "evaluations": {"total_submitted": 0, "avg_marks": 0, "out_of": 15, "grade_distribution": {}},
+        }
     try:
         # MCQ stats (degrades to empty if table missing)
         mcq_data = _safe_rows("mcq_sessions", "percentage, topic, created_at", user_id)
