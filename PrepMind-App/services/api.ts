@@ -9,7 +9,30 @@
  * Or use a tunnel like ngrok for public access.
  */
 
+import { supabase } from '@/lib/supabase';
+
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+
+/**
+ * Build request headers including the Supabase access token.
+ *
+ * The backend derives the user id from this token rather than trusting a
+ * `user_id` field, so a caller can only ever act as themselves.
+ */
+export async function authHeaders(extra: Record<string, string> = {}): Promise<Record<string, string>> {
+  try {
+    const { data } = await supabase.auth.getSession();
+    const token = data.session?.access_token;
+    return token ? { ...extra, Authorization: `Bearer ${token}` } : extra;
+  } catch {
+    return extra;
+  }
+}
+
+/** GET helper that always sends the auth token. */
+export async function authedGet(path: string): Promise<Response> {
+  return fetch(`${BASE_URL}${path}`, { headers: await authHeaders() });
+}
 
 type EvaluatePayload = {
   image_base64: string;
@@ -38,7 +61,7 @@ export type EvaluationResult = {
 export async function evaluateAnswer(payload: EvaluatePayload): Promise<EvaluationResult> {
   const response = await fetch(`${BASE_URL}/api/evaluate`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: await authHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(payload),
   });
 
@@ -64,10 +87,24 @@ export type EvaluationHistoryItem = {
 
 /** Fetch a user's past answer evaluations (most recent first). */
 export async function listEvaluations(userId: string): Promise<EvaluationHistoryItem[]> {
-  const res = await fetch(`${BASE_URL}/api/evaluations?user_id=${encodeURIComponent(userId)}`);
+  const res = await authedGet(`/api/evaluations?user_id=${encodeURIComponent(userId)}`);
   if (!res.ok) return [];
   const data = await res.json().catch(() => ({ evaluations: [] }));
   return (data.evaluations || []) as EvaluationHistoryItem[];
+}
+
+export type EvaluationQuota = { used: number; limit: number; remaining: number };
+
+/** Server-authoritative monthly evaluation quota (client storage is bypassable). */
+export async function getEvaluationQuota(userId: string): Promise<EvaluationQuota | null> {
+  try {
+    const res = await authedGet(`/api/evaluations/quota?user_id=${encodeURIComponent(userId)}`);
+    if (!res.ok) return null;
+    const d = await res.json();
+    return { used: d.used, limit: d.limit, remaining: d.remaining };
+  } catch {
+    return null;
+  }
 }
 
 // ── Phase 3: Knowledge Base Q&A ─────────────────────────────────────────────────
@@ -87,7 +124,7 @@ export async function askQuestion(
 ): Promise<AskResult> {
   const response = await fetch(`${BASE_URL}/api/ask`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: await authHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify({ question, use_rag: useRag, top_k: 4 }),
   });
 
@@ -130,7 +167,7 @@ export async function chatWithVoiceAgent(
 ): Promise<VoiceChatResult> {
   const response = await fetch(`${BASE_URL}/api/voice/chat`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: await authHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify({ question, history, use_rag: useRag }),
   });
 

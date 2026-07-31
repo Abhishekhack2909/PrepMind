@@ -22,7 +22,9 @@ services:
       - key: DEEPGRAM_API_KEY
         sync: false          # optional — for the live voice agent
       - key: RAG_ENABLED
-        value: "false"       # keep off unless you install chromadb + use a bigger plan
+        value: "true"        # pgvector + Gemini embeddings — no native deps, fits free tier
+      - key: STRICT_AUTH
+        value: "false"       # flip to "true" once all clients send the auth token
       - key: ALLOWED_ORIGINS
         sync: false          # set to your Vercel URL, e.g. https://prepmind.vercel.app
       - key: PYTHON_VERSION
