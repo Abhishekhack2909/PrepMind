@@ -35,6 +35,17 @@ app.add_middleware(
 )
 
 
+@app.get("/")
+async def root():
+    """Landing route so hitting the bare domain isn't a bare 404."""
+    return {
+        "service": "PrepMind API",
+        "status": "ok",
+        "docs": "/docs",
+        "health": "/health",
+    }
+
+
 @app.get("/health")
 async def health_check():
     return {"status": "ok", "service": "PrepMind API"}
