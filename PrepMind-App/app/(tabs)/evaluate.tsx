@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import { File, Paths } from 'expo-file-system';
-import { evaluateAnswer, listEvaluations, type EvaluationResult, type EvaluationHistoryItem } from '@/services/api';
+import { evaluateAnswer, listEvaluations, getEvaluationQuota, type EvaluationResult, type EvaluationHistoryItem } from '@/services/api';
 import { useAuth } from '@/hooks/useAuth';
 import { Colors, Spacing, Radius, Shadows, Typography, themed } from '@/constants/theme';
 
@@ -87,12 +87,22 @@ export default function EvaluateScreen() {
   const remaining = Math.max(0, FREE_MONTHLY_LIMIT - usedThisMonth);
   const dailyQuestion = DAILY_QUESTIONS[new Date().getDate() % DAILY_QUESTIONS.length];
 
-  // Load this month's evaluation usage.
+  // Load this month's usage: local value first for instant paint, then the
+  // server count (authoritative — local storage resets if app data is cleared).
   useEffect(() => {
     AsyncStorage.getItem(quotaKey)
       .then((raw) => setUsedThisMonth(raw ? parseInt(raw, 10) || 0 : 0))
       .catch(() => {});
-  }, [quotaKey]);
+
+    const uid = session?.user?.id;
+    if (!uid) return;
+    getEvaluationQuota(uid).then((q) => {
+      if (q) {
+        setUsedThisMonth(q.used);
+        AsyncStorage.setItem(quotaKey, String(q.used)).catch(() => {});
+      }
+    });
+  }, [quotaKey, session?.user?.id]);
 
   async function bumpQuota() {
     const next = usedThisMonth + 1;
@@ -132,7 +142,7 @@ export default function EvaluateScreen() {
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'],   // MediaTypeOptions is deprecated in SDK 56
       quality: 0.7,
       allowsEditing: true,
       base64: true,   // read bytes here — file:// can't be fetched on native (expo/fetch)

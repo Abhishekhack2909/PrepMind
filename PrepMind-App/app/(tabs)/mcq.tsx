@@ -6,6 +6,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Colors, Spacing, Radius, Shadows, Typography, themed } from '@/constants/theme';
 import { useAuth } from '@/hooks/useAuth';
+import { authHeaders } from '@/services/api';
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
@@ -70,8 +71,11 @@ export default function MCQScreen() {
   // Bookmarked question indices (visual flag during the quiz)
   const [bookmarked, setBookmarked] = useState<Record<number, boolean>>({});
 
-  // Timer state (14:59 format)
-  const [timeLeft, setTimeLeft] = useState(14 * 60 + 59);
+  // Timer: UPSC Prelims allows ~72s per question, so scale to the quiz length
+  // instead of a fixed clock that's wrong for every size but one.
+  const SECONDS_PER_QUESTION = 72;
+  const QUESTION_COUNT = 5;
+  const [timeLeft, setTimeLeft] = useState(SECONDS_PER_QUESTION * QUESTION_COUNT);
 
   useEffect(() => {
     let timer: any;
@@ -131,11 +135,11 @@ export default function MCQScreen() {
     setSelectedTopic(topic);
     setQuizState('loading');
     setError('');
-    setTimeLeft(14 * 60 + 59); // Reset timer
+    setTimeLeft(SECONDS_PER_QUESTION * QUESTION_COUNT); // Reset timer
     try {
       const res = await fetch(`${BASE_URL}/api/mcq/generate`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await authHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ topic, count: 5, user_id: session?.user?.id }),
       });
       const data = await res.json();
@@ -188,7 +192,7 @@ export default function MCQScreen() {
     try {
       const res = await fetch(`${BASE_URL}/api/mcq/submit`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await authHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           // Omit when there's no session — the backend then grades without
           // persisting, instead of failing on an invalid user UUID.
