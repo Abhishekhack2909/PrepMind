@@ -1,5 +1,5 @@
 {
-  "buildCommand": "npx expo export --platform web && cp web/manifest.json dist/manifest.json && cp web/service-worker.js dist/service-worker.js",
+  "buildCommand": "npx expo export --platform web && node scripts/build-pwa.mjs",
   "outputDirectory": "dist",
   "rewrites": [
     {
