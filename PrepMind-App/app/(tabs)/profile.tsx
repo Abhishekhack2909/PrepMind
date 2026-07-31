@@ -16,6 +16,7 @@ import { supabase } from '@/lib/supabase';
 const IS_EXPO_GO = Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
 import { Colors, Spacing, Radius, Shadows, Typography, themed } from '@/constants/theme';
 import { useAuth } from '@/hooks/useAuth';
+import { authedGet } from '@/services/api';
 import { useAppTheme } from '../_layout';
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:8000';
@@ -56,7 +57,7 @@ export default function ProfileScreen() {  // profile screen
 
   useEffect(() => {
     if (!userId) { setLoading(false); return; }
-    fetch(`${BASE_URL}/api/analytics/summary?user_id=${userId}`)
+    authedGet(`/api/analytics/summary?user_id=${userId}`)
       .then(r => r.json())
       .then(sum => {
         if (sum?.success) setSummary(sum);
@@ -95,7 +96,7 @@ export default function ProfileScreen() {  // profile screen
       return;
     }
     const res = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'],   // MediaTypeOptions is deprecated in SDK 56
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.6,

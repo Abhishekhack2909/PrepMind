@@ -9,6 +9,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { supabase } from '@/lib/supabase';
 import { Colors, Spacing, Radius, Shadows, Typography, themed } from '@/constants/theme';
 import { useAuth } from '@/hooks/useAuth';
+import { authHeaders, authedGet } from '@/services/api';
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
@@ -94,7 +95,7 @@ export default function PlannerScreen() {
         if (data?.exam_date) setExamDate(String(data.exam_date).slice(0, 10));
       } catch { }
       try {
-        const res = await fetch(`${BASE_URL}/api/analytics/weakness?user_id=${encodeURIComponent(userId)}`);
+        const res = await authedGet(`/api/analytics/weakness?user_id=${encodeURIComponent(userId)}`);
         const d = await res.json();
         const weak = (d?.weakness_map || [])
           .filter((w: any) => w.level !== 'strong')
@@ -117,7 +118,7 @@ export default function PlannerScreen() {
   async function loadExistingPlan() {
     if (!userId) return;   // no session yet — show setup
     try {
-      const res = await fetch(`${BASE_URL}/api/planner/latest?user_id=${encodeURIComponent(userId)}`);
+      const res = await authedGet(`/api/planner/latest?user_id=${encodeURIComponent(userId)}`);
       const data = await res.json();
       if (data.success && data.plan) {
         setPlan(data.plan);
@@ -138,7 +139,7 @@ export default function PlannerScreen() {
     try {
       const res = await fetch(`${BASE_URL}/api/planner/generate`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: await authHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           user_id: userId,
           hours_per_day: hoursPerDay,
