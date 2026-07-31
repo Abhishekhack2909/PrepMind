@@ -1,135 +1,165 @@
 """
-RAG Service — Retrieval Augmented Generation (crash-safe, optional)
+RAG Service — Retrieval Augmented Generation (Supabase pgvector + Gemini embeddings)
 
-HOW RAG WORKS (Learning):
-  1. INDEXING (once): documents → chunks → embeddings → ChromaDB
-  2. RETRIEVAL (per query): question → embedding → top-K similar chunks
-  3. GENERATION: chunks + question → LLM → grounded answer
+HOW RAG WORKS:
+  1. INDEXING (once):  documents → chunks → embeddings → knowledge_chunks table
+  2. RETRIEVAL (per query): question → embedding → nearest chunks (cosine)
+  3. GENERATION: chunks + question → LLM → answer grounded in real source text
 
-⚠️  ENVIRONMENT NOTE (why RAG can be disabled):
-  On some Windows setups the native pieces of the vector stack crash the whole
-  Python process (not a catchable exception):
-    - chromadb 1.5.x's Rust core can segfault on `add`/`count`/`query`
-    - onnxruntime's DLL can fail to initialise
-    - torch inference crashes when numpy 2.x is installed (needs numpy<2)
-  A native crash cannot be caught with try/except, so if the vector stack is
-  unhealthy it takes the API server down with it.
+WHY THIS IMPLEMENTATION:
+  The original version used ChromaDB + sentence-transformers. Both caused hard
+  failures: ChromaDB's Rust core segfaulted the process on some Windows hosts,
+  and torch (needed by sentence-transformers) is ~200MB and OOMs small cloud
+  instances. Neither is catchable in Python, so a single RAG call could take the
+  whole API server down.
 
-  To stay reliable we gate ALL vector work behind `RAG_ENABLED`:
-    - RAG_ENABLED=false (default) → ChromaDB/torch are never imported or called.
-      retrieve_context() returns [] and every AI feature falls back to the LLM's
-      own (strong) UPSC knowledge. The app works end-to-end.
-    - RAG_ENABLED=true → the knowledge base is used (only flip this on once the
-      native stack is verified healthy on the host).
+  Now: Postgres (which we already have via Supabase) + the pgvector extension,
+  with embeddings from the Gemini HTTP API. Zero native dependencies, so it runs
+  the same on a laptop and on a 512MB server.
+
+SETUP: run `supabase_rag.sql` once to create the table + match_knowledge() RPC.
+
+Every function degrades gracefully — if embeddings or the DB are unavailable,
+retrieval returns [] and callers fall back to the LLM's own knowledge rather
+than erroring out.
 """
 
+from __future__ import annotations
+
 import os
-from typing import List, Dict, Any
+from typing import Any, Dict, List
 
-RAG_ENABLED = os.getenv("RAG_ENABLED", "false").strip().lower() in ("1", "true", "yes", "on")
+from services.embeddings import EMBED_DIMS, embed_documents, embed_query
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "..", "chroma_db")
+# RAG can be force-disabled without touching code (e.g. if the Gemini quota is
+# exhausted). Defaults to ON now that there's no native crash risk.
+RAG_ENABLED = os.getenv("RAG_ENABLED", "true").strip().lower() in ("1", "true", "yes", "on")
 
-# These are created lazily only when RAG is enabled, so a broken native stack
-# never loads at import time.
-_client = None
-_collection = None
-_init_error: str | None = None
+_supabase = None
 
 
-def _get_collection():
-    """Lazily create the ChromaDB collection. Returns None if RAG is disabled
-    or initialisation fails (Python-level failures only — see the env note)."""
-    global _client, _collection, _init_error
-    if not RAG_ENABLED:
-        return None
-    if _collection is not None:
-        return _collection
-    if _init_error is not None:
-        return None
-    try:
-        import chromadb
-        from chromadb.utils import embedding_functions
-
-        _client = chromadb.PersistentClient(path=DB_PATH)
-        embedding_fn = embedding_functions.SentenceTransformerEmbeddingFunction(
-            model_name="all-MiniLM-L6-v2"
-        )
-        _collection = _client.get_or_create_collection(
-            name="prepmind_knowledge",
-            embedding_function=embedding_fn,
-            metadata={"hnsw:space": "cosine"},
-        )
-        return _collection
-    except Exception as e:  # noqa: BLE001
-        _init_error = str(e)
-        print(f"[WARN] RAG init failed, disabling knowledge base: {e}")
-        return None
+def _get_supabase():
+    """Lazily create the Supabase client (service key — bypasses RLS to write)."""
+    global _supabase
+    if _supabase is None:
+        from supabase import create_client
+        url = os.getenv("SUPABASE_URL", "")
+        key = os.getenv("SUPABASE_SERVICE_KEY", "")
+        if not url or not key:
+            raise RuntimeError("SUPABASE_URL / SUPABASE_SERVICE_KEY not configured")
+        _supabase = create_client(url, key)
+    return _supabase
 
 
 def chunk_text(text: str, chunk_size: int = 400, overlap: int = 50) -> List[str]:
-    """Split a large document into overlapping ~chunk_size-word chunks."""
+    """Split a document into overlapping ~chunk_size-word chunks.
+
+    The overlap matters: without it, a fact sitting on a chunk boundary gets cut
+    in half and neither chunk retrieves well.
+    """
     words = text.split()
-    chunks = []
+    if not words:
+        return []
+    chunks: List[str] = []
     start = 0
+    step = max(1, chunk_size - overlap)
     while start < len(words):
-        end = min(start + chunk_size, len(words))
-        chunks.append(" ".join(words[start:end]))
-        start += chunk_size - overlap
+        chunks.append(" ".join(words[start:min(start + chunk_size, len(words))]))
+        start += step
     return chunks
 
 
 def ingest_document(text: str, source: str, doc_type: str = "notes") -> int:
-    """Ingest a document into ChromaDB. No-op (returns 0) when RAG is disabled."""
-    collection = _get_collection()
-    if collection is None:
+    """Chunk + embed a document and store it. Returns the number of chunks added."""
+    if not RAG_ENABLED:
         return 0
+
     chunks = chunk_text(text)
-    existing = collection.count()
-    ids = [f"{source}_{existing + i}" for i in range(len(chunks))]
-    metadatas = [{"source": source, "type": doc_type, "chunk": i} for i in range(len(chunks))]
-    collection.add(documents=chunks, ids=ids, metadatas=metadatas)
-    return len(chunks)
+    if not chunks:
+        return 0
+
+    total = 0
+    # Batch to stay well within API payload limits on large documents.
+    BATCH = 50
+    for i in range(0, len(chunks), BATCH):
+        batch = chunks[i:i + BATCH]
+        vectors = embed_documents(batch)
+        if not vectors:
+            print("[WARN] ingest aborted — embeddings unavailable")
+            break
+        rows = [
+            {
+                "content": chunk,
+                "source": source,
+                "doc_type": doc_type,
+                "chunk_index": i + j,
+                "embedding": vectors[j],
+            }
+            for j, chunk in enumerate(batch)
+        ]
+        try:
+            _get_supabase().table("knowledge_chunks").insert(rows).execute()
+            total += len(rows)
+        except Exception as e:  # noqa: BLE001
+            print(f"[WARN] failed to store chunk batch: {e}")
+            break
+    return total
 
 
 def retrieve_context(query: str, top_k: int = 4) -> List[Dict[str, Any]]:
-    """Return the most relevant chunks for a question.
+    """Return the most semantically similar chunks for a question.
 
-    Always returns [] when RAG is disabled/unavailable so callers transparently
-    fall back to the LLM's own knowledge instead of crashing.
+    Returns [] (never raises) when RAG is disabled or anything is unavailable, so
+    callers transparently fall back to the LLM's own knowledge.
     """
-    collection = _get_collection()
-    if collection is None:
+    if not RAG_ENABLED or not query.strip():
         return []
+
+    vector = embed_query(query)
+    if vector is None:
+        return []
+
     try:
-        if collection.count() == 0:
-            return []
-        results = collection.query(
-            query_texts=[query],
-            n_results=min(top_k, collection.count()),
-            include=["documents", "metadatas", "distances"],
-        )
-        chunks = []
-        for i, doc in enumerate(results["documents"][0]):
-            chunks.append({
-                "text": doc,
-                "source": results["metadatas"][0][i].get("source", "unknown"),
-                "distance": results["distances"][0][i],
-            })
-        return chunks
+        res = _get_supabase().rpc(
+            "match_knowledge",
+            {
+                "query_embedding": vector,
+                "match_count": top_k,
+                # Filters out weak matches so we don't feed the LLM irrelevant
+                # context, which is worse than giving it none at all.
+                "min_similarity": 0.35,
+            },
+        ).execute()
+        rows = res.data or []
     except Exception as e:  # noqa: BLE001
         print(f"[WARN] retrieve_context failed: {e}")
         return []
 
+    return [
+        {
+            "text": r.get("content", ""),
+            "source": r.get("source", "unknown"),
+            # Kept for API compatibility with the old ChromaDB shape, where
+            # lower distance = closer. similarity 1.0 → distance 0.0
+            "distance": round(1.0 - float(r.get("similarity", 0.0)), 4),
+            "similarity": round(float(r.get("similarity", 0.0)), 4),
+        }
+        for r in rows
+    ]
+
 
 def get_stats() -> Dict[str, Any]:
-    """Return knowledge base statistics (or a disabled marker)."""
+    """Knowledge base statistics (never raises — used by a public endpoint)."""
     if not RAG_ENABLED:
-        return {"enabled": False, "total_chunks": 0, "note": "RAG disabled (set RAG_ENABLED=true to enable)"}
-    collection = _get_collection()
-    if collection is None:
-        return {"enabled": False, "total_chunks": 0, "error": _init_error}
+        return {"enabled": False, "total_chunks": 0, "note": "RAG disabled (set RAG_ENABLED=true)"}
     try:
-        return {"enabled": True, "total_chunks": collection.count(), "db_path": DB_PATH}
+        res = _get_supabase().table("knowledge_chunks").select("id", count="exact").limit(1).execute()
+        return {
+            "enabled": True,
+            "total_chunks": res.count or 0,
+            "backend": "supabase pgvector",
+            "embedding_model": "gemini-embedding-001",
+            "dimensions": EMBED_DIMS,
+        }
     except Exception as e:  # noqa: BLE001
         return {"enabled": False, "total_chunks": 0, "error": str(e)}
