@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Colors, Spacing, Radius, Shadows, Typography, themed } from '@/constants/theme';
 import { useAuth } from '@/hooks/useAuth';
+import { authedGet } from '@/services/api';
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
@@ -49,8 +50,8 @@ export default function WeaknessScreen() { // for testing only
     setError('');
     try {
       const [wRes, sRes] = await Promise.all([
-        fetch(`${BASE_URL}/api/analytics/weakness?user_id=${userId}`).catch(() => null),
-        fetch(`${BASE_URL}/api/analytics/summary?user_id=${userId}`).catch(() => null),
+        authedGet(`/api/analytics/weakness?user_id=${userId}`).catch(() => null),
+        authedGet(`/api/analytics/summary?user_id=${userId}`).catch(() => null),
       ]);
 
       if (wRes?.ok) {

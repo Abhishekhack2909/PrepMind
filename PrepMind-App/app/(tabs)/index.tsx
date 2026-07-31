@@ -7,6 +7,7 @@ import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Colors, Spacing, Radius, Shadows, Typography, themed } from '@/constants/theme';
 import { useAuth } from '@/hooks/useAuth';
+import { authedGet } from '@/services/api';
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
@@ -43,8 +44,8 @@ export default function HomeScreen() {  // for testing only
     if (!userId) { setLoading(false); return; }
     try {
       const [sumRes, planRes] = await Promise.all([
-        fetch(`${BASE_URL}/api/analytics/summary?user_id=${userId}`).catch(() => null),
-        fetch(`${BASE_URL}/api/planner/latest?user_id=${userId}`).catch(() => null),
+        authedGet(`/api/analytics/summary?user_id=${userId}`).catch(() => null),
+        authedGet(`/api/planner/latest?user_id=${userId}`).catch(() => null),
       ]);
       if (sumRes?.ok) {
         const d = await sumRes.json();
