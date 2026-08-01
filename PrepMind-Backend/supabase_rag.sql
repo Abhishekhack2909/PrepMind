@@ -23,11 +23,13 @@ CREATE TABLE IF NOT EXISTS knowledge_chunks (
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
--- Approximate-nearest-neighbour index for cosine distance.
--- lists=100 suits up to ~100k rows; raise it if the corpus grows a lot.
-CREATE INDEX IF NOT EXISTS knowledge_chunks_embedding_idx
-  ON knowledge_chunks USING ivfflat (embedding vector_cosine_ops)
-  WITH (lists = 100);
+-- HNSW index for cosine similarity search.
+-- Works correctly at any dataset size (unlike ivfflat which needs 300+ rows).
+-- m=16, ef_construction=64 is a good default for recall vs. build time.
+DROP INDEX IF EXISTS knowledge_chunks_embedding_idx;
+CREATE INDEX IF NOT EXISTS knowledge_chunks_embedding_hnsw_idx
+  ON knowledge_chunks USING hnsw (embedding vector_cosine_ops)
+  WITH (m = 16, ef_construction = 64);
 
 CREATE INDEX IF NOT EXISTS knowledge_chunks_source_idx ON knowledge_chunks (source);
 
