@@ -41,7 +41,7 @@ const SUGGESTIONS = [
 
 /** Minimal vector-style glyph drawn with Views — replaces emoji in the orb. */
 function OrbGlyph({ state }: { state: AgentState }) {
-  if (state === 'listening') {
+  if (state === 'listening') { // for voice screen
     return <View style={glyph.recordDot} />;
   }
   if (state === 'thinking') {
