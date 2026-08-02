@@ -109,7 +109,8 @@ export default function MCQScreen() {
     });
   }
 
-  function reportQuestion() {
+
+  function reportQuestion() { //for mcq screen
     Alert.alert(
       'Report Question',
       'Flag this question as incorrect or unclear? Our team will review it.',
@@ -123,6 +124,7 @@ export default function MCQScreen() {
       ]
     );
   }
+
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
