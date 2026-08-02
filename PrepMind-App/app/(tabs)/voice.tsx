@@ -44,7 +44,7 @@ function OrbGlyph({ state }: { state: AgentState }) {
   if (state === 'listening') { // for voice screen
     return <View style={glyph.recordDot} />;
   }
-  if (state === 'thinking') {
+  if (state === 'thinking') {  // when the screen showing for thinking
     return (
       <View style={glyph.row}>
         <View style={[glyph.dot, { opacity: 0.5 }]} />
@@ -52,8 +52,8 @@ function OrbGlyph({ state }: { state: AgentState }) {
         <View style={glyph.dot} />
       </View>
     );
-  }
-  if (state === 'speaking') {
+  } /
+  if (state === 'speaking') { //when the screen  showing for speaking
     return (
       <View style={glyph.row}>
         <View style={[glyph.bar, { height: 14 }]} />
