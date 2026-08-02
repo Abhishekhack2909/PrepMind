@@ -52,7 +52,7 @@ function OrbGlyph({ state }: { state: AgentState }) {
         <View style={glyph.dot} />
       </View>
     );
-  } /
+  }
   if (state === 'speaking') { //when the screen  showing for speaking
     return (
       <View style={glyph.row}>
@@ -63,6 +63,7 @@ function OrbGlyph({ state }: { state: AgentState }) {
       </View>
     );
   }
+
   if (state === 'error') {
     return <Text style={glyph.errorMark}>!</Text>;
   }
@@ -226,7 +227,7 @@ export default function VoiceAgentScreen() {
     ).start();
   }, []);
 
-  const startSpeakingAnimation = useCallback(() => {
+  const startSpeakingAnimation = useCallback(() => { //for startspeaking session on screen 
     stopAllAnimations();
     Animated.loop(
       Animated.sequence([
@@ -350,7 +351,7 @@ export default function VoiceAgentScreen() {
     }
   }, []);
 
-  const stopSpeaking = useCallback(() => {
+  const stopSpeaking = useCallback(() => { // stop speaking button
     if (Platform.OS === 'web' && typeof window !== 'undefined' && window.speechSynthesis) {
       window.speechSynthesis.cancel();
     } else {
