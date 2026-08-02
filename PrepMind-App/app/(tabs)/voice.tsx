@@ -32,7 +32,7 @@ type Message = { // for message assistent switching
   sources?: string[];
 };
 
-const SUGGESTIONS = [
+const SUGGESTIONS = [ //for voice screen 
   { label: 'Directive Principles', query: 'Explain the Directive Principles of State Policy and their importance.' },
   { label: 'Preamble summary', query: 'Give me a concise summary of the Indian Constitution Preamble.' },
   { label: 'Modern India 1857–1947', query: 'Summarize the key events in Modern Indian history from 1857 to 1947.' },
