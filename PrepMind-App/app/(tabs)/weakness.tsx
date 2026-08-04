@@ -48,7 +48,7 @@ export default function WeaknessScreen() {
   const fetchData = useCallback(async () => {
     if (!userId) { setLoading(false); return; }
     setError('');
-    try {
+    try { // for testing only
       const [wRes, sRes] = await Promise.all([
         authedGet(`/api/analytics/weakness?user_id=${userId}`).catch(() => null),
         authedGet(`/api/analytics/summary?user_id=${userId}`).catch(() => null),
