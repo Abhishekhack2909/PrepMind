@@ -12,7 +12,7 @@ router = APIRouter(prefix="/api", tags=["Evaluate"])
 # Free-tier cap, enforced server-side. The client also tracks this for instant
 # UI feedback, but that copy lives in AsyncStorage and resets if the user clears
 # app data — so this count (from the DB) is the real one.
-FREE_MONTHLY_EVALUATIONS = int(os.getenv("FREE_MONTHLY_EVALUATIONS", "3"))
+FREE_MONTHLY_EVALUATIONS = int(os.getenv("FREE_MONTHLY_EVALUATIONS", "10"))
 
 
 def _evaluations_this_month(user_id: str) -> int:
@@ -35,7 +35,7 @@ supabase_client = create_client(
     os.getenv("SUPABASE_URL", ""),
     os.getenv("SUPABASE_SERVICE_KEY", "")
 )
-#helllre
+
 class EvaluateRequest(BaseModel):
     image_base64: str
     question: Optional[str] = None
@@ -107,7 +107,6 @@ async def evaluation_quota(user_id: Optional[str] = Depends(resolve_user_id)):
     }
 
 
-#one of the router
 @router.get("/evaluations")
 async def list_evaluations(user_id: Optional[str] = Depends(resolve_user_id)):
     """Return a user's past evaluations (most recent first)."""

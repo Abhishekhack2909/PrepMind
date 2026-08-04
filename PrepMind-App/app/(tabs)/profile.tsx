@@ -34,7 +34,7 @@ const BADGES: Badge[] = [
   { id: 'sharp', icon: '🏆', title: 'Sharp Shooter', earned: (s) => s.accuracy >= 75 },
 ];
 
-export default function ProfileScreen() {  // profile screen 
+export default function ProfileScreen() {
   const router = useRouter();
   const { session, signOut } = useAuth();
   const userId = session?.user?.id;
@@ -44,6 +44,8 @@ export default function ProfileScreen() {  // profile screen
   const initial = displayName[0].toUpperCase();
 
   const [summary, setSummary] = useState<any>(null);
+  const [evalHistory, setEvalHistory] = useState<any[]>([]);
+  const [historyExpanded, setHistoryExpanded] = useState(false);
   const [loading, setLoading] = useState(true);
   const [name, setName] = useState<string>('');
   const [avatarUri, setAvatarUri] = useState<string | null>(null);
@@ -64,6 +66,12 @@ export default function ProfileScreen() {  // profile screen
       })
       .catch(() => null)
       .finally(() => setLoading(false));
+
+    // Fetch evaluation history
+    authedGet(`/api/evaluations?user_id=${userId}`)
+      .then(r => r.json())
+      .then(d => { if (d?.success) setEvalHistory(d.evaluations || []); })
+      .catch(() => null);
 
     // Load persisted profile bits (name from Supabase, avatar + prefs from local storage)
     (async () => {
@@ -107,7 +115,7 @@ export default function ProfileScreen() {  // profile screen
     }
   }
 
-  async function saveName() { //function to save the name of the user
+  async function saveName() {
     const trimmed = nameDraft.trim();
     if (!trimmed) { Alert.alert('Name required'); return; }
     setName(trimmed);
@@ -131,7 +139,7 @@ export default function ProfileScreen() {  // profile screen
     }
   }
 
-  async function toggleNotif(v: boolean) {//function to toggle the notification
+  async function toggleNotif(v: boolean) {
     setNotifOn(v);
     await AsyncStorage.setItem('prepmind:notifOn', v ? '1' : '0');
 
@@ -180,8 +188,6 @@ export default function ProfileScreen() {  // profile screen
 
   async function chooseAppearance(v: 'system' | 'light' | 'dark') {
     setAppearanceVisible(false);
-    // themed() styles rebuild at render, and the root remounts on theme change(as per the app.tsx file),
-    // so this flips the whole app instantly — no reload needed(for mobile mainly). just checking it.
     await setAppearancePref(v);
   }
 
@@ -222,7 +228,7 @@ export default function ProfileScreen() {  // profile screen
     accuracy: summary?.mcq?.avg_score ?? 0,
   };
 
-  return ( //  for profile page
+  return (
     <SafeAreaView style={styles.safe}>
       {/* ── Top App Bar ── */}
       <View style={styles.topAppBar}>
@@ -346,6 +352,61 @@ export default function ProfileScreen() {  // profile screen
             })}
           </View>
         </View>
+
+        {/* ── Evaluation History ── */}
+        {evalHistory.length > 0 && (
+          <View style={styles.historyCard}>
+            <TouchableOpacity
+              style={styles.historyHeader}
+              activeOpacity={0.7}
+              onPress={() => setHistoryExpanded(e => !e)}
+            >
+              <Text style={styles.historyTitle}>📝 Past Evaluations</Text>
+              <Text style={styles.historyChevron}>{historyExpanded ? '▲' : '▼'}</Text>
+            </TouchableOpacity>
+
+            {historyExpanded && evalHistory.slice(0, 5).map((ev, i) => {
+              const gradeColor = ev.grade === 'A' || ev.grade === 'A+'
+                ? Colors.success
+                : ev.grade === 'B' || ev.grade === 'B+'
+                ? Colors.primary
+                : ev.grade === 'C'
+                ? Colors.warning
+                : Colors.error;
+              const dateStr = ev.created_at
+                ? new Date(ev.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
+                : '';
+              return (
+                <View key={ev.id || i} style={styles.evalItem}>
+                  <View style={styles.evalItemHeader}>
+                    <View style={[styles.gradeBadge, { backgroundColor: gradeColor + '18', borderColor: gradeColor + '40' }]}>
+                      <Text style={[styles.gradeText, { color: gradeColor }]}>{ev.grade}</Text>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.evalMarks}>{ev.total_marks ?? '—'} / 15 marks</Text>
+                      {ev.question && (
+                        <Text style={styles.evalQuestion} numberOfLines={1}>{ev.question}</Text>
+                      )}
+                    </View>
+                    <Text style={styles.evalDate}>{dateStr}</Text>
+                  </View>
+                  {ev.strong_points?.[0] && (
+                    <Text style={styles.evalPoint} numberOfLines={1}>✅ {ev.strong_points[0]}</Text>
+                  )}
+                  {ev.improvement_areas?.[0] && (
+                    <Text style={[styles.evalPoint, { color: Colors.warning }]} numberOfLines={1}>⚠️ {ev.improvement_areas[0]}</Text>
+                  )}
+                </View>
+              );
+            })}
+
+            {!historyExpanded && (
+              <Text style={styles.historyPreview}>
+                {evalHistory.length} evaluation{evalHistory.length !== 1 ? 's' : ''} recorded
+              </Text>
+            )}
+          </View>
+        )}
 
         {/* ── Settings Box ── */}
         <View style={styles.settingsCard}>
@@ -577,7 +638,7 @@ const modalStyles = themed((Colors) => StyleSheet.create({
   },
 }));
 
-const styles = themed((Colors) => StyleSheet.create({ // for profile styles
+const styles = themed((Colors) => StyleSheet.create({
   safe: {
     flex: 1,
     backgroundColor: Colors.background,
@@ -856,6 +917,85 @@ const styles = themed((Colors) => StyleSheet.create({ // for profile styles
   },
   badgeLabelLocked: {
     color: Colors.onSurfaceMuted,
+  },
+
+  // Evaluation History Card
+  historyCard: {
+    backgroundColor: Colors.surfaceCard,
+    borderRadius: Radius.xxl,
+    ...Shadows.card,
+    overflow: 'hidden',
+  },
+  historyHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: Spacing.lg,
+    paddingBottom: Spacing.md,
+  },
+  historyTitle: {
+    ...Typography.subtitle,
+  },
+  historyChevron: {
+    fontSize: 12,
+    color: Colors.onSurfaceMuted,
+  },
+  historyPreview: {
+    fontFamily: 'Inter_400Regular',
+    fontSize: 13,
+    color: Colors.onSurfaceMuted,
+    textAlign: 'center',
+    paddingBottom: Spacing.md,
+  },
+  evalItem: {
+    marginHorizontal: Spacing.lg,
+    marginBottom: Spacing.md,
+    backgroundColor: Colors.surfaceContainer,
+    borderRadius: Radius.lg,
+    padding: Spacing.md,
+    gap: 6,
+  },
+  evalItemHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  gradeBadge: {
+    width: 38,
+    height: 38,
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  gradeText: {
+    fontFamily: 'PlusJakartaSans_700Bold',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  evalMarks: {
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 13,
+    color: Colors.onSurface,
+    fontWeight: '600',
+  },
+  evalQuestion: {
+    fontFamily: 'Inter_400Regular',
+    fontSize: 12,
+    color: Colors.onSurfaceVariant,
+    marginTop: 1,
+  },
+  evalDate: {
+    fontFamily: 'Inter_400Regular',
+    fontSize: 11,
+    color: Colors.onSurfaceMuted,
+    alignSelf: 'flex-start',
+  },
+  evalPoint: {
+    fontFamily: 'Inter_400Regular',
+    fontSize: 12,
+    color: Colors.onSurfaceVariant,
+    lineHeight: 17,
   },
 
   // Settings Card

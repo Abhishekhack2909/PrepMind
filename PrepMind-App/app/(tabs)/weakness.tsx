@@ -34,7 +34,7 @@ const LEVEL_LABELS = {
   strong: 'Strong',
 };
 
-export default function WeaknessScreen() { // for testing only
+export default function WeaknessScreen() {
   const router = useRouter();
   const { session } = useAuth();
   const userId = session?.user?.id;
@@ -79,7 +79,6 @@ export default function WeaknessScreen() { // for testing only
     fetchData();
   }
 
-  // Real data only — no more fake mockup fallback(for now).
   const finalWeakness: WeaknessEntry[] = weakness;
   const hasData = finalWeakness.length > 0;
 
@@ -226,7 +225,6 @@ export default function WeaknessScreen() { // for testing only
               </Text>
             )}
             {finalWeakness.map((item, idx) => {
-              // Dynamically resolve status color based on score thresholds(for now)
               const score = item.avg_score;
               const color = score < 40 ? STATUS_COLORS.weak : score <= 70 ? STATUS_COLORS.moderate : STATUS_COLORS.strong;
 
@@ -646,5 +644,5 @@ const styles = themed((Colors) => StyleSheet.create({
     color: Colors.primary,
     fontWeight: '600',
   },
-})); // export default function WeaknessScreen() {
+}));
 

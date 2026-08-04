@@ -20,7 +20,7 @@ const QUOTES = [
   { text: 'Discipline is the bridge between goals and accomplishment.', author: 'Jim Rohn' },
 ];
 
-export default function HomeScreen() {  // for testing only
+export default function HomeScreen() {
   const router = useRouter();
   const { session, user } = useAuth();
   const userId = session?.user?.id;
@@ -78,7 +78,7 @@ export default function HomeScreen() {  // for testing only
     }
   }, [fetchData, userId]);
 
-  function onRefresh() { // for refreshing the page
+  function onRefresh() {
     setRefreshing(true);
     fetchData();
   }
@@ -242,7 +242,7 @@ export default function HomeScreen() {  // for testing only
   );
 }
 
-const styles = themed((Colors) => StyleSheet.create({ // for  theme styling only
+const styles = themed((Colors) => StyleSheet.create({
   safe: {
     flex: 1,
     backgroundColor: Colors.background,
