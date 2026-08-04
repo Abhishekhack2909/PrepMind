@@ -13,6 +13,51 @@ import { supabase } from '@/lib/supabase';
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
+// ── Server cold-start detection ───────────────────────────────────────────────
+// Render free tier sleeps after 15 min idle; first request can take ~50s.
+// We fire 'waking' after 3s and 'awake' when the response arrives so the
+// ServerWakeupBanner can show/hide without polling.
+
+type ServerEventName = 'waking' | 'awake';
+const _listeners: Record<ServerEventName, Array<() => void>> = { waking: [], awake: [] };
+
+export const serverEvents = {
+  on(event: ServerEventName, cb: () => void): () => void {
+    _listeners[event].push(cb);
+    return () => { _listeners[event] = _listeners[event].filter(f => f !== cb); };
+  },
+  emit(event: ServerEventName) {
+    _listeners[event].forEach(cb => cb());
+  },
+};
+
+let _wakeupPending = false;
+
+/** Wraps fetch, fires waking/awake events on slow responses. */
+async function trackedFetch(input: RequestInfo, init?: RequestInit): Promise<Response> {
+  let timer: ReturnType<typeof setTimeout> | null = null;
+  // Only trigger banner for Render/production calls, not localhost
+  const isRemote = typeof input === 'string' && !input.includes('localhost') && !input.includes('127.0.0.1');
+
+  if (isRemote && !_wakeupPending) {
+    timer = setTimeout(() => {
+      _wakeupPending = true;
+      serverEvents.emit('waking');
+    }, 3000);
+  }
+
+  try {
+    const res = await fetch(input, init);
+    return res;
+  } finally {
+    if (timer) clearTimeout(timer);
+    if (_wakeupPending) {
+      _wakeupPending = false;
+      serverEvents.emit('awake');
+    }
+  }
+}
+
 /**
  * Build request headers including the Supabase access token.
  *
@@ -31,7 +76,7 @@ export async function authHeaders(extra: Record<string, string> = {}): Promise<R
 
 /** GET helper that always sends the auth token. */
 export async function authedGet(path: string): Promise<Response> {
-  return fetch(`${BASE_URL}${path}`, { headers: await authHeaders() });
+  return trackedFetch(`${BASE_URL}${path}`, { headers: await authHeaders() });
 }
 
 type EvaluatePayload = {
@@ -59,7 +104,7 @@ export type EvaluationResult = {
  * Send a handwritten answer image to backend for Gemini evaluation.
  */
 export async function evaluateAnswer(payload: EvaluatePayload): Promise<EvaluationResult> {
-  const response = await fetch(`${BASE_URL}/api/evaluate`, {
+  const response = await trackedFetch(`${BASE_URL}/api/evaluate`, {
     method: 'POST',
     headers: await authHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify(payload),
@@ -122,7 +167,7 @@ export async function askQuestion(
   question: string,
   useRag: boolean = true
 ): Promise<AskResult> {
-  const response = await fetch(`${BASE_URL}/api/ask`, {
+  const response = await trackedFetch(`${BASE_URL}/api/ask`, {
     method: 'POST',
     headers: await authHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify({ question, use_rag: useRag, top_k: 4 }),
@@ -165,7 +210,7 @@ export async function chatWithVoiceAgent(
   history: ConversationTurn[] = [],
   useRag: boolean = true,
 ): Promise<VoiceChatResult> {
-  const response = await fetch(`${BASE_URL}/api/voice/chat`, {
+  const response = await trackedFetch(`${BASE_URL}/api/voice/chat`, {
     method: 'POST',
     headers: await authHeaders({ 'Content-Type': 'application/json' }),
     body: JSON.stringify({ question, history, use_rag: useRag }),

@@ -21,6 +21,7 @@ import {
 } from '@expo-google-fonts/inter';
 import { useAuth } from '@/hooks/useAuth';
 import { Colors, setColorMode, type ColorMode, themed } from '@/constants/theme';
+import { ServerWakeupBanner } from '@/components/ServerWakeupBanner';
 
 export type AppearancePref = 'system' | 'light' | 'dark';
 
@@ -155,6 +156,8 @@ export default function RootLayout() {
           <Stack.Screen name="(auth)" />
           <Stack.Screen name="(tabs)" />
         </Stack>
+        {/* Cold-start banner: shows when Render backend takes > 3s to respond */}
+        <ServerWakeupBanner />
       </AuthGuard>
     </ThemeCtx.Provider>
   );
