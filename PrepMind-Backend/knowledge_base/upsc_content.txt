@@ -13,13 +13,13 @@ Key Features of the Indian Constitution:
 
 FUNDAMENTAL RIGHTS (Articles 12-35):
 1. Right to Equality (Art 14-18)
-2. Right to Freedom (Art 19-22)
-3. Right Against Exploitation (Art 23-24)
+2. Right to Freedom (Art 19-22) — Six freedoms including speech, assembly, association, movement, residence, profession.
+3. Right Against Exploitation (Art 23-24) — Prohibition of trafficking and child labour (below 14 years in hazardous industries).
 4. Right to Freedom of Religion (Art 25-28)
 5. Cultural and Educational Rights (Art 29-30)
 6. Right to Constitutional Remedies (Art 32) — Dr. Ambedkar called this the "Heart and Soul of the Constitution"
 
-Article 32 gives the right to move the Supreme Court for enforcement of Fundamental Rights. Writs: Habeas Corpus, Mandamus, Prohibition, Certiorari, Quo Warranto.
+Article 32 gives the right to move the Supreme Court for enforcement of Fundamental Rights. Writs: Habeas Corpus (produce the body), Mandamus (command to do duty), Prohibition (stop lower court), Certiorari (quash lower court order), Quo Warranto (by what authority).
 
 DIRECTIVE PRINCIPLES OF STATE POLICY (Articles 36-51):
 DPSPs are borrowed from the Irish Constitution. They are non-justiciable (cannot be enforced in court) but fundamental in governance. They aim to establish a welfare state. Key DPSPs include:
@@ -28,15 +28,102 @@ DPSPs are borrowed from the Irish Constitution. They are non-justiciable (cannot
 - Uniform Civil Code (Art 44)
 - Village Panchayats (Art 40)
 - Protection of environment (Art 48A)
+- Right to work (Art 41)
+- Living wage for workers (Art 43)
 
 FUNDAMENTAL DUTIES (Article 51A):
-Added by 42nd Amendment 1976 on recommendation of Swaran Singh Committee. Currently 11 duties (10 added in 1976, 11th by 86th Amendment 2002). They are non-justiciable. Example: to abide by the Constitution, to defend the country, to protect natural environment.
+Added by 42nd Amendment 1976 on recommendation of Swaran Singh Committee. Currently 11 duties (10 added in 1976, 11th by 86th Amendment 2002). They are non-justiciable. Example: to abide by the Constitution, to defend the country, to protect natural environment, to promote harmony, to develop scientific temper.
+
+---
+
+POLITY — PARLIAMENT AND LEGISLATIVE PROCESS
+
+Parliament of India consists of: President + Rajya Sabha + Lok Sabha.
+
+RAJYA SABHA (Council of States):
+- Maximum strength: 250 (238 elected + 12 nominated by President for art, literature, science, social service)
+- Currently: 245 members
+- Permanent body — cannot be dissolved. One-third members retire every 2 years.
+- Presided by Vice President of India (ex-officio Chairman)
+- Minimum age: 30 years
+- Term: 6 years
+
+LOK SABHA (House of the People):
+- Maximum strength: 552 (530 from states + 20 from UTs + 2 Anglo-Indian, now removed by 104th Amendment 2020)
+- Current strength: 543 elected
+- Term: 5 years (can be dissolved by President on PM's advice)
+- Presided by Speaker (elected by members)
+- Minimum age: 25 years
+
+MONEY BILL vs ORDINARY BILL:
+- Money Bill (Art 110): Only introduced in Lok Sabha. Rajya Sabha can delay max 14 days. Speaker certifies Money Bill.
+- Financial Bill: Can be introduced in either House.
+- Constitutional Amendment (Art 368): Requires special majority (2/3 of members present and voting + majority of total membership). Some require ratification by half the states.
+
+IMPORTANT CONSTITUTIONAL AMENDMENTS:
+- 1st Amendment (1951): Added 9th Schedule (laws beyond judicial review)
+- 42nd Amendment (1976): Added "Socialist", "Secular", "Integrity" to Preamble; added Fundamental Duties
+- 44th Amendment (1978): Restored right to property as legal right; right to life cannot be suspended even in Emergency
+- 52nd Amendment (1985): Anti-defection law (10th Schedule)
+- 61st Amendment (1989): Lowered voting age from 21 to 18
+- 73rd/74th Amendment (1992): Constitutional status to Panchayats/Municipalities
+- 86th Amendment (2002): Art 21A — Right to Education (6-14 years)
+- 91st Amendment (2003): Council of Ministers limited to 15% of Lok Sabha strength
+- 101st Amendment (2016): GST (Goods and Services Tax)
+- 103rd Amendment (2019): 10% EWS reservation in education and public employment
+- 104th Amendment (2020): Removed Anglo-Indian nominated seats
+
+---
+
+POLITY — PRESIDENT, PRIME MINISTER AND COUNCIL OF MINISTERS
+
+PRESIDENT OF INDIA:
+- Elected by Electoral College: elected members of Parliament + elected members of State Legislative Assemblies.
+- Term: 5 years. Re-eligible.
+- Minimum age: 35 years. Must be Indian citizen.
+- Can be impeached by Parliament for violation of Constitution (Art 61) — requires 2/3 majority and 14 days notice.
+- Article 74: President acts on advice of Council of Ministers headed by PM. 44th Amendment made it binding.
+- Emergency Powers: National Emergency (Art 352), State Emergency/President's Rule (Art 356), Financial Emergency (Art 360).
+- Ordinance making power under Art 123 (when Parliament not in session).
+
+PRIME MINISTER:
+- Head of government. Leader of majority party in Lok Sabha.
+- Heads Council of Ministers. Can recommend dissolution of Lok Sabha.
+- Art 75: PM appointed by President; other ministers appointed by President on PM's advice.
+- Collective Responsibility to Lok Sabha (Art 75(3)).
+
+GOVERNOR:
+- Appointed by President. Serves at pleasure of President (not fixed term in practice).
+- Constitutional head of State; real power with Chief Minister.
+- Can reserve State Bills for President's consideration.
+- Art 356: On Governor's report, President's Rule imposed.
+
+---
+
+POLITY — JUDICIARY
+
+SUPREME COURT:
+- Established 26 Jan 1950. Located in Delhi.
+- Consists of CJI + 33 other judges (total 34).
+- Jurisdiction: Original (disputes between states/Centre), Appellate (from High Courts), Advisory (Art 143 — President's reference), Special Leave Petition (Art 136).
+- Judicial Review: Power to strike down laws violating Constitution.
+- Basic Structure Doctrine: Kesavananda Bharati case (1973) — Parliament cannot amend Basic Structure of Constitution. Basic Structure includes: Supremacy of Constitution, Republican and Democratic form, Secular character, Separation of Powers, Judicial Review, Federalism.
+
+HIGH COURTS:
+- 25 High Courts in India.
+- Calcutta HC is oldest (1862). Bombay and Madras HCs also established in 1862.
+- Exercise supervisory jurisdiction over subordinate courts.
+
+LOKPAL AND LOKAYUKTA:
+- Lokpal Act 2013: Anti-corruption ombudsman at national level.
+- Inquires into corruption allegations against PM (with restrictions), Ministers, MPs, Group A/B/C/D officers.
+- First Lokpal: Justice Pinaki Chandra Ghose (2019).
 
 ---
 
 NCERT GEOGRAPHY — PHYSICAL FEATURES OF INDIA
 
-India is the 7th largest country in the world by area (3.28 million sq km) and 2nd most populous. It is located between latitudes 8°4'N to 37°6'N and longitudes 68°7'E to 97°25'E. The Tropic of Cancer (23.5°N) passes through 8 states: Rajasthan, Gujarat, Madhya Pradesh, Chhattisgarh, Jharkhand, West Bengal, Tripura, and Mizoram.
+India is the 7th largest country in the world by area (3.28 million sq km) and 2nd most populous. Located between latitudes 8°4'N to 37°6'N and longitudes 68°7'E to 97°25'E. Tropic of Cancer (23.5°N) passes through 8 states: Rajasthan, Gujarat, Madhya Pradesh, Chhattisgarh, Jharkhand, West Bengal, Tripura, and Mizoram.
 
 MAJOR PHYSIOGRAPHIC DIVISIONS:
 
@@ -50,7 +137,7 @@ Formed by tectonic plate collision (Indian Plate with Eurasian Plate). Three par
 Formed by alluvial deposits of Indus, Ganga, and Brahmaputra rivers. Most fertile and densely populated region. Divided into: Bhabar (porous), Terai (marshy), Bhangar (old alluvium), Khadar (new alluvium).
 
 3. THE PENINSULAR PLATEAU:
-Oldest and most stable landmass. Two divisions:
+Oldest and most stable landmass (pre-Cambrian rocks). Two divisions:
 - Deccan Plateau: Triangular. Bounded by Western and Eastern Ghats.
 - Central Highlands: North of Narmada. Includes Malwa Plateau, Bundelkhand.
 Western Ghats: Continuous range, higher (avg 1200m). Eastern Ghats: Discontinuous, lower (avg 600m). Highest peak of Western Ghats: Anamudi (2695m in Kerala — also highest in South India).
@@ -60,72 +147,572 @@ Western Coast: Narrow, steep. Divisions: Konkan (Mumbai to Goa), Kannad (Goa to 
 Eastern Coast: Wider, gentle. Divisions: Northern Circar, Coromandel.
 
 5. ISLANDS:
-Andaman & Nicobar: Bay of Bengal. Volcanic origin. Barren Island — only active volcano in South Asia.
-Lakshadweep: Arabian Sea. Coral origin. Smallest UT of India.
+Andaman & Nicobar: Bay of Bengal. Volcanic origin. Barren Island — only active volcano in South Asia. 572 islands.
+Lakshadweep: Arabian Sea. Coral origin. Smallest UT of India. 36 islands.
 
 ---
 
-NCERT HISTORY — MAURYA EMPIRE
+GEOGRAPHY — RIVERS AND DRAINAGE
 
-The Maurya Empire (321-185 BCE) was the first pan-Indian empire. Founded by Chandragupta Maurya with the help of Chanakya (Kautilya). Chanakya's Arthashastra describes statecraft and economic policy.
+HIMALAYAN RIVERS (Perennial — fed by glaciers + rain):
+- Indus System: Indus, Jhelum, Chenab, Ravi, Beas, Sutlej. Largely in Pakistan after Partition.
+- Ganga System: Ganga (from Gangotri/Gomukh), Yamuna (longest tributary), Ghaghra, Gandak, Kosi.
+- Brahmaputra: Originates in Tibet (called Tsangpo). Flows through Arunachal Pradesh (Siang), Assam. Has antecedent drainage. World's highest navigable river.
 
-CHANDRAGUPTA MAURYA (321-297 BCE):
-Defeated Dhana Nanda (last Nanda ruler) and established the empire. Later defeated Seleucus Nicator (Greek general) in 305 BCE. Seleucus sent Megasthenes as ambassador whose book "Indica" describes Mauryan society. Chandragupta converted to Jainism and died at Shravanabelagola (Karnataka) by Sallekhana (fasting unto death).
+PENINSULAR RIVERS (Non-perennial — seasonal):
+Westward flowing (into Arabian Sea): Narmada, Tapi. Flow through rift valleys.
+Eastward flowing (into Bay of Bengal): Mahanadi, Godavari (largest peninsular river — 1465 km), Krishna, Kaveri.
 
-BINDUSARA (297-272 BCE):
-Known as "Amitraghata" (slayer of enemies). Extended empire to Deccan. Called "Amitrokates" by Greeks.
-
-ASHOKA THE GREAT (268-232 BCE):
-Most famous Mauryan ruler. Kalinga War (261 BCE) was a turning point — massive casualties led to his conversion to Buddhism. Adopted policy of "Dhamma" (moral conduct). Sent missionaries to Sri Lanka, Egypt, Syria, Greece. Erected pillars (Ashokan Edicts) across empire. Lion Capital at Sarnath is India's national emblem. Rock Edicts and Pillar Edicts are primary sources.
-
-DECLINE OF MAURYA EMPIRE:
-Ashoka's successors were weak. Pushyamitra Shunga (a general) assassinated last Mauryan king Brihadratha in 185 BCE and established the Shunga dynasty.
-
----
-
-INDIAN ECONOMY — FIVE YEAR PLANS AND PLANNING
-
-India adopted Five Year Plans from 1951, inspired by Soviet model. The Planning Commission (established 1950) was replaced by NITI Aayog on 1 January 2015. NITI Aayog (National Institution for Transforming India) acts as a think tank. PM is the Chairperson.
-
-KEY PLANS:
-- 1st Plan (1951-56): Agriculture focus. Target 2.1%, Achieved 3.6%
-- 2nd Plan (1956-61): Mahalanobis Model. Heavy industry focus. Steel plants at Bhilai, Durgapur, Rourkela.
-- Green Revolution (mid-1960s): HYV seeds, irrigation, fertilizers. Punjab, Haryana, UP benefited most. M.S. Swaminathan is father of Green Revolution in India. Norman Borlaug introduced dwarf wheat varieties.
-- 5th Plan (1974-79): Poverty alleviation (Garibi Hatao), self-reliance. 20-point programme by Indira Gandhi.
-- 8th Plan (1992-97): Liberalization, Privatization, Globalization (LPG Reforms 1991). Narasimha Rao government. Manmohan Singh as Finance Minister introduced reforms.
-- 12th Plan (2012-17): Last Five Year Plan. Focus on "Faster, Sustainable, and More Inclusive Growth".
-
-IMPORTANT ECONOMIC CONCEPTS:
-- GDP: Total value of goods and services produced within a country in a year.
-- GNP: GDP + income earned by residents abroad - income earned by foreigners in India.
-- Per Capita Income: GNP/Total Population.
-- HDI: Human Development Index. Published by UNDP. Three dimensions: Health (life expectancy), Education (mean years of schooling), Standard of Living (GNI per capita). India ranked 134th in HDI 2022 report.
+IMPORTANT LAKES:
+- Chilika Lake (Odisha): Largest coastal lagoon in Asia.
+- Wular Lake (J&K): Largest freshwater lake in India.
+- Loktak Lake (Manipur): Largest freshwater lake in Northeast. Has phumdis (floating vegetation).
+- Dal Lake (J&K): Famous for houseboats.
+- Sambhar Lake (Rajasthan): Largest saltwater lake in India.
 
 ---
 
-CURRENT AFFAIRS — ENVIRONMENT AND ECOLOGY
+GEOGRAPHY — CLIMATE OF INDIA
 
-CLIMATE CHANGE AND INDIA:
-Paris Agreement (2015): Limit global temperature rise to 1.5°C above pre-industrial levels. India's NDC (Nationally Determined Contribution):
-- Reduce emissions intensity of GDP by 45% by 2030 (from 2005 levels)
-- Achieve 50% cumulative electric power from non-fossil fuel sources by 2030
-- Create additional carbon sink of 2.5-3 billion tonnes of CO2 equivalent through forests by 2030
+India has tropical monsoon climate. Controlled by: Coriolis force, Inter-Tropical Convergence Zone (ITCZ), Jet streams, El Nino.
+
+MONSOON MECHANISM:
+- Southwest Monsoon (June-September): Brings 75% of India's annual rainfall. Two branches: Arabian Sea branch (hits Western Ghats first) and Bay of Bengal branch (enters through northeast).
+- Northeast Monsoon (Oct-Dec): Brings rain to Tamil Nadu and Andhra Pradesh coast.
+- Western Disturbances: Extra-tropical cyclones from Mediterranean — bring rain/snow to Northwest India in winter.
+
+RAINFALL DISTRIBUTION:
+- Highest: Mawsynram, Meghalaya (11,871 mm) — wettest place on Earth.
+- Lowest: Leh, Ladakh (50 mm) — cold desert.
+- Highest variability: Rajasthan.
+
+SEASONS: Pre-monsoon hot weather (March-May), Southwest Monsoon (June-Sept), Retreating Monsoon (Oct-Nov), Winter/NE Monsoon (Dec-Feb).
+
+---
+
+NCERT HISTORY — ANCIENT INDIA
+
+INDUS VALLEY CIVILIZATION (2500-1750 BCE):
+Also called Harappan Civilization (after Harappa, first site discovered in 1921 by Daya Ram Sahni). Mohenjodaro discovered in 1922 by R.D. Banerji. Key features:
+- Urban planning with grid pattern streets.
+- Great Bath at Mohenjodaro (public bathing facility).
+- Granary — largest building at Mohenjodaro.
+- No temple structure found.
+- Seals with Indus script (undeciphered).
+- Trade with Mesopotamia. Bronze Age civilization.
+- Decline theories: Aryan invasion, climatic change (Saraswati River drying), floods.
+
+VEDIC PERIOD:
+Early Vedic (1500-1000 BCE): Rigvedic age. Society based on tribal/kinship. Economy: pastoral/cattle-rearing. Varna system (4 varnas: Brahmin, Kshatriya, Vaishya, Shudra) — based on occupation not birth in early period.
+Later Vedic (1000-600 BCE): Agriculture became main occupation. Birth-based caste system. Emergence of kingdoms.
+
+Four Vedas: Rigveda (hymns), Samaveda (melodies), Yajurveda (rituals), Atharvaveda (magic/spells).
+
+MAURYA EMPIRE (321-185 BCE):
+Founded by Chandragupta Maurya with Chanakya's (Kautilya) help. Chanakya's Arthashastra describes statecraft. Ashoka's Dhamma: non-violence, religious tolerance, respect for elders, generosity. Kalinga War (261 BCE) transformed Ashoka. Lion Capital at Sarnath — national emblem. Ashokan Edicts in Brahmi script.
+
+GUPTA EMPIRE (320-550 CE):
+Called "Golden Age of India". Chandragupta I (320 CE) founded it. Samudragupta — "Napoleon of India" — great military conquests. Chandragupta II/Vikramaditya — defeated Shakas; peak of Gupta power. Fa-Hien (Chinese traveller) visited during Chandragupta II reign. Kalidasa — greatest Sanskrit poet (Meghaduta, Abhijnanashakuntalam, Raghuvamsha). Aryabhata — mathematician/astronomer (pi value, heliocentric theory, zero concept). Varahamihira — astronomy. Decline due to Huna invasions.
+
+MEDIEVAL INDIA — DELHI SULTANATE (1206-1526):
+Five dynasties: Slave/Mamluk (1206-1290), Khilji (1290-1320), Tughlaq (1320-1414), Sayyid (1414-1451), Lodi (1451-1526).
+- Qutb-ud-din Aibak (1206): First Sultan of Delhi. Built Qutb Minar (started).
+- Iltutmish (1211-1236): Consolidated the Sultanate. Received investiture from Caliph of Baghdad. Completed Qutb Minar.
+- Razia Sultan (1236-1240): First female ruler of Delhi.
+- Alauddin Khilji (1296-1316): Market reforms (price control). Repelled Mongol invasions. Built Alai Darwaza.
+- Muhammad bin Tughlaq (1325-1351): Transfer of capital from Delhi to Daulatabad. Introduction of token currency. Ibn Battuta visited during his reign.
+- Firuz Shah Tughlaq (1351-1388): Welfare measures — built canals, prohibited torture.
+- Ibrahim Lodi (1517-1526): Last Sultan. Defeated by Babur in First Battle of Panipat (1526).
+
+MUGHAL EMPIRE (1526-1857):
+- Babur (1526-1530): Founded Mughal Empire. First Battle of Panipat (1526) vs Ibrahim Lodi. Battle of Khanwa (1527) vs Rana Sanga.
+- Humayun (1530-1556): Defeated by Sher Shah Suri (1540). Regained throne 1555. Died 1556 (fell from library steps).
+- Akbar (1556-1605): Greatest Mughal. Second Battle of Panipat (1556) vs Hemu. Din-i-Ilahi (syncretic religion). Navratnas at court including Birbal, Tansen, Todar Mal, Abul Fazl. Abolished jizya. Rajput policy of matrimonial alliances.
+- Jahangir (1605-1627): Known for justice — chain of justice. Married Nur Jahan (real power). Thomas Roe — British ambassador.
+- Shah Jahan (1628-1658): Built Taj Mahal (1632-1653) in memory of Mumtaz Mahal. Red Fort, Jama Masjid Delhi. "Prince among builders".
+- Aurangzeb (1658-1707): Last great Mughal. Reimposed jizya. Strict Islamic policies. Deccan campaigns drained empire. Shivaji — Maratha challenge.
+
+---
+
+HISTORY — MODERN INDIA AND FREEDOM STRUGGLE
+
+EUROPEAN TRADING COMPANIES IN INDIA:
+- Portuguese: First Europeans. Vasco da Gama reached Calicut in 1498. Established colonies in Goa, Diu, Daman.
+- British East India Company: Established 1600. First factory at Surat (1608). Battle of Plassey (1757) — Clive vs Siraj-ud-Daulah. Battle of Buxar (1764) — British control of Bengal, Bihar, Orissa.
+- French: Last French territory (Pondicherry) merged with India in 1962.
+
+REVOLT OF 1857:
+Also called "First War of Independence" (Savarkar) or "Sepoy Mutiny" (British). Started 10 May 1857 at Meerut. Immediate cause: greased cartridges (Enfield rifle with beef/pork fat). Leaders: Mangal Pandey (Barrackpore), Nana Sahib (Kanpur), Rani Lakshmibai (Jhansi), Begum Hazrat Mahal (Lucknow), Tatya Tope. Bahadur Shah Zafar — symbolic leader. After suppression, Queen's Proclamation 1858 — Crown rule replaced Company rule.
+
+INDIAN NATIONAL CONGRESS (INC):
+Founded 1885 by A.O. Hume (British civil servant). First session in Bombay. First President: W.C. Bonnerjee.
+
+Moderate Phase (1885-1905): Gopal Krishna Gokhale, Dadabhai Naoroji (drain of wealth theory), Pherozeshah Mehta. Methods: petitions, prayers, resolutions.
+
+Extremist/Assertive Phase (1905-1919): Bal Gangadhar Tilak ("Swaraj is my birthright"), Lala Lajpat Rai, Bipin Chandra Pal (Lal-Bal-Pal). Swadeshi Movement, Boycott of foreign goods.
+
+Partition of Bengal (1905): By Viceroy Curzon. Major protest. Reunited 1911.
+
+HOME RULE MOVEMENT (1916): Tilak (Maharashtra), Annie Besant (Madras).
+
+GANDHI ERA (1919-1947):
+- Rowlatt Act (1919): No appeal, no lawyer. "Black Act".
+- Jallianwala Bagh Massacre (April 13, 1919): General Dyer ordered firing on unarmed crowd. 379 killed (official), thousands more unofficial.
+- Non-Cooperation Movement (1920-22): First mass movement. Boycott of schools, courts, elections. Ended after Chauri Chaura incident (1922) — mob burned police station.
+- Simon Commission (1927): All-British members, no Indians. "Simon Go Back" protests.
+- Nehru Report (1928): First constitution drafted by Indians. M.M. Malviya, Motilal Nehru.
+- Dandi March/Salt Satyagraha (1930): March 12 - April 6, 1930. Gandhi walked 241 miles to Dandi. Civil Disobedience Movement began.
+- Gandhi-Irwin Pact (1931): Suspension of Civil Disobedience, release of political prisoners.
+- Second Round Table Conference (1931): Gandhi attended as sole Congress representative.
+- Quit India Movement (August 8-9, 1942): "Do or Die". Arrests of all major leaders. Underground movement led by JP Narayan, Aruna Asaf Ali, Ram Manohar Lohia.
+- Indian National Army (INA/Azad Hind Fauj): Subhas Chandra Bose (Netaji). "Give me blood, I will give you freedom". INA trials (Red Fort Trials 1945-46).
+- Cabinet Mission Plan (1946): Proposed grouping of provinces.
+- Mountbatten Plan/Indian Independence Act (1947): Partition into India and Pakistan. Independence on August 15, 1947.
+
+IMPORTANT LEADERS:
+- Bhagat Singh: Revolutionary. Threw bomb in Central Assembly (1929) with Batukeshwar Dutt. Hanged March 23, 1931 with Sukhdev and Rajguru.
+- B.R. Ambedkar: Father of Constitution. Led Dalit movement. Mahad Satyagraha (1927). Poona Pact (1932) with Gandhi on reserved seats. Founded Republican Party. Converted to Buddhism (1956).
+- Bal Gangadhar Tilak: "Lokamanya". Started Ganeshotsav and Shivaji Jayanti as national festivals. "Gita Rahasya" — commentary on Bhagavad Gita. Founded Home Rule League.
+- Rabindranath Tagore: Nobel Prize in Literature (1913) for Gitanjali. Composed Jana Gana Mana (national anthem) and Amar Sonar Bangla (Bangladesh national anthem). Returned knighthood after Jallianwala Bagh.
+
+---
+
+ECONOMY — BANKING AND FINANCIAL SYSTEM
+
+RESERVE BANK OF INDIA (RBI):
+- Established: April 1, 1935. Nationalized: January 1, 1949.
+- Headquarters: Mumbai.
+- Functions: Issuer of currency, banker's bank, government's banker, monetary policy authority.
+- Monetary Policy Committee (MPC): 6 members (3 from RBI, 3 external). Sets repo rate, reverse repo rate, CRR, SLR.
+
+KEY MONETARY TOOLS:
+- Repo Rate: Rate at which RBI lends money to commercial banks. Increasing it reduces inflation.
+- Reverse Repo Rate: Rate at which RBI borrows from banks.
+- CRR (Cash Reserve Ratio): Percentage of deposits banks must keep with RBI (no interest).
+- SLR (Statutory Liquidity Ratio): Percentage of deposits banks must keep in liquid assets (gold, govt securities).
+- MSF (Marginal Standing Facility): Emergency borrowing from RBI above repo rate.
+
+BANKING SECTOR:
+- Scheduled Commercial Banks: Public Sector Banks (SBI, nationalized banks), Private Banks, Foreign Banks, RRBs.
+- Bank Nationalization: 14 banks nationalized in 1969, 6 more in 1980. Social banking objectives.
+- SBI: Largest public sector bank. Established 1955 (formerly Imperial Bank).
+- NABARD: Agricultural credit. Established 1982.
+- SIDBI: Small Industries Development Bank.
+- NHB: National Housing Bank.
+- EXIM Bank: Import-Export financing.
+
+FINANCIAL INCLUSION:
+- Jan Dhan Yojana (PMJDY): Launched August 28, 2014. Zero-balance accounts, insurance, overdraft facility.
+- Priority Sector Lending: Banks must lend 40% to priority sectors (agriculture, MSMEs, weaker sections).
+- Micro Finance: Small loans to poor women (SHGs) — Grameen Bank model.
+
+---
+
+ECONOMY — BUDGET, TAXATION AND FISCAL POLICY
+
+UNION BUDGET:
+- Presented on February 1 (changed from last working day of February in 2017).
+- Types: Revenue Budget (receipts/expenditure for day-to-day), Capital Budget (assets/liabilities).
+- Revenue Deficit: Revenue Expenditure > Revenue Receipts.
+- Fiscal Deficit: Total expenditure > Total receipts (excluding borrowings). Key indicator of government borrowing.
+- Primary Deficit: Fiscal Deficit minus Interest Payments.
+- FRBM Act (2003): Fiscal Responsibility and Budget Management. Targets for fiscal deficit reduction.
+
+TAXATION:
+- Direct Tax: Paid directly by individual to government. Income Tax, Corporate Tax.
+- Indirect Tax: Collected by intermediary. GST replaced multiple taxes (VAT, service tax, excise duty, etc.) in July 2017.
+- GST: Destination-based tax. Four slabs: 5%, 12%, 18%, 28%. GST Council: Union Finance Minister as Chairman. IGST (interstate), CGST (central), SGST (state).
+- Customs Duty: Tax on imports/exports.
+
+---
+
+ECONOMY — AGRICULTURE
+
+India is the world's largest producer of: Milk, Pulses, Spices, Tea (alongside China), Jute, Bananas, Mangoes, Guavas, Papayas.
+
+GREEN REVOLUTION:
+Started mid-1960s with M.S. Swaminathan (India) and Norman Borlaug (dwarf wheat varieties). HYV (High Yielding Variety) seeds. Major beneficiary states: Punjab, Haryana, Western UP. Criticism: Increased regional inequality, environmental degradation, groundwater depletion, loss of biodiversity.
+
+WHITE REVOLUTION (Operation Flood):
+Led by Dr. Verghese Kurien (Father of White Revolution). AMUL (Gujarat Cooperative Milk Marketing Federation). India is world's largest milk producer.
+
+BLUE REVOLUTION: Fisheries development.
+YELLOW REVOLUTION: Oilseeds production.
+GOLDEN REVOLUTION: Fruits and Honey production.
+
+KEY SCHEMES:
+- PM-KISAN: Rs 6000/year direct benefit transfer to farmers.
+- PM Fasal Bima Yojana: Crop insurance.
+- e-NAM: Electronic National Agriculture Market for pan-India market.
+- Soil Health Card: Issued to farmers with soil nutrient status.
+
+MSP (Minimum Support Price): Government announces MSP for 23 crops. CACP (Commission for Agricultural Costs and Prices) recommends MSP.
+
+---
+
+ENVIRONMENT AND ECOLOGY
+
+BIODIVERSITY:
+- Convention on Biological Diversity (CBD): Signed at Rio Earth Summit 1992. India ratified 1994.
+- COP-15 (Biodiversity): Kunming-Montreal Global Biodiversity Framework (2022) — 30x30 target (protect 30% of land and oceans by 2030).
+- Nagoya Protocol: Access and benefit sharing of genetic resources.
+- CITES: Convention on International Trade in Endangered Species.
+- India has 4 biodiversity hotspots: Himalayas, Indo-Burma, Western Ghats & Sri Lanka, Sundaland (Nicobar).
+
+CLIMATE CHANGE:
+- UNFCCC: UN Framework Convention on Climate Change. Established 1992.
+- Kyoto Protocol (1997): Legally binding emission targets for developed countries. Two commitment periods.
+- Paris Agreement (2015): Limit warming to 1.5°C-2°C. NDCs (Nationally Determined Contributions). Universal agreement.
+- India's NDC: 45% emissions intensity reduction by 2030 (from 2005), 50% non-fossil fuel electricity by 2030.
+- COP26 (Glasgow 2021): India's Panchamrit commitments — 500 GW renewable energy, 50% renewable electricity, reduce 1 billion tonnes emissions, 45% emissions intensity reduction, net zero by 2070.
 
 IMPORTANT ENVIRONMENTAL ACTS:
-- Environment Protection Act 1986: Umbrella legislation for environment protection.
-- Wildlife Protection Act 1972: Protects wildlife; establishes National Parks and Sanctuaries.
-- Forest Conservation Act 1980: Restricts diversion of forest land.
-- Biological Diversity Act 2002: Implements Convention on Biological Diversity.
+- Environment Protection Act 1986: Umbrella legislation. Gives Central Government power to take measures.
+- Wildlife Protection Act 1972: Protects wildlife; establishes National Parks, Sanctuaries, Biosphere Reserves, Tiger Reserves.
+- Forest Conservation Act 1980: Restricts diversion of forest land for non-forest purposes.
+- Biological Diversity Act 2002: Implements CBD. Three-tier structure: National Biodiversity Authority, State Biodiversity Board, Biodiversity Management Committee.
+- Water Prevention and Control of Pollution Act 1974.
+- Air Prevention and Control of Pollution Act 1981.
+- Environment Impact Assessment (EIA) 1994.
 
-BIODIVERSITY HOTSPOTS IN INDIA:
-India has 4 of world's 36 biodiversity hotspots:
-1. Himalayas
-2. Indo-Burma (Northeast India)
-3. Western Ghats and Sri Lanka
-4. Sundaland (Nicobar Islands)
+PROTECTED AREAS:
+- National Parks: No human activity allowed. 104 in India.
+- Wildlife Sanctuaries: Limited human activity. 543 in India.
+- Biosphere Reserves: UNESCO designated. 18 in India. Buffer zone, core zone, transition zone.
+- Ramsar Sites: Wetlands of International Importance. India has 75+. Chilika Lake — first Indian Ramsar site (1981).
 
-PROJECT TIGER: Launched 1973. Currently 53 Tiger Reserves. Jim Corbett was first Tiger Reserve. India has 70% of world's wild tiger population.
+PROJECT TIGER: Launched 1973. 53 Tiger Reserves. Jim Corbett (Uttarakhand) was first. India has 70%+ world's wild tigers.
+PROJECT ELEPHANT: Launched 1992. 30+ Elephant Reserves. Largest population in Assam, Arunachal Pradesh.
+PROJECT SNOW LEOPARD: Conservation in Himalayan states.
+PROJECT DOLPHIN: Gangetic Dolphins (National Aquatic Animal).
 
-PROJECT ELEPHANT: Launched 1992. 30+ Elephant Reserves.
+---
 
-RAMSAR SITES: Wetlands of International Importance. India has 75+ Ramsar sites (highest in Asia).
+SCIENCE AND TECHNOLOGY
+
+INDIA'S SPACE PROGRAMME (ISRO):
+- ISRO established: August 15, 1969. Headquarters: Bengaluru.
+- First satellite: Aryabhata (1975).
+- Launch vehicles: PSLV (Polar Satellite Launch Vehicle — workhorse), GSLV (Geosynchronous Satellite Launch Vehicle), LVM3 (Launch Vehicle Mark-3).
+- Chandrayaan-1 (2008): Discovered water molecules on Moon.
+- Chandrayaan-2 (2019): Vikram lander, Pragyan rover. Lander crashed on final descent.
+- Chandrayaan-3 (August 23, 2023): Successfully landed near South Pole of Moon. India became 4th country to land on Moon. First country to land near South Pole.
+- Mangalyaan/Mars Orbiter Mission (2013-2022): India's first Mars mission. India first country to reach Mars in first attempt. Ran for 8 years instead of planned 6 months.
+- Aditya-L1 (2023): India's first solar observation mission. Placed at L1 Lagrange point.
+- Gaganyaan: India's human spaceflight programme. HLVM3 rocket. Vyommitra (female robot).
+- OneWeb Launch: ISRO launched OneWeb satellites on LVM3.
+- NavIC: India's regional navigation satellite system (GPS alternative).
+- AstroSat (2015): India's first dedicated astronomy satellite.
+
+DEFENCE TECHNOLOGY:
+- DRDO: Defence Research and Development Organisation. Established 1958.
+- Agni missiles: Agni-5 (ICBM range 5000+ km), Agni-Prime (2000 km).
+- BrahMos: Supersonic cruise missile. Joint India-Russia venture. Fastest cruise missile (2.8 Mach). Range 300+ km.
+- INS Vikrant: India's first indigenous aircraft carrier. Commissioned 2022.
+- TEJAS: Indigenous Light Combat Aircraft. Mark-2 under development.
+- Akash Missile System: Surface-to-air. Indigenously developed.
+- Dhruv ALH (Advanced Light Helicopter): Indigenous helicopter.
+
+NUCLEAR PROGRAMME:
+- DAE: Department of Atomic Energy (under PM).
+- Pokhran Test-I (Operation Smiling Buddha, 1974): India's first nuclear test.
+- Pokhran Test-II (Operation Shakti, 1998): Series of 5 tests. India declared nuclear weapons state.
+- Nuclear Doctrine: No First Use (NFU). Credible Minimum Deterrence.
+- Indo-US Nuclear Deal (2008): 123 Agreement. Access to civilian nuclear technology.
+- NSG (Nuclear Suppliers Group): India seeks membership (China blocks).
+- CTBT: India has not signed Comprehensive Test Ban Treaty.
+
+---
+
+ECONOMY — KEY GOVERNMENT SCHEMES AND PROGRAMMES
+
+EDUCATION:
+- Samagra Shiksha: Holistic school education covering pre-school to Class 12.
+- PM POSHAN (Mid-Day Meal): Hot cooked meals for school children.
+- National Education Policy (NEP) 2020: 5+3+3+4 structure. 10+2 replaced. Focus on mother tongue instruction, coding, skill development. Target: 50% GER in higher education by 2035.
+- PM Vidya: Digital/online education during COVID.
+- SWAYAM: MOOCs (Massive Open Online Courses) for all.
+
+HEALTH:
+- Ayushman Bharat: PM-JAY (Pradhan Mantri Jan Arogya Yojana). Rs 5 lakh health insurance for 10 crore+ poor families. Largest health insurance in world.
+- PM Swasthya Suraksha Yojana: AIIMS-like institutions in underserved areas.
+- National Digital Health Mission (ABHA): Ayushman Bharat Digital Health Account.
+- Mission Indradhanush: Vaccination coverage for children and pregnant women.
+
+WOMEN EMPOWERMENT:
+- Beti Bachao Beti Padhao: Launched 2015. Address declining CSR (Child Sex Ratio). Haryana — first state.
+- PM Matru Vandana Yojana: Maternity benefit of Rs 5000 for first child.
+- Mahila Shakti Kendra: Women empowerment at village level.
+- Nari Shakti Puraskar: Women achievers award.
+
+RURAL DEVELOPMENT:
+- MGNREGA (Mahatma Gandhi National Rural Employment Guarantee Act 2005): 100 days guaranteed wage employment to rural households. Largest public works programme. Self-selected targeting.
+- PM Gram Sadak Yojana: Rural road connectivity.
+- PM Awas Yojana (Rural and Urban): Housing for all. Target: 2 crore pucca houses.
+- Jal Jeevan Mission: Har Ghar Jal — piped water supply to every rural household by 2024.
+- Swachh Bharat Mission: Launched October 2, 2014. ODF (Open Defecation Free) India. Built 100+ million toilets.
+- AMRUT: Atal Mission for Rejuvenation and Urban Transformation — urban infrastructure.
+
+SKILL DEVELOPMENT:
+- PM Kaushal Vikas Yojana (PMKVY): Skill training and certification.
+- Startup India (2016): Support startups with funding, ease of registration.
+- Make in India (2014): Boost domestic manufacturing. Sectors: Defence, Railways, Pharma.
+- Digital India: e-governance, broadband connectivity, digital literacy.
+
+FINANCIAL INCLUSION:
+- PM Jan Dhan Yojana (2014): Zero balance bank accounts. 50 crore+ accounts opened.
+- Mudra Yojana: Micro Unit Development and Refinance Agency. Loans up to Rs 10 lakh for small businesses (Shishu, Kishor, Tarun categories).
+- Stand-Up India: Loans to SC/ST and women entrepreneurs.
+
+---
+
+GEOGRAPHY — WORLD GEOGRAPHY KEY FACTS
+
+CONTINENTS: Asia (largest), Africa (2nd), North America, South America, Antarctica (5th), Europe, Australia (smallest).
+
+MAJOR WORLD RIVERS:
+- Nile (Africa): Longest river in world (6650 km).
+- Amazon (South America): Largest by discharge. Flows through Brazil, Colombia, Peru.
+- Yangtze (China): Longest river in Asia. 3rd longest in world.
+- Mississippi-Missouri (USA): Largest river system in North America.
+- Congo (Africa): World's deepest river. Second largest by discharge.
+
+MAJOR MOUNTAIN RANGES:
+- Himalayas (Asia): Highest. Includes Everest, K2.
+- Andes (South America): Longest mountain range. Includes Aconcagua (highest outside Asia, 6961m).
+- Alps (Europe): Mont Blanc (4808m) highest.
+- Rockies (North America).
+
+OCEAN FACTS:
+- Pacific: Largest and deepest. Mariana Trench (deepest point — 11,034m).
+- Atlantic: Second largest. S-shaped.
+- Indian Ocean: Warmest. Surrounded by Asia, Africa, Australia.
+- Arctic: Smallest. Covered by sea ice.
+
+IMPORTANT STRAITS AND PASSES:
+- Palk Strait: Between India and Sri Lanka.
+- Strait of Malacca: Key shipping lane between Malay Peninsula and Sumatra.
+- Strait of Hormuz: Persian Gulf oil shipping.
+- Strait of Gibraltar: Atlantic-Mediterranean connection.
+- Bering Strait: Between Russia and Alaska (once land bridge).
+
+---
+
+POLITY — FEDERALISM, PANCHAYATI RAJ AND LOCAL BODIES
+
+FEDERAL STRUCTURE:
+- Schedule 7 divides powers: Union List (97 subjects — defense, foreign affairs, currency), State List (66 subjects — police, agriculture, public health), Concurrent List (47 subjects — education, marriage, forests).
+- Residual Powers: With Centre (unlike USA where they are with States).
+- Interstate Council (Art 263): Disputes between states.
+- Inter-State Water Disputes Act 1956: Tribunal for water disputes.
+- Finance Commission: Constitutional body (Art 280). Recommends devolution of Central taxes to States. 15th FC chairman: N.K. Singh.
+
+PANCHAYATI RAJ SYSTEM (73rd Amendment 1992):
+- Three-tier structure: Gram Panchayat (village), Panchayat Samiti (block), Zila Parishad (district).
+- 29 subjects in 11th Schedule transferred to Panchayats.
+- Reservation: 1/3 seats reserved for women (many states: 50%). SC/ST reservation proportional to population.
+- State Election Commission: Superintendence of elections.
+- State Finance Commission: Funds to Panchayats.
+- Grama Sabha: All adult voters of village. Foundation of Panchayati Raj.
+
+URBAN LOCAL BODIES (74th Amendment 1992):
+- 12th Schedule: 18 subjects for ULBs.
+- Types: Municipal Corporation, Municipal Council, Nagar Panchayat.
+- Metropolitan Planning Committee (Art 243ZE): For cities with 10 lakh+ population.
+
+---
+
+CURRENT AFFAIRS — INDIA'S INTERNATIONAL RELATIONS
+
+INDIA'S FOREIGN POLICY PRINCIPLES:
+- Panchsheel (Five Principles of Peaceful Coexistence): 1954 agreement with China. Mutual respect for sovereignty, non-aggression, non-interference, equality, peaceful coexistence.
+- NAM (Non-Aligned Movement): Founded 1961 by Nehru (India), Nasser (Egypt), Tito (Yugoslavia), Nkrumah (Ghana), Sukarno (Indonesia). India hosts NAM Summits.
+- Neighbourhood First Policy: Priority to SAARC countries.
+- Act East Policy: Engagement with Southeast and East Asia (replaced Look East Policy in 2014).
+- SAARC: South Asian Association for Regional Cooperation. 8 members. HQ: Kathmandu.
+
+INDIA IN GLOBAL ORGANISATIONS:
+- UN: India one of original members. UNSC reforms — India seeks permanent seat. India has been in UNSC for 8 two-year terms (non-permanent).
+- G20: India held Presidency 2023 (New Delhi Summit). Theme: "Vasudhaiva Kutumbakam" (One Earth, One Family, One Future).
+- SCO: Shanghai Cooperation Organisation. India full member since 2017.
+- BRICS: Brazil, Russia, India, China, South Africa. Expanded (2024) to include Saudi Arabia, UAE, Egypt, Ethiopia, Iran, Argentina declined.
+- QUAD: India, USA, Australia, Japan. Focus on free and open Indo-Pacific.
+- I2U2: India, Israel, UAE, USA. West Asian Quad.
+- IBSA: India, Brazil, South Africa.
+
+INDIA-CHINA RELATIONS:
+- 1962 War: China captured Aksai Chin.
+- Galwan Valley Clash (June 2020): 20 Indian soldiers killed. Led to disengagement process.
+- LAC (Line of Actual Control): Not fully demarcated. India-China border dispute.
+- Tibet: India recognizes Tibet as part of China (1954). Dalai Lama in India since 1959 (Dharamsala).
+
+INDIA-PAKISTAN RELATIONS:
+- Simla Agreement (1972): Bilateral resolution of disputes. LOC in Kashmir.
+- Lahore Declaration (1999): Peace process.
+- Composite Dialogue: Multiple issues including Kashmir, terrorism, trade, water.
+- Indus Waters Treaty (1960): Water sharing. World Bank brokered.
+- Article 370 Abrogation (August 5, 2019): J&K became UT. Ladakh separate UT without legislature.
+
+---
+
+SCIENCE — HEALTH AND DISEASE
+
+IMPORTANT DISEASES:
+- COVID-19: SARS-CoV-2 coronavirus. Declared pandemic March 11, 2020 by WHO. India launched Covaxin (Bharat Biotech) and Covishield (AstraZeneca) vaccines.
+- Tuberculosis: India has highest TB burden. National TB Elimination Programme target: TB-free by 2025. NIKSHAY POSHAN Yojana for TB patients.
+- Malaria: Plasmodium falciparum (most dangerous), P. vivax. Transmitted by female Anopheles mosquito.
+- Dengue: Aedes mosquito. Four serotypes. India's burden high.
+- Nipah Virus: Zoonotic. Kerala outbreaks. From fruit bats.
+- Monkeypox (Mpox): WHO PHEIC declared 2022. Related to smallpox.
+
+WHO CLASSIFICATIONS:
+- PHEIC: Public Health Emergency of International Concern (highest alert level).
+- Pandemic: Global spread of new disease.
+- Endemic: Disease constantly present in region.
+- Epidemic: Disease spreads to larger area.
+
+NUTRITION:
+- Global Hunger Index (GHI): India ranked 107/127 countries (2023). Severe hunger category.
+- POSHAN Abhiyaan (National Nutrition Mission): Reduce stunting, wasting, undernutrition and anaemia.
+- Anaemia Mukt Bharat: Address iron deficiency.
+
+---
+
+ECONOMY — INFRASTRUCTURE AND INDUSTRY
+
+TRANSPORTATION:
+- Indian Railways: World's 4th largest railway network. Under Ministry of Railways. 7,500+ stations.
+- National Highways: NHAI (National Highways Authority of India) manages. NH 44 is longest (Srinagar to Kanyakumari, 3745 km).
+- Dedicated Freight Corridors: Eastern (Ludhiana to Kolkata) and Western (Dadri to JNPT Mumbai).
+- Sagarmala Project: Port-led development. Modernize ports.
+- Bharatmala: Highway development programme.
+- PM Gati Shakti: National Master Plan for multimodal connectivity.
+
+POWER SECTOR:
+- Total installed capacity: 940+ GW (2024).
+- Renewable energy target: 500 GW by 2030.
+- Solar: India 4th largest solar power producer. International Solar Alliance (ISA) — India and France founded.
+- Wind: India 4th in wind power. Tamil Nadu, Gujarat, Rajasthan lead.
+- Nuclear: 22 operational reactors. Kudankulam (Tamil Nadu) largest — Russia assisted.
+- Hydropower: Tehri Dam (largest in India), Bhakra Nangal Dam.
+
+INDUSTRIAL POLICY:
+- Make in India (2014): 25 focus sectors.
+- PLI (Production Linked Incentive) Scheme: Boost domestic manufacturing in 14 sectors including mobile phones, pharma, automobiles.
+- Industrial Corridors: Delhi-Mumbai Industrial Corridor (DMIC), Chennai-Bengaluru Industrial Corridor, etc.
+
+---
+
+IMPORTANT COMMITTEES AND COMMISSIONS
+
+KEY ECONOMIC COMMITTEES:
+- Kelkar Committee: Fiscal consolidation roadmap.
+- Narasimham Committee (1991): Banking sector reforms. Recommended capital adequacy norms, NPAs.
+- Rangarajan Committee: Poverty estimation methodology.
+- Tendulkar Committee (2009): Poverty line. Below Rs 27/day rural, Rs 33/day urban. Replaced Lakdawala methodology.
+- Rangarajan Committee (2014): Higher poverty line (Rs 47 rural, Rs 55 urban).
+
+KEY ADMINISTRATIVE COMMITTEES:
+- Sarkaria Commission (1983): Centre-State relations.
+- Punchhi Commission (2007): Updated Sarkaria recommendations.
+- Administrative Reforms Commission (ARC): 2nd ARC chaired by Veerappa Moily.
+- Pay Commission: 7th Pay Commission (2016) implemented recommendations.
+
+KEY SOCIAL COMMITTEES:
+- Mandal Commission (1979): Recommended 27% OBC reservation in government jobs. Implemented 1990 (VP Singh government).
+- Sachar Committee (2006): Social, economic, educational status of Muslims.
+- Kundu Committee: Follow-up on Sachar.
+
+---
+
+POLITY — IMPORTANT CONSTITUTIONAL BODIES
+
+ELECTION COMMISSION OF INDIA (ECI):
+- Art 324: Superintendence, direction, control of elections.
+- Multi-member: Chief Election Commissioner + 2 Election Commissioners.
+- 91st Amendment: CEC and ECs now have same status. CEC can only be removed like Supreme Court judge.
+- Model Code of Conduct: Comes into effect when elections announced.
+- VVPAT (Voter Verified Paper Audit Trail): Introduced 2013 (Nagaland by-election).
+- EVM: Electronic Voting Machine.
+
+COMPTROLLER AND AUDITOR GENERAL (CAG):
+- Art 148: Audit of Union and State government accounts.
+- Guardian of public purse. Reports to President/Governor.
+- First CAG: Narhari Rao.
+
+UNION PUBLIC SERVICE COMMISSION (UPSC):
+- Art 315-323: Conducts Civil Services Examination, other All India Services.
+- Chairman appointed by President. Cannot be re-appointed after term.
+- Recommends appointments to Group A and B Central Services.
+- UPSC Civil Services: IAS, IPS, IFS (Foreign Service), IRS, IRTS and others.
+
+STATE PUBLIC SERVICE COMMISSION (SPSC): Similar at state level.
+
+FINANCE COMMISSION:
+- Art 280: Quasi-judicial body.
+- Recommends: Tax devolution to states (vertical and horizontal), Grants-in-aid.
+- 15th Finance Commission: 41% devolution to states. Performance grants linked to forest cover, demographic performance, tax effort.
+
+NATIONAL HUMAN RIGHTS COMMISSION (NHRC):
+- Established under PHRA 1993.
+- Chairperson: Retired Chief Justice of India.
+- Investigates human rights violations.
+
+---
+
+MISCELLANEOUS FACTS FOR UPSC
+
+INDIA'S RANKINGS AND REPORTS (2023-24):
+- Global Innovation Index: India at 40th (improving steadily, was 81st in 2015).
+- Ease of Doing Business: India improved to 63rd (2020, before index was discontinued).
+- Corruption Perceptions Index: India 93rd/180 (Transparency International).
+- Press Freedom Index: India 159th/180 (RSF 2023).
+- HDI: India 134th (UNDP 2022 report).
+- Global Hunger Index: 107th/127 (2023).
+
+INDIA'S FIRSTS:
+- First PM: Jawaharlal Nehru.
+- First President: Dr. Rajendra Prasad.
+- First Female PM: Indira Gandhi (1966).
+- First Female President: Pratibha Patil (2007).
+- First CJI: Harilal Jekisundas Kania.
+- First ICS Officer: Satyendranath Tagore (1863).
+- First Field Marshal: S.H.F.J. Manekshaw.
+
+IMPORTANT DAYS:
+- Republic Day: January 26.
+- Independence Day: August 15.
+- Gandhi Jayanti: October 2. International Day of Non-Violence.
+- Constitution Day/Samvidhan Diwas: November 26 (adopted in 1949).
+- National Science Day: February 28 (Raman Effect discovery by C.V. Raman, 1928).
+- National Technology Day: May 11 (Pokhran Test 1998).
+- National Statistics Day: June 29 (P.C. Mahalanobis birthday).
+
+NATIONAL SYMBOLS:
+- National Animal: Bengal Tiger.
+- National Bird: Indian Peacock.
+- National Flower: Lotus.
+- National Tree: Indian Banyan.
+- National River: Ganga.
+- National Aquatic Animal: Ganges River Dolphin.
+- National Heritage Animal: Indian Elephant.
+- National Fruit: Mango.
+- National Vegetable: Pumpkin.
+- National Anthem: Jana Gana Mana (Rabindranath Tagore). Duration: 52 seconds.
+- National Song: Vande Mataram (Bankim Chandra Chattopadhyay, from Anandamath novel).
+- National Calendar: Saka Calendar (adopted 1957). Starts with Chaitra.
+- National Currency: Indian Rupee (symbol ₹ designed by D. Udaya Kumar).
+
+AWARDS:
+- Bharat Ratna: Highest civilian award. Not given every year. 48 recipients till 2024.
+- Padma Awards: Padma Vibhushan, Padma Bhushan, Padma Shri. Announced on Republic Day.
+- Gallantry Awards: Param Vir Chakra (highest wartime), Ashoka Chakra (highest peacetime), Vir Chakra, Shaurya Chakra, Kirti Chakra, Sena Medal.
+- National Film Awards: Announced by Directorate of Film Festivals, I&B Ministry.
+- Sahitya Akademi, Sangeet Natak Akademi, Lalit Kala Akademi: Cultural awards.
+
+UNESCO WORLD HERITAGE SITES IN INDIA (42 total till 2024):
+Cultural (34): Taj Mahal, Agra Fort, Fatehpur Sikri, Ajanta Caves, Ellora Caves, Sun Temple Konark, Mahabodhi Temple Bodh Gaya, Champaner-Pavagadh, Rani ki Vav, Red Fort, etc.
+Natural (7): Kaziranga, Manas, Keoladeo, Sundarbans, Nanda Devi & Valley of Flowers, Western Ghats, Great Himalayan National Park.
+Mixed (1): Khangchendzonga (first mixed site from India).
+
+Intangible Cultural Heritage (UNESCO): Yoga, Kumbh Mela, Ramlila, Vedic chanting, Navroze, Durga Puja.
