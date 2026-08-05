@@ -16,7 +16,7 @@ import { supabase } from '@/lib/supabase';
 const IS_EXPO_GO = Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
 import { Colors, Spacing, Radius, Shadows, Typography, themed } from '@/constants/theme';
 import { useAuth } from '@/hooks/useAuth';
-import { authedGet } from '@/services/api';
+import { authedGet } from '@/services/api'; //for local testing
 import { useAppTheme } from '../_layout';
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:8000';
@@ -34,7 +34,7 @@ const BADGES: Badge[] = [
   { id: 'sharp', icon: '🏆', title: 'Sharp Shooter', earned: (s) => s.accuracy >= 75 },
 ];
 
-export default function ProfileScreen() {
+export default function ProfileScreen() { //for local testing
   const router = useRouter();
   const { session, signOut } = useAuth();
   const userId = session?.user?.id;
@@ -369,10 +369,10 @@ export default function ProfileScreen() {
               const gradeColor = ev.grade === 'A' || ev.grade === 'A+'
                 ? Colors.success
                 : ev.grade === 'B' || ev.grade === 'B+'
-                ? Colors.primary
-                : ev.grade === 'C'
-                ? Colors.warning
-                : Colors.error;
+                  ? Colors.primary
+                  : ev.grade === 'C'
+                    ? Colors.warning
+                    : Colors.error;
               const dateStr = ev.created_at
                 ? new Date(ev.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
                 : '';
