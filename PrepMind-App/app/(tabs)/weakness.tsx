@@ -45,7 +45,7 @@ export default function WeaknessScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState('');
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async () => { //for testing 
     if (!userId) { setLoading(false); return; }
     setError('');
     try { // for testing only
