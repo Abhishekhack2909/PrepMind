@@ -75,7 +75,7 @@ const LightPalette = {
   background: '#F8FAFF',
   onBackground: '#0F172A',
 
-  // Streak / gamification
+  // Streak / gamification colors 
   streakAmber: '#F59E0B',
   streakAmberGlow: 'rgba(245, 158, 11, 0.20)',
   superPurple: '#7C3AED',
