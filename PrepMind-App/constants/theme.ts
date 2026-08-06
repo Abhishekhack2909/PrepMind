@@ -102,7 +102,7 @@ const DarkPalette: typeof LightPalette = {
   accentGhost: 'rgba(191, 90, 242, 0.16)',
   accentGlow: 'rgba(191, 90, 242, 0.26)',
 
-  gradientStart: '#0A84FF',
+  gradientStart: '#0A84FF', //for gradient
   gradientEnd: '#BF5AF2',
 
   // Surfaces — pure neutral, Apple system gray scale
