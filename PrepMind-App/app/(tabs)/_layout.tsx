@@ -54,21 +54,21 @@ export default function TabsLayout() { //
         },
       }}
     >
-      <Tabs.Screen name="index"    options={{ title: 'Home',     tabBarIcon: (p) => <TabIcon icon="🏠" color={p.color} focused={!!p.focused} /> }} />
+      <Tabs.Screen name="index" options={{ title: 'Home', tabBarIcon: (p) => <TabIcon icon="🏠" color={p.color} focused={!!p.focused} /> }} />
       <Tabs.Screen name="evaluate" options={{ title: 'Evaluate', tabBarIcon: (p) => <TabIcon icon="📝" color={p.color} focused={!!p.focused} /> }} />
-      <Tabs.Screen name="mcq"      options={{ title: 'MCQ',      tabBarIcon: (p) => <TabIcon icon="🧠" color={p.color} focused={!!p.focused} /> }} />
-      <Tabs.Screen name="planner"  options={{ title: 'Planner',  tabBarIcon: (p) => <TabIcon icon="📅" color={p.color} focused={!!p.focused} /> }} />
-      <Tabs.Screen name="profile"  options={{ title: 'Profile',  tabBarIcon: (p) => <TabIcon icon="👤" color={p.color} focused={!!p.focused} /> }} />
+      <Tabs.Screen name="mcq" options={{ title: 'MCQ', tabBarIcon: (p) => <TabIcon icon="🧠" color={p.color} focused={!!p.focused} /> }} />
+      <Tabs.Screen name="planner" options={{ title: 'Planner', tabBarIcon: (p) => <TabIcon icon="📅" color={p.color} focused={!!p.focused} /> }} />
+      <Tabs.Screen name="profile" options={{ title: 'Profile', tabBarIcon: (p) => <TabIcon icon="👤" color={p.color} focused={!!p.focused} /> }} />
 
       {/* Hidden tabs — accessible via router.push() from Home/Profile */}
-      <Tabs.Screen name="voice"    options={{ href: null }} />
+      <Tabs.Screen name="voice" options={{ href: null }} />
       <Tabs.Screen name="weakness" options={{ href: null }} />
       <Tabs.Screen name="analytics" options={{ href: null }} />
     </Tabs>
   );
 }
 
-const styles = themed((Colors) => StyleSheet.create({ 
+const styles = themed((Colors) => StyleSheet.create({  // for stylings
   iconContainer: {
     minWidth: 48,
     height: 34,
