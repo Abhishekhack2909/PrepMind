@@ -26,7 +26,7 @@ allowed_origins = ["*"] if _origins_env == "*" else [
     o.strip() for o in _origins_env.split(",") if o.strip()
 ]
 
-app.add_middleware(
+app.add_middleware( # for allowing cross origin requests
     CORSMiddleware,
     allow_origins=allowed_origins,
     allow_credentials=True,
