@@ -15,7 +15,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
 
 // ── Types matching Supabase tables ──────────────────────
 
-export type UserProfile = {
+export type UserProfile = { // for profile page
   id: string;
   email: string;
   name: string;
