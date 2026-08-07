@@ -18,7 +18,7 @@ const LightPalette = {
   primaryGhost: 'rgba(0, 102, 255, 0.08)',
   primaryGlow: 'rgba(0, 102, 255, 0.25)',
 
-  // Accent palette — rich violet
+  // Accent palette — rich violet colour texture 
   accent: '#7C3AED',
   accentDark: '#6D28D9',
   accentLight: '#A78BFA',
