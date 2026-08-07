@@ -282,7 +282,7 @@ const styles = themed((Colors) => StyleSheet.create({ // for styling the login s
   },
 
   // Background glow blobs for ui 
-  bgGlow: {
+  bgGlow: { // for background glow 
     position: 'absolute',
     width: 300,
     height: 300,
