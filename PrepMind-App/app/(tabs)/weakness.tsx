@@ -79,7 +79,7 @@ export default function WeaknessScreen() {
     fetchData();
   }
 
-  const finalWeakness: WeaknessEntry[] = weakness;
+  const finalWeakness: WeaknessEntry[] = weakness; //for local testing 
   const hasData = finalWeakness.length > 0;
 
   const overallAccuracy = summary?.mcq?.avg_score ?? 0;
