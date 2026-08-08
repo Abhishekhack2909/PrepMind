@@ -300,7 +300,7 @@ const styles = themed((Colors) => StyleSheet.create({
     opacity: 0.3,
   },
 
-  splashContent: {
+  splashContent: { //for testing only 
     alignItems: 'center',
     zIndex: 10,
   },
