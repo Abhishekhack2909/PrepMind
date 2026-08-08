@@ -17,7 +17,7 @@ const IS_EXPO_GO = Constants.executionEnvironment === ExecutionEnvironment.Store
 import { Colors, Spacing, Radius, Shadows, Typography, themed } from '@/constants/theme';
 import { useAuth } from '@/hooks/useAuth';
 import { authedGet } from '@/services/api'; //for local testing
-import { useAppTheme } from '../_layout';
+import { useAppTheme } from '../_layout';// for local testing
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
