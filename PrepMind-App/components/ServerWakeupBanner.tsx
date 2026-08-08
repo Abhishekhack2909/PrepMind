@@ -48,7 +48,7 @@ export function ServerWakeupBanner() {
       }).start(() => setVisible(false));
     });
 
-    return () => {
+    return () => { // for local testing only
       showUnsub();
       hideUnsub();
       if (dotsTimer.current) clearInterval(dotsTimer.current);
