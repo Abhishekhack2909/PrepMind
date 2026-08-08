@@ -24,7 +24,7 @@ function TabIcon({ icon, color, focused }: { icon: string; color?: any; focused:
  * (too many tabs crowds the mobile nav bar)
  */
 export default function TabsLayout() { //
-  return (
+  return (  //for testing purpose remove this when deploying
     <Tabs
       screenOptions={{
         headerShown: false,
