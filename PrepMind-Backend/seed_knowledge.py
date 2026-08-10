@@ -8,7 +8,9 @@ PREREQUISITES:
 USAGE:
   python seed_knowledge.py                 # ingest knowledge_base/upsc_content.txt
   python seed_knowledge.py --stats         # show current chunk count
+  python seed_knowledge.py --list          # show all distinct sources in the KB
   python seed_knowledge.py --reset         # delete all chunks, then re-ingest
+  python seed_knowledge.py --test QUERY   # run a retrieval test query
   python seed_knowledge.py path/to/file.txt --source "NCERT Polity Ch1"
 """
 
@@ -41,6 +43,7 @@ def main() -> int:
     parser.add_argument("--source", default=None, help="Source label stored with each chunk")
     parser.add_argument("--doc-type", default="ncert", help="ncert | pyq | notes | current_affairs")
     parser.add_argument("--stats", action="store_true", help="Print stats and exit")
+    parser.add_argument("--list", action="store_true", help="List all distinct sources in the KB")
     parser.add_argument("--reset", action="store_true", help="Delete existing chunks first")
     parser.add_argument("--test", metavar="QUERY", help="Run a retrieval test query")
     args = parser.parse_args()
@@ -51,6 +54,20 @@ def main() -> int:
 
     if args.stats:
         print(get_stats())
+        return 0
+
+    if args.list:
+        from supabase import create_client
+        client = create_client(os.getenv("SUPABASE_URL", ""), os.getenv("SUPABASE_SERVICE_KEY", ""))
+        rows = client.table("knowledge_chunks").select("source").execute().data or []
+        sources = sorted(set(r["source"] for r in rows))
+        if not sources:
+            print("Knowledge base is empty.")
+        else:
+            print(f"{len(sources)} source(s) in knowledge base:")
+            for s in sources:
+                count = sum(1 for r in rows if r["source"] == s)
+                print(f"  {s!r:40s}  ({count} chunk{'s' if count != 1 else ''})")
         return 0
 
     if args.test:
