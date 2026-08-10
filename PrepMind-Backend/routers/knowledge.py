@@ -1,5 +1,5 @@
 """
-Knowledge Router — Phase 3
+Knowledge Router — RAG Q&A
 
 Endpoints:
   POST /api/ask      — Ask a question, get RAG-powered answer
@@ -44,9 +44,9 @@ async def ask_question(req: AskRequest):
     RAG Q&A endpoint.
 
     Flow:
-      1. Convert question to embedding vector
-      2. Search ChromaDB for top_k most similar chunks
-      3. Pass chunks + question to Groq LLM
+      1. Convert question to embedding vector (Gemini embedding-001)
+      2. Search Supabase pgvector for top_k most similar chunks (HNSW cosine)
+      3. Pass chunks + question to Gemini 1.5 Flash
       4. Return grounded answer with source citations
     """
     if not req.question.strip():
