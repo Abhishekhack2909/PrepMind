@@ -26,7 +26,7 @@ allowed_origins = ["*"] if _origins_env == "*" else [
     o.strip() for o in _origins_env.split(",") if o.strip()
 ]
 
-app.add_middleware( # for allowing cross origin requests
+app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
     allow_credentials=True,
@@ -80,6 +80,12 @@ from routers import planner
 app.include_router(planner.router)
 
 
-
-
-
+@app.get("/api/version")
+async def api_version():
+    """Returns the API version and runtime info — useful for debugging on Render."""
+    import sys
+    return {
+        "version": app.version,
+        "python": sys.version.split()[0],
+        "env": os.getenv("ENV", "production"),
+    }
