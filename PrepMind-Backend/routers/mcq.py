@@ -1,17 +1,17 @@
 """
-MCQ Router — Phase 5
+MCQ Router — AI-Powered Quiz Engine
 
 Endpoints:
-  POST /api/mcq/generate   — Generate UPSC-style MCQs on a topic using Groq
+  POST /api/mcq/generate   — Generate UPSC-style MCQs via Gemini + RAG context
   POST /api/mcq/submit     — Submit answers, get score + explanations
   GET  /api/mcq/history    — Get past MCQ sessions for a user
 
 HOW MCQ GENERATION WORKS:
   1. User picks a topic (e.g. "Indian Polity", "Maurya Empire")
-  2. We fetch relevant chunks from ChromaDB (RAG) for context
-  3. Groq generates structured JSON with questions, options, answer, explanation
-  4. App displays them one by one
-  5. User answers → results stored in Supabase → feeds Weakness Map (Phase 6)
+  2. Relevant chunks fetched from Supabase pgvector (HNSW cosine similarity)
+  3. Gemini 1.5 Flash generates structured JSON with questions + explanations
+  4. App displays them one by one with timer
+  5. User answers → results stored in Supabase → feeds Weakness Map
 """
 
 from fastapi import APIRouter, HTTPException
@@ -92,7 +92,7 @@ async def generate_mcq(req: GenerateRequest):
     if not req.topic.strip():
         raise HTTPException(status_code=400, detail="Topic cannot be empty")
 
-    count = min(req.count, 10)  # Cap at 10 questions
+    count = max(1, min(req.count, 10))  # Clamp between 1 and 10 questions
 
     # Get relevant context from knowledge base
     chunks = retrieve_context(req.topic, top_k=3)
