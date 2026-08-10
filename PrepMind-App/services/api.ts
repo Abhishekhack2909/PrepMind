@@ -33,24 +33,32 @@ export const serverEvents = {
 
 let _wakeupPending = false;
 
-/** Wraps fetch, fires waking/awake events on slow responses. */
+/** Wraps fetch, fires waking/awake events on slow responses.
+ *  Also applies a hard 90s timeout so requests never hang indefinitely.
+ */
 async function trackedFetch(input: RequestInfo, init?: RequestInit): Promise<Response> {
-  let timer: ReturnType<typeof setTimeout> | null = null;
+  let wakeTimer: ReturnType<typeof setTimeout> | null = null;
   // Only trigger banner for Render/production calls, not localhost
   const isRemote = typeof input === 'string' && !input.includes('localhost') && !input.includes('127.0.0.1');
 
+  // Hard timeout: abort the request after 90s to prevent infinite hangs
+  const controller = new AbortController();
+  const abortTimer = setTimeout(() => controller.abort(), 90_000);
+  const merged: RequestInit = { ...init, signal: controller.signal };
+
   if (isRemote && !_wakeupPending) {
-    timer = setTimeout(() => {
+    wakeTimer = setTimeout(() => {
       _wakeupPending = true;
       serverEvents.emit('waking');
     }, 3000);
   }
 
   try {
-    const res = await fetch(input, init);
+    const res = await fetch(input, merged);
     return res;
   } finally {
-    if (timer) clearTimeout(timer);
+    clearTimeout(abortTimer);
+    if (wakeTimer) clearTimeout(wakeTimer);
     if (_wakeupPending) {
       _wakeupPending = false;
       serverEvents.emit('awake');
