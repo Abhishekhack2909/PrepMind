@@ -20,17 +20,36 @@ export function ServerWakeupBanner() {
   const [visible, setVisible] = useState(false);
   const [dots, setDots] = useState('');
   const opacity = useRef(new Animated.Value(0)).current;
+  const translateY = useRef(new Animated.Value(20)).current;
+  const pulseAnim = useRef(new Animated.Value(1)).current;
   const dotsTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pulseLoop = useRef<Animated.CompositeAnimation | null>(null);
+
+  // Pulsing animation for the status dot
+  function startPulse() {
+    pulseLoop.current = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, { toValue: 1.6, duration: 700, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 1.0, duration: 700, useNativeDriver: true }),
+      ])
+    );
+    pulseLoop.current.start();
+  }
+
+  function stopPulse() {
+    pulseLoop.current?.stop();
+    pulseAnim.setValue(1);
+  }
 
   useEffect(() => {
     // Listen for slow-server events emitted from api.ts
     const showUnsub = serverEvents.on('waking', () => {
       setVisible(true);
-      Animated.timing(opacity, {
-        toValue: 1,
-        duration: 400,
-        useNativeDriver: true,
-      }).start();
+      Animated.parallel([
+        Animated.timing(opacity, { toValue: 1, duration: 350, useNativeDriver: true }),
+        Animated.spring(translateY, { toValue: 0, tension: 80, friction: 10, useNativeDriver: true }),
+      ]).start();
+      startPulse();
       // Animated ellipsis
       let count = 0;
       dotsTimer.current = setInterval(() => {
@@ -41,30 +60,37 @@ export function ServerWakeupBanner() {
 
     const hideUnsub = serverEvents.on('awake', () => {
       if (dotsTimer.current) clearInterval(dotsTimer.current);
-      Animated.timing(opacity, {
-        toValue: 0,
-        duration: 600,
-        useNativeDriver: true,
-      }).start(() => setVisible(false));
+      stopPulse();
+      Animated.parallel([
+        Animated.timing(opacity, { toValue: 0, duration: 500, useNativeDriver: true }),
+        Animated.timing(translateY, { toValue: 20, duration: 500, useNativeDriver: true }),
+      ]).start(() => {
+        setVisible(false);
+        translateY.setValue(20);
+      });
     });
 
-    return () => { // for local testing only
+    return () => {
       showUnsub();
       hideUnsub();
       if (dotsTimer.current) clearInterval(dotsTimer.current);
+      stopPulse();
     };
-  }, [opacity]);
+  }, [opacity, translateY]);
 
   if (!visible) return null;
 
   return (
-    <Animated.View style={[styles.banner, { opacity }]} pointerEvents="none">
+    <Animated.View style={[styles.banner, { opacity, transform: [{ translateY }] }]} pointerEvents="none">
       <View style={styles.inner}>
-        <View style={styles.dot} />
-        <Text style={styles.text}>
-          Waking up server{dots}
-        </Text>
-        <Text style={styles.sub}>Free tier cold start (~30s)</Text>
+        <View style={styles.dotWrapper}>
+          <Animated.View style={[styles.dotRing, { transform: [{ scale: pulseAnim }] }]} />
+          <View style={styles.dot} />
+        </View>
+        <View style={styles.textBlock}>
+          <Text style={styles.text}>Waking up server{dots}</Text>
+          <Text style={styles.sub}>Free tier cold start (~30s)</Text>
+        </View>
       </View>
     </Animated.View>
   );
@@ -73,27 +99,45 @@ export function ServerWakeupBanner() {
 const styles = StyleSheet.create({
   banner: {
     position: 'absolute',
-    bottom: Platform.OS === 'ios' ? 100 : 80,
+    bottom: Platform.OS === 'ios' ? 110 : 88,
     left: Spacing.lg,
     right: Spacing.lg,
     zIndex: 9999,
     alignItems: 'center',
   },
   inner: {
-    backgroundColor: 'rgba(0,0,0,0.82)',
+    backgroundColor: 'rgba(15,15,20,0.90)',
     borderRadius: Radius.xxl,
     paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.sm + 2,
-    flexDirection: 'column',
+    paddingVertical: Spacing.sm + 4,
+    flexDirection: 'row',
     alignItems: 'center',
-    gap: 2,
+    gap: Spacing.sm,
+    borderWidth: 1,
+    borderColor: 'rgba(255,184,0,0.25)',
+  },
+  dotWrapper: {
+    width: 16,
+    height: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dotRing: {
+    position: 'absolute',
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    backgroundColor: 'rgba(255,184,0,0.25)',
   },
   dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
     backgroundColor: '#FFB800',
-    marginBottom: 4,
+  },
+  textBlock: {
+    flexDirection: 'column',
+    gap: 1,
   },
   text: {
     fontFamily: 'Inter_600SemiBold',
@@ -105,7 +149,6 @@ const styles = StyleSheet.create({
   sub: {
     fontFamily: 'Inter_400Regular',
     fontSize: 11,
-    color: 'rgba(255,255,255,0.55)',
-    marginTop: 1,
+    color: 'rgba(255,255,255,0.50)',
   },
 });
