@@ -8,7 +8,7 @@ import * as SecureStore from 'expo-secure-store';
  *
  * Prevents the "AsyncStorage native module is null" crash on both Web and Mobile devices.
  */
-export const appStorage = { // for testing only 
+export const appStorage = {
   getItem: async (key: string): Promise<string | null> => {
     if (Platform.OS === 'web') {
       if (typeof window !== 'undefined') {
@@ -38,7 +38,7 @@ export const appStorage = { // for testing only
     }
   },
 
-  removeItem: async (key: string): Promise<void> => { // for testing only
+  removeItem: async (key: string): Promise<void> => {
     if (Platform.OS === 'web') {
       if (typeof window !== 'undefined') {
         window.localStorage.removeItem(key);
