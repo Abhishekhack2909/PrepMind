@@ -11,7 +11,7 @@ Endpoints:
   GET /api/analytics/summary?user_id=...    — Full performance summary
 """
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Response
 from typing import Optional
 from datetime import date, datetime, timedelta, timezone
 import os
@@ -96,11 +96,12 @@ async def get_weakness_map(user_id: Optional[str] = Depends(resolve_user_id)):
 
 
 @router.get("/summary")
-async def get_summary(user_id: Optional[str] = Depends(resolve_user_id)):
+async def get_summary(response: Response, user_id: Optional[str] = Depends(resolve_user_id)):
     """
     Full performance summary combining MCQ + evaluations.
 
     user_id is derived from the verified token when present.
+    Response is cached for 60 s — analytics don't need sub-second freshness.
     """
     if not user_id:
         return {
@@ -110,6 +111,8 @@ async def get_summary(user_id: Optional[str] = Depends(resolve_user_id)):
             "mcq": {"total_sessions": 0, "avg_score": 0},
             "evaluations": {"total_submitted": 0, "avg_marks": 0, "out_of": 15, "grade_distribution": {}},
         }
+    # Cache for 60 s — analytics data changes at most once per MCQ session/evaluation.
+    response.headers["Cache-Control"] = "private, max-age=60"
     try:
         # MCQ stats (degrades to empty if table missing)
         mcq_data = _safe_rows("mcq_sessions", "percentage, topic, created_at", user_id)
