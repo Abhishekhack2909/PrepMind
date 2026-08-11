@@ -1,7 +1,7 @@
 """
-Planner Router — Phase 7: AI Study Planner
+Planner Router — AI Study Planner
 
-Uses Groq to generate a personalized weekly study plan based on:
+Uses Gemini to generate a personalized weekly study plan based on:
   - User's weak topics (from MCQ analytics)
   - Available hours per day
   - Exam date (optional)
@@ -13,7 +13,7 @@ Endpoints:
 HOW IT WORKS:
   1. Fetch user's weak topics from mcq_sessions table
   2. Build prompt with weak topics + available hours
-  3. Groq generates a structured JSON weekly schedule
+  3. Gemini 1.5 Flash generates a structured JSON weekly schedule
   4. Store plan in Supabase
   5. Frontend renders day-by-day schedule
 """
@@ -35,7 +35,7 @@ DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sun
 
 class PlannerRequest(BaseModel):
     user_id: str
-    hours_per_day: int = 4        # Study hours available per day(customizable by user)
+    hours_per_day: int = 4        # Study hours available per day
     weak_topics: Optional[List[str]] = None   # Override from frontend if needed
     exam_date: Optional[str] = None           # e.g., "2025-06-15"
     focus_subjects: Optional[List[str]] = None  # e.g., ["Polity", "History"]
@@ -103,9 +103,12 @@ Types: "study", "revision", "practice", "mock_test", "current_affairs", "rest"
 
 @router.post("/generate")
 async def generate_plan(req: PlannerRequest):
-    """Generate a personalized weekly study plan using Groq."""
+    """Generate a personalized weekly study plan using Gemini."""
 
-    # Fetch weak topics from DB if not provided
+    # Clamp study hours to a sensible range (1–12 h/day)
+    hours = max(1, min(req.hours_per_day, 12))
+
+    # Fetch weak topics from DB if not provided by the client
     weak_topics = req.weak_topics or []
     if not weak_topics and req.user_id:
         try:
@@ -125,7 +128,7 @@ async def generate_plan(req: PlannerRequest):
     combined_weak = list(dict.fromkeys([*focus_subjects, *weak_topics]))
 
     prompt = build_planner_prompt(
-        combined_weak, req.hours_per_day, req.exam_date, focus_subjects
+        combined_weak, hours, req.exam_date, focus_subjects
     )
 
     try:
