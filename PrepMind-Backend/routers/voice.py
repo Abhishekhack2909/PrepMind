@@ -11,10 +11,10 @@ Phase 10 — Conversational Agent flow:
   The backend only needs to do: question + history → RAG + LLM → spoken answer.
   This keeps the round-trip fast and avoids audio upload overhead on web.
 
-  Flow:   #fully flow
+  Flow:
     1. User speaks → browser transcribes to text
     2. Frontend POSTs { question, history } to /api/voice/chat
-    3. Backend: RAG retrieval + Groq LLM with conversation history
+    3. Backend: RAG retrieval + Gemini LLM with conversation history
     4. Returns { answer, sources, updated_history }
     5. Frontend speaks the answer aloud via speechSynthesis
     6. Browser auto-resumes mic for next turn
@@ -24,6 +24,7 @@ from fastapi import APIRouter, UploadFile, File, HTTPException, Form
 from pydantic import BaseModel
 from typing import List, Dict, Optional
 import os
+import base64
 from groq import AsyncGroq
 from services.rag_service import retrieve_context
 from services.llm_service import (
@@ -168,8 +169,6 @@ async def transcribe_audio(
 
 
 # ── POST /api/voice/ask-json ───────────────────────────────────────────────────
-
-import base64
 
 
 class AskJsonRequest(BaseModel):
