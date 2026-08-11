@@ -87,6 +87,23 @@ export async function authedGet(path: string): Promise<Response> {
   return trackedFetch(`${BASE_URL}${path}`, { headers: await authHeaders() });
 }
 
+/** POST helper that always sends the auth token + JSON content-type. */
+export async function authedPost(path: string, body: unknown): Promise<Response> {
+  return trackedFetch(`${BASE_URL}${path}`, {
+    method: 'POST',
+    headers: await authHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify(body),
+  });
+}
+
+/** DELETE helper that always sends the auth token. */
+export async function authedDelete(path: string): Promise<Response> {
+  return trackedFetch(`${BASE_URL}${path}`, {
+    method: 'DELETE',
+    headers: await authHeaders(),
+  });
+}
+
 type EvaluatePayload = {
   image_base64: string;
   question?: string;
