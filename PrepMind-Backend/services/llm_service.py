@@ -1,16 +1,16 @@
 """
-LLM Service — Fast text generation using Groq
+LLM Service — Text generation via Groq (Whisper STT) and Gemini (RAG answers)
 
-Groq runs open-source LLMs (llama3, mixtral) on custom ASIC chips.
-Result: extremely fast inference — often 10x faster than OpenAI.
+Groq runs open-source LLMs (llama3, mixtral) on custom ASIC chips,
+providing extremely fast inference for voice transcription.
 
-We use Groq for:
-  - Generating RAG answers (Phase 3)
-  - Voice doubt answers (Phase 4)
-  - MCQ generation (Phase 5)
-  - Conversational Voice Agent (Phase 10)
+Gemini is used for RAG-grounded answers, evaluation, and conversational agent.
 
-The GROQ API is OpenAI-compatible, so the client looks familiar.
+We use these for:
+  - Generating RAG answers (knowledge Q&A)
+  - Voice doubt answers
+  - MCQ generation
+  - Conversational Voice Agent
 """
 
 import os
@@ -65,7 +65,7 @@ async def generate_rag_answer(question: str, context_chunks: list) -> dict:
 
     Args:
         question: Student's question
-        context_chunks: List of relevant text chunks from ChromaDB
+        context_chunks: List of relevant text chunks from Supabase pgvector
 
     Returns:
         dict with 'answer', 'sources', 'model'
@@ -104,7 +104,7 @@ Answer the question. Use the context if helpful; otherwise use your own knowledg
             "success": True,
             "answer": answer,
             "sources": sources,
-            "model": "llama3-8b-8192",
+            "model": "llama-3.1-8b-instant",
             "tokens_used": response.usage.total_tokens,
         }
 
@@ -132,7 +132,7 @@ async def generate_simple_answer(question: str) -> dict:
             "success": True,
             "answer": response.choices[0].message.content,
             "sources": ["General Knowledge"],
-            "model": "llama3-8b-8192",
+            "model": "llama-3.1-8b-instant",
         }
     except Exception as e:
         return {"success": False, "error": str(e)}
@@ -179,7 +179,7 @@ async def generate_conversational_answer(
     messages.append({"role": "user", "content": user_content})
 
     try:
-        client = _get_groq_client() # groq client
+        client = _get_groq_client()
         response = await client.chat.completions.create(
             model="llama-3.1-8b-instant",
             messages=messages,
@@ -194,5 +194,5 @@ async def generate_conversational_answer(
             "model": "llama-3.1-8b-instant",
             "tokens_used": response.usage.total_tokens,
         }
-    except Exception as e: # groq client 
+    except Exception as e:
         return {"success": False, "error": str(e)}
