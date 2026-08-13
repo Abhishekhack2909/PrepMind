@@ -46,9 +46,25 @@ async def root():
     }
 
 
+_started_at: str | None = None
+
+@app.on_event("startup")
+async def _record_startup():
+    import datetime
+    global _started_at
+    _started_at = datetime.datetime.utcnow().isoformat() + "Z"
+
+
 @app.get("/health")
 async def health_check():
-    return {"status": "ok", "service": "PrepMind API"}
+    """Lightweight health probe used by Render and uptime monitors."""
+    import os
+    return {
+        "status": "ok",
+        "service": "PrepMind API",
+        "rag_enabled": os.getenv("RAG_ENABLED", "true").lower() in ("1", "true", "yes", "on"),
+        "started_at": _started_at,
+    }
 
 
 # ── Phase 2: Answer Evaluator ─────────────────────────────────────────────────
