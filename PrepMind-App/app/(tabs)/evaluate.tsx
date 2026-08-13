@@ -13,8 +13,8 @@ import { Colors, Spacing, Radius, Shadows, Typography, themed } from '@/constant
 
 type AppState = 'idle' | 'loading' | 'results' | 'error';
 
-// Free-tier monthly evaluation quota (tracked locally per device/user).
-const FREE_MONTHLY_LIMIT = 3;
+// Free-tier monthly evaluation quota — must match FREE_MONTHLY_EVALUATIONS in the backend.
+const FREE_MONTHLY_LIMIT = 10;
 
 // Curated daily Mains question — rotates deterministically by day of month.
 const DAILY_QUESTIONS = [
