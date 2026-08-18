@@ -42,7 +42,7 @@ export function ServerWakeupBanner() {
   }
 
   useEffect(() => {
-    // Listen for slow-server events emitted from api.ts
+
     const showUnsub = serverEvents.on('waking', () => {
       setVisible(true);
       Animated.parallel([
