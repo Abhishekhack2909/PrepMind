@@ -84,7 +84,7 @@ export default function WeaknessScreen() {
 
   const overallAccuracy = summary?.mcq?.avg_score ?? 0;
 
-  // Weakest topic (only meaningful when we have data)
+
   const sortedWeakness = [...finalWeakness].sort((a, b) => a.avg_score - b.avg_score);
   const criticalTopic = hasData ? sortedWeakness[0].topic : '—';
   const criticalScore = hasData ? sortedWeakness[0].avg_score : 0;
