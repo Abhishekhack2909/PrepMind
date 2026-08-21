@@ -56,7 +56,7 @@ export function ServerWakeupBanner() {
         count = (count + 1) % 4;
         setDots('.'.repeat(count));
       }, 500);
-    });
+    }); // for testing purpose
 
     const hideUnsub = serverEvents.on('awake', () => {
       if (dotsTimer.current) clearInterval(dotsTimer.current);
