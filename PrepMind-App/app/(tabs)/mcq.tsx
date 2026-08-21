@@ -123,7 +123,7 @@ export default function MCQScreen() {
         },
       ]
     );
-  }
+  } // for testing purpose
 
 
   const formatTime = (seconds: number) => {
