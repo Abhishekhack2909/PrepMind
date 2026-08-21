@@ -68,7 +68,7 @@ export function ServerWakeupBanner() {
         setVisible(false);
         translateY.setValue(20);
       });
-    });
+    }); // for testing purpose
 
     return () => {
       showUnsub();
