@@ -100,7 +100,7 @@ export default function WeaknessScreen() {
         </View>
       </SafeAreaView>
     );
-  }
+  } // for testting purpose
 
   return (
     <SafeAreaView style={styles.safe}>
