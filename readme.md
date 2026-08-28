@@ -10,7 +10,7 @@ Live Demo → **[prepmind.vercel.app](https://prepmind.vercel.app)** · Backend 
 
 | Feature | What it does | AI Stack |
 |---------|-------------|----------|
-| **Answer Evaluator** | Photograph handwritten Mains answers → AI grades marks, structure, examples, impression + writes model answer | Gemini 1.5 Flash (Vision) |
+| **Answer Evaluator** | Photograph handwritten Mains answers → AI Grades marks, structure, examples, impression + writes model answer | Gemini 1.5 Flash (Vision) |
 | **Voice Tutor** | Speak any doubt → transcribed → RAG-grounded answer spoken back | Groq Whisper STT + Gemini RAG |
 | **MCQ Engine** | Generate UPSC-style questions on any topic, timed quiz, instant explanations | Gemini text generation |
 | **Study Planner** | 7-day personalized schedule built from your actual weak topics | Gemini + Supabase analytics |
