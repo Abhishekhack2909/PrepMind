@@ -1,4 +1,4 @@
-# PrepMind 🎯
+# PrepMind 
 
 > **AI-Powered UPSC preparation companion** — speaks your doubts, grades your answers, maps your weaknesses, plans your schedule.
 
