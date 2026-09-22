@@ -2,7 +2,7 @@
 
 > **AI-Powered UPSC preparation companion** — speaks your Doubts, grades your answers, maps your weaknesses, plans your schedule.
 
-Live Demo → **[prepmind.vercel.app](https://prepmind.vercel.app)** · Backend → **[prepmind-2ua4.onrender.com](https://prepmind-2ua4.onrender.com)**
+live Demo → **[prepmind.vercel.app](https://prepmind.vercel.app)** · Backend → **[prepmind-2ua4.onrender.com](https://prepmind-2ua4.onrender.com)**
 
 ---
 
